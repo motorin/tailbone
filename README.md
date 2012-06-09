@@ -1,4 +1,5 @@
 app-dust-backbone
 =================
 
-Client-side application on backbone.js and dust.js. With ideas of placeholders based templates.
+Строим client-side application.
+Считаем его пока чем-то смешанным между менеджером шаблонов, и менеджером разметки.
