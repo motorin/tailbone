@@ -275,6 +275,8 @@ $(document).ready(function() {
     
   });
   
-  
+  test('addView and model linking', 3, function() {
+    
+  });
   
 });
