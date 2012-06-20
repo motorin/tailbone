@@ -1,4 +1,4 @@
-window.Inn = {} if not window.Inn?
+window.Inn ?= {}
 
 #
 # Частая проверка
