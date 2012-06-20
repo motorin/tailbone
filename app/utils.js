@@ -18,7 +18,7 @@
     function Error(message) {
       this.message = message;
       this.name = "InnError";
-      this.stack = (new window.Error()).stack;
+      this.stack = (new Error.__super__.constructor).stack;
     }
 
     return Error;
