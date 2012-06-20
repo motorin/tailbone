@@ -73,9 +73,34 @@ $(document).ready(function() {
     ok(this.dataManager instanceof Inn.DataManager, 'Ожидаем объект менеджера данных');
   });
 
-  test('addDataAsset', 1, function() {
+  test('addDataAsset', 5, function() {
+    this.dataManager.addDataAsset(this.model);
+    strictEqual(this.dataManager._dataSets[0], this.model, 'Внутри dataManager данные должны храниться внутри массива _dataSets');
+
+    this.dataManager.addDataAsset(this.model_2);
+    strictEqual(this.dataManager._dataSets[0], this.model, 'Добавление данных не должно перетирать старые');
+    strictEqual(this.dataManager._dataSets[1], this.model_2, 'Добавление данных не должно перетирать старые');
+    
+    this.dataManager.addDataAsset(this.model_2);
+    strictEqual(this.dataManager._dataSets[2], undefined, 'Если данные уже добавлены, они не должны быть добавлены повторно');
+    
+    this.dataManager.addDataAsset(this.model);
+    strictEqual(this.dataManager._dataSets[2], undefined, 'Если данные уже добавлены, они не должны быть добавлены повторно');
+    
+  });
+
+  test('addDataAsset: return self', 1, function() {
     strictEqual(this.dataManager.addDataAsset(this.model), this.dataManager, 'Функция Inn.DataManager.addDataAsset должна возвращать саму себя');
   });
+  
+  test('addDataAsset: asset types', 5, function() {
+    raises(this.dataManager.addDataAsset({}), Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
+    raises(this.dataManager.addDataAsset(), Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
+    raises(this.dataManager.addDataAsset(""), Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
+    raises(this.dataManager.addDataAsset(new Backbone.Model()), Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
+    raises(this.dataManager.addDataAsset(new Backbone.Collection()), Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
+  });
+  
   
   test('add:dataAsset event', 1, function() {
     var some_variable;
@@ -141,6 +166,17 @@ $(document).ready(function() {
   
   test('extends Backbone.View', 1, function() {
     ok(this.canonical_view instanceof Backbone.View, 'Модель должна наследоваться от Backbone.View');
+  });
+  
+  test('triggers render event on render()', 1, function() {
+    var some_variable;
+    some_variable = false;
+    this.view.on('render', function(){
+      some_variable = true;
+    });
+    this.view.render();
+    
+    ok(some_variable, 'View должна триггерить событие render при своем рендеринге');
   });
   
   test('_getTemplateURL()', 2, function() {
@@ -225,13 +261,37 @@ $(document).ready(function() {
     equal(typeof this.layout.render().done, 'function', 'Функция, рендерящая мастер-шаблон должна вернуть deferred-объект, у которого будет метод done');
   });
   
-  test('addView', 1, function() {
+  test('addView', 5, function() {
+    this.layout.addView(this.tagsView);
+    strictEqual(this.layout._views[0], this.tagsView, 'Внутри layout view должны храниться внутри массива _views');
+
+    this.layout.addView(this.userbarView);
+    strictEqual(this.layout._views[0], this.tagsView, 'Внутри layout view должны храниться внутри массива');
+    strictEqual(this.layout._views[1], this.userbarView, 'Добавление view не должно перетирать старые view');
+    
+    this.layout.addView(this.userbarView);
+    strictEqual(this.layout._views[2], undefined, 'Если view уже добавлена, она не должна быть добавлена повторно');
+    
+    this.layout.addView(this.tagsView);
+    strictEqual(this.layout._views[2], undefined, 'Если view уже добавлена, она не должна быть добавлена повторно');
+    
+  });
+  
+  test('addView: return self', 1, function() {
     strictEqual(this.layout.addView(this.tagsView), this.layout, 'Функция Inn.Layout.addView должна возвращать саму себя');
   });
   
+  test('addView: type', 4, function() {
+    raises(this.dataManager.addView({}), Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
+    raises(this.dataManager.addView(), Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
+    raises(this.dataManager.addView(""), Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
+    raises(this.dataManager.addView(new Backbone.View()), Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
+  });
+  
+  
   test('add:view event', 1, function() {
     var some_variable;
-    this.view.on('add:view', function(view){
+    this.layout.on('add:view', function(view){
       some_variable = view;
     });
     this.layout.addView(this.tagsView);
@@ -275,8 +335,22 @@ $(document).ready(function() {
     
   });
   
-  test('addView and model linking', 3, function() {
+  test('addView: bind layout', 1, function() {
+    this.layout.addView(this.tagsView);
+    strictEqual(this.layout.getView('tags').options.layout, this.layout, 'Добавляя себе view Layout прописывает себя в его options');
+  });
+  
+  test('digView', 1, function() {
+    var some_variable;
+    some_variable = false;
+    this.layout.digView = function(view){
+      some_variable = view;
+    }
+
+    this.layout.addView(this.tagsView);
+    this.tagsView.render();
     
+    strictEqual(some_variable, this.tagsView, 'Layout должен слушать событие render у своих вьющек и просканировать их на предмет появления плейсхолдеров');
   });
   
 });
