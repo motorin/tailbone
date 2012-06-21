@@ -22,18 +22,14 @@ $(document).ready(function() {
     ok(this.model instanceof Backbone.Model, 'Модель должна наследоваться от Backbone.Model');
   });
   
-  test('done', 1, function() {
-    equal(typeof this.model.done, 'function', 'Модель должна иметь deferred-метод "done"');
+  test('fetch.done', 1, function() {
+    equal(typeof this.model.fetch().done, 'function', 'Модель должна иметь возвращать deferred-метод "done" при запросе к серверу');
   });
 
 
   module("Inn.Collection", {
     setup: function() {
-      this.collection = new Inn.Collection({
-        id: 'collection_id',
-        name: 'model_name',
-        model: Inn.Model
-      });
+      this.collection = new Inn.Collection();
       this.collection.add([{
         id: 'model_1',
         name: "Model number 1"
@@ -51,15 +47,20 @@ $(document).ready(function() {
     ok(this.collection instanceof Backbone.Collection, 'Модель должна наследоваться от Backbone.Collection');
   });
 
+  test('contains Inn.Models', 1, function() {
+    ok(this.collection.models[0] instanceof Inn.Model, 'Коолекция должно состоят из Inn.Model');
+  });
+
 
   module("Inn.DataManager", {
     setup: function() {
-      this.model = new InnModel({
+      this.model = new Inn.Model({
         id: 'data_id'
       });
-      this.model_2 = new InnModel({
+      this.model_2 = new Inn.Model({
         id: 'data_id2'
       });
+      this.collectionModel = new Inn.Collection();
       
       this.dataManager = new Inn.DataManager();
     },
@@ -73,7 +74,7 @@ $(document).ready(function() {
     ok(this.dataManager instanceof Inn.DataManager, 'Ожидаем объект менеджера данных');
   });
 
-  test('addDataAsset', 5, function() {
+  test('addDataAsset', 7, function() {
     this.dataManager.addDataAsset(this.model);
     strictEqual(this.dataManager._dataSets[0], this.model, 'Внутри dataManager данные должны храниться внутри массива _dataSets');
 
@@ -87,6 +88,14 @@ $(document).ready(function() {
     this.dataManager.addDataAsset(this.model);
     strictEqual(this.dataManager._dataSets[2], undefined, 'Если данные уже добавлены, они не должны быть добавлены повторно');
     
+    this.dataManager.addDataAsset(this.collectionModel, 'collection');
+    strictEqual(this.dataManager._dataSets[2], this.collectionModel, 'Добавление коллекции');
+    
+    delete this.collectionModel.id
+    
+    this.dataManager.addDataAsset(this.collectionModel, 'collection');
+    strictEqual(this.dataManager._dataSets[3], undefined, 'Если колллекция добавлена, до повторно она добавляться не должна');
+    
   });
 
   test('addDataAsset: return self', 1, function() {
@@ -94,11 +103,11 @@ $(document).ready(function() {
   });
   
   test('addDataAsset: asset types', 5, function() {
-    raises(this.dataManager.addDataAsset({}), Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
-    raises(this.dataManager.addDataAsset(), Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
-    raises(this.dataManager.addDataAsset(""), Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
-    raises(this.dataManager.addDataAsset(new Backbone.Model()), Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
-    raises(this.dataManager.addDataAsset(new Backbone.Collection()), Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
+    raises(function(){this.dataManager.addDataAsset({})}, Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
+    raises(function(){this.dataManager.addDataAsset()}, Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
+    raises(function(){this.dataManager.addDataAsset("")}, Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
+    raises(function(){this.dataManager.addDataAsset(new Backbone.Model())}, Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
+    raises(function(){this.dataManager.addDataAsset(new Backbone.Collection())}, Inn.Error, 'Если тип данных не Inn.Model и не Inn.Collection то должна вызываться ошибка');
   });
   
   
@@ -113,15 +122,19 @@ $(document).ready(function() {
   });
   
   
-  test('getDataAsset', 2, function() {
+  test('getDataAsset', 3, function() {
     this.dataManager.addDataAsset(this.model_2);
     equal(this.dataManager.getDataAsset('data_id2'), this.model_2, 'Функция Inn.DataManager.getDataAsset должна возвращать модель по id');
+    
+    this.dataManager.addDataAsset(this.collectionModel, 'collection');
+    strictEqual(this.dataManager.getDataAsset('collection'), this.collectionModel, 'Функция Inn.DataManager.getDataAsset должна возвращать коллекцию по id');
+    
     strictEqual(this.dataManager.getDataAsset('other_data_id'), null, 'Функция Inn.DataManager.get должна возвращать null если модель не найдена');
   });
   
-  test('removeDataAsset', 3, function() {
+  test('removeDataAsset', 2, function() {
     this.dataManager.addDataAsset(this.model);
-    equal(this.dataManager.removeDataAsset('data_id'), this.dataManager, 'Функция Inn.DataManager.removeDataAsset должна возвращать саму себя');
+    this.dataManager.removeDataAsset('data_id');
     strictEqual(this.dataManager.getDataAsset('data_id'), null, 'Функция Inn.DataManager.removeDataAsset не удалила данные');
     strictEqual(this.dataManager.removeDataAsset('data_id'), null, 'Функция Inn.DataManager.removeDataAsset должна возвращать null если модель не найдена');
   });
@@ -136,14 +149,6 @@ $(document).ready(function() {
     
     strictEqual(some_variable, true, 'Функция Inn.DataManager.removeDataAsset должна вызывать событие "remove:dataAsset"');
   });
-  
-
-  test('массивные методы', 2, function() {
-    this.dataManager.addDataAsset(this.model);
-    this.dataManager.addDataAsset(this.model_2);
-    equal(this.dataManager[1], this.model_2, 'Inn.DataManager должен брать данные по индексу, как массив');
-    equal(this.dataManager.length, 2, 'Inn.DataManager.lenth должна возвращать длину массива данных');
-  });
 
 
   module("Inn.View", {
@@ -154,7 +159,7 @@ $(document).ready(function() {
 
       this.overriden_view = new Inn.View({
         id: 'content',
-        template: 'bFrontpage'
+        templateURL: 'bFrontpage'
       });
 
     },
@@ -171,62 +176,74 @@ $(document).ready(function() {
   test('triggers render event on render()', 1, function() {
     var some_variable;
     some_variable = false;
-    this.view.on('render', function(){
+    this.canonical_view.on('render', function(){
       some_variable = true;
     });
-    this.view.render();
+    this.canonical_view.render();
     
     ok(some_variable, 'View должна триггерить событие render при своем рендеринге');
   });
   
   test('_getTemplateURL()', 2, function() {
     //по умолчанию название шаблона должно генерироваться на основе ID по схеме "b%ViewId%". Если жестко задан параметр "template" то должен браться он
-    equal(canonical_view._getTemplateURL(), 'bMovie', 'Должно вернуть bMovie, а вернуло ' + canonical_view._getTemplateURL());
-    equal(overriden_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + overriden_view._getTemplateURL());
+    equal(this.canonical_view._getTemplateURL(), 'bMovie', 'Должно вернуть bMovie, а вернуло ' + this.canonical_view._getTemplateURL());
+    equal(this.overriden_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + this.overriden_view._getTemplateURL());
   });
 
 
   module("Inn.Layout", {
     setup: function(){
+      this.dataManager = new Inn.DataManager();
+      
       this.layout_config = {
-        'header': {},
-        'footer': {
-          template: 'bFooter'
+        routes: {
+          'header': {},
+          'footer': {
+            template: 'bFooter'
+          },
+          'content': {
+            template: 'bFrontpage',
+            partials: [{
+              'tags': {}
+            }, {
+              'sortings': {}
+            }, {
+              'promoMovie': {}
+            }, {
+              'frontPageMovies': {
+                template: 'bFrontPageMovies',
+                partials: [{
+                  'pagination': {}
+                }]
+              }
+            }]
+          }
         },
-        'content': {
-          template: 'bFrontpage',
-          partials: [{
-            'tags': {}
-          }, {
-            'sortings': {}
-          }, {
-            'promoMovie': {}
-          }, {
-            'frontPageMovies': {
-              template: 'bFrontPageMovies',
-              partials: [{
-                'pagination': {}
-              }]
-            }
-          }]
-        }
+        dataManager: this.dataManager
       };
       
       this.layout = new Inn.Layout(this.layout_config);
       
-      this.dataManager = new Inn.DataManager();
+      
       
       this.userModel = new Inn.Model({
         id: 'user',
         name: 'user'
       });
       
+      this.collectionModel = new Inn.Collection();
+      
+      this.otherCollectionModel = new Inn.Collection();
+      
+      
       this.tagsModel = new Inn.Model({
         id: 'tags'
       });
       
-      this.dataManager.addDataAsset(userModel);
-      this.dataManager.addDataAsset(tagsModel);
+      this.dataManager.addDataAsset(this.userModel);
+      this.dataManager.addDataAsset(this.tagsModel);
+      this.dataManager.addDataAsset(this.collectionModel, 'collection');
+      this.dataManager.addDataAsset(this.otherCollectionModel, 'otherCollection');
       
       this.tagsView = new Inn.View({
         id: 'tags'
@@ -234,12 +251,21 @@ $(document).ready(function() {
       
       this.userbarView = new Inn.View({
         id: 'userbar',
-        model: userModel
+        model: this.userModel
       });
       
       this.otherUserView = new Inn.View({
         id: 'user',
-        model: userModel
+        model: this.userModel
+      });
+      
+      this.collectionView = new Inn.View({
+        id: 'collection'
+      });
+      
+      this.collectionSetView = new Inn.View({
+        id: 'collectionSet',
+        collection: this.otherCollectionModel
       });
       
       this.orphanView = new Inn.View({
@@ -253,7 +279,16 @@ $(document).ready(function() {
   });
   
   test("Наличие", 1, function() {
-    ok(this.template instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)');
+    ok(this.layout instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)');
+  });
+  
+  test("_dataManager link require", 2, function() {
+    raises(function(){new Inn.Layout()}, Inn.Error, 'Если не передан экземпляр менеджера данных то должна вызываться ошибка');
+    raises(function(){new Inn.Layout({dataManager: {}})}, Inn.Error, 'Если не передан экземпляр менеджера данных неверного типа то должна вызываться ошибка');
+  });
+  
+  test("_dataManager link", 1, function() {
+    ok(this.layout._dataManager instanceof Inn.DataManager, 'При создании layout у нему должна крепиться ссылка на менеджер данных');
   });
   
   test('render', 2, function() {
@@ -282,10 +317,10 @@ $(document).ready(function() {
   });
   
   test('addView: type', 4, function() {
-    raises(this.dataManager.addView({}), Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
-    raises(this.dataManager.addView(), Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
-    raises(this.dataManager.addView(""), Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
-    raises(this.dataManager.addView(new Backbone.View()), Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
+    raises(function(){this.layout.addView({})}, Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
+    raises(function(){this.layout.addView()}, Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
+    raises(function(){this.layout.addView("")}, Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
+    raises(function(){this.layout.addView(new Backbone.View())}, Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка');
   });
   
   
@@ -323,7 +358,7 @@ $(document).ready(function() {
     strictEqual(some_variable, true, 'Функция Inn.Layout.removeView должна вызывать событие "remove:view"');
   });
   
-  test('addView and model linking', 3, function() {
+  test('addView and data linking', 5, function() {
     this.layout.addView(this.tagsView);
     strictEqual(this.layout.getView('tags').model, this.tagsModel, 'При добавлении View в мастер-шаблон, к нему должны быть привязаны данные по его ID');
     
@@ -332,6 +367,13 @@ $(document).ready(function() {
     
     this.layout.addView(this.orphanView);
     strictEqual(this.layout.getView('orphan').model, undefined, 'Если модели нет в менеджере, она остается неопределенной');
+    
+    this.layout.addView(this.collectionView);
+    strictEqual(this.layout.getView('collection').collection, this.collectionModel, 'Если данные являются коллекцией, то они идут в атрибут collection');
+    
+    this.layout.addView(this.collectionSetView);
+    strictEqual(this.layout.getView('collectionSet').collection, this.otherCollectionModel, 'Если коллекция задана явно, то она остается');
+    
     
   });
   
