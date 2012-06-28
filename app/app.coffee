@@ -1,27 +1,69 @@
+###
+Проверяем, если наш "неймспейс" и, если его нет, создаем
+###
 window.Inn ?= {}
 
+###
+Модель приложения
+###
 Inn.Model = Backbone.Model.extend({
   url: ->
     return '#'
 });
 
+###
+Коллекция приложения
+###
 Inn.Collection = Backbone.Collection.extend({
   url: ->
     return '#'
   model: Inn.Model
 });
 
+###
+Стандартная вьюшка приложения
+###
 Inn.View = Backbone.View.extend({
+  initialize: (options)->
+    @options.templateFolder = '' unless options.templateFolder
+    @options.templateFormat = 'js' unless options.templateFormat
+    
   render: ->
-    @trigger('render', this)
+    view = this
+    renderDeferred = new $.Deferred()
+    
+    if typeof @_template == 'function'
+      @$el.htmll = @_template()
+      @trigger('render', this)
+      renderDeferred.resolve()
+    else
+      @_getTemplate().done ->
+        view.$el.html view._template()
+        view.trigger('render', view)
+        renderDeferred.resolve()
+      
+    return renderDeferred
 
   _getTemplateURL: ->
-    return 'b'+@id[0].toUpperCase()+@id.slice(1) if not @options.templateURL?
+    devider = if @options.templateFolder then '/' else ''
+    return @options.templateFolder+devider+'b'+@id[0].toUpperCase()+@id.slice(1)+'.'+@options.templateFormat if not @options.templateURL?
     return @options.templateURL
+  
+  _getTemplate: ->
+    templateDeferred = new $.Deferred()
+    view = this
+    view._template = ->
+      return 'some code'
+    templateDeferred.resolve()
+        
+    return templateDeferred
 });
 
+###
+Менеджер шаблонов
+###
 class Inn.Layout
-  constructor: (options) ->
+  constructor: (@options) ->
     
     throw new Inn.Error('dataManager should be in options') unless options && options.dataManager && options.dataManager instanceof Inn.DataManager
     
@@ -42,8 +84,6 @@ class Inn.Layout
     
     view.options.layout = this
     
-    view.on 'render', _.bind(this.digView, this)
-    
     unless view.model or view.collection
       data = @_dataManager.getDataAsset(view.id)
       if data
@@ -54,6 +94,8 @@ class Inn.Layout
       else
         delete view.model
         delete view.collection
+    
+    view.on 'render', _.bind(@_recheckSubViews, this, view)
     
     @trigger('add:view', view);
     
@@ -78,10 +120,35 @@ class Inn.Layout
     
     @trigger('remove:view')
   
-  digView: (view) ->
-    
   
+  processRoutes: ->
+    layout = this
+    
+    _.each @options.routes, (route, name)->
+      layout.addView new Inn.View
+        id: name
+        templateURL: if route.template then route.template else undefined
+        
+      layout._processPartials(route)
 
+
+  _processPartials: (route)->
+    if route.partials
+      layout = this
+      
+      _.each route.partials, (partial, name)->
+        layout.addView new Inn.View
+          id: name
+          templateURL: if partial.template then partial.template else undefined
+          
+        layout._processPartials(partial)
+    
+  _recheckSubViews: (view)->
+
+  
+###
+Менеджер данных
+###
 class Inn.DataManager
   constructor: () ->    
     @_dataSets = []
@@ -95,7 +162,8 @@ class Inn.DataManager
     throw new Inn.Error('dataAsset id is required') unless dataAsset.id or id
     
     dataAsset.id = id if id
-    
+
+    #do not add same data twice
     @_dataSets.push(dataAsset) if _.indexOf(@_dataSets, dataAsset) == -1
     
     @trigger('add:dataAsset', dataAsset);
