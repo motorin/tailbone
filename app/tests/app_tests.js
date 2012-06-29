@@ -196,14 +196,16 @@
     return equal(typeof this.canonical_view.render().done, 'function', 'Функция, рендерящая шаблон должна вернуть deferred-объект, у которого будет метод done');
   });
 
-  test('triggers render event on render()', 1, function() {
+  asyncTest('triggers render event on render()', 1, function() {
     var some_variable;
     some_variable = false;
     this.real_view.on('render', function() {
       return some_variable = true;
     });
-    this.real_view.render();
-    return ok(some_variable, 'View должна триггерить событие render при своем рендеринге');
+    return this.real_view.render().done(function() {
+      ok(some_variable, 'View должна триггерить событие render при своем рендеринге');
+      return start();
+    });
   });
 
   test('_getTemplateURL()', 2, function() {
@@ -223,24 +225,22 @@
 
   asyncTest('render should define _template', 1, function() {
     var render, test;
-    render = this.canonical_view.render();
+    render = this.real_view.render();
     test = this;
-    render.done(function() {
-      ok(test.canonical_view._template, 'При рендеренге должна создаваться функция-шаблон');
+    return render.done(function() {
+      ok(test.real_view._template, 'При рендеренге должна создаваться функция-шаблон');
       return start();
     });
-    return render.resolve();
   });
 
   asyncTest('render should render _template', 1, function() {
     var render, test;
-    render = this.canonical_view.render();
+    render = this.real_view.render();
     test = this;
-    render.done(function() {
-      equal(test.canonical_view.$el.text(), 'some code', 'Должнен отрендериться временный элемент');
+    return render.done(function() {
+      equal(test.real_view.$el.text(), 'Some content', 'Должнен отрендериться временный элемент');
       return start();
     });
-    return render.resolve();
   });
 
   module("Inn.Layout", {
@@ -301,8 +301,12 @@
         id: 'collectionSet',
         collection: this.otherCollectionModel
       });
-      return this.orphanView = new Inn.View({
+      this.orphanView = new Inn.View({
         id: 'orphan'
+      });
+      return this.realView = new Inn.View({
+        id: 'someView',
+        templateFolder: 'app/templates'
       });
     },
     teardown: function() {
@@ -318,7 +322,8 @@
       delete this.otherUserView;
       delete this.collectionView;
       delete this.collectionSetView;
-      return delete this.orphanView;
+      delete this.orphanView;
+      return delete this.someView;
     }
   });
 
@@ -429,15 +434,18 @@
     return strictEqual(this.layout.getView('tags').options.layout, this.layout, 'Добавляя себе view Layout прописывает себя в его options');
   });
 
-  test('listen to views render event and call recheckSubViews method', 1, function() {
-    var some_variable;
+  asyncTest('listen to views render event and call recheckSubViews method', 1, function() {
+    var some_variable, test;
     some_variable = false;
+    test = this;
     this.layout._recheckSubViews = function(view) {
       return some_variable = view;
     };
-    this.layout.addView(this.tagsView);
-    this.tagsView.render();
-    return strictEqual(some_variable, this.tagsView, 'Layout должен отслеживать события рендера и вызывать свой метод _recheckSubViews с передачей view в параметре');
+    this.layout.addView(this.realView);
+    return this.realView.render().done(function() {
+      strictEqual(some_variable, test.realView, 'Layout должен отслеживать события рендера и вызывать свой метод _recheckSubViews с передачей view в параметре');
+      return start();
+    });
   });
 
   test('recheckSubViews method', 1, function() {

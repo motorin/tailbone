@@ -50,21 +50,24 @@
       }
     },
     render: function() {
-      var renderDeferred, view;
+      var view;
+      if (this.renderDeferred && this.renderDeferred.state() === 'pending') {
+        return this.renderDeferred;
+      }
+      this.renderDeferred = new $.Deferred();
       view = this;
-      renderDeferred = new $.Deferred();
       if (typeof this._template === 'function') {
-        this.$el.htmll = this._template();
+        this.$el.html(this._template());
         this.trigger('render', this);
-        renderDeferred.resolve();
+        view.renderDeferred.resolve();
       } else {
         this._getTemplate().done(function() {
           view.$el.html(view._template());
           view.trigger('render', view);
-          return renderDeferred.resolve();
+          return view.renderDeferred.resolve();
         });
       }
-      return renderDeferred;
+      return this.renderDeferred;
     },
     _getTemplateURL: function() {
       var devider;
@@ -75,14 +78,24 @@
       return this.options.templateURL;
     },
     _getTemplate: function() {
-      var templateDeferred, view;
-      templateDeferred = new $.Deferred();
+      var view;
+      if (this.templateDeferred && this.templateDeferred.state() === 'pending') {
+        return this.templateDeferred;
+      }
+      this.templateDeferred = new $.Deferred();
       view = this;
-      view._template = function() {
-        return 'some code';
-      };
-      templateDeferred.resolve();
-      return templateDeferred;
+      $.getScript(this._getTemplateURL(), function() {
+        view._template = function(data) {
+          var rendered_html;
+          rendered_html = '';
+          dust.render('bSomeView', data, function(err, text) {
+            return rendered_html = text;
+          });
+          return rendered_html;
+        };
+        return view.templateDeferred.resolve();
+      });
+      return this.templateDeferred;
     }
   });
 

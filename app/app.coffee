@@ -29,20 +29,24 @@ Inn.View = Backbone.View.extend({
     @options.templateFormat = 'js' unless options.templateFormat
     
   render: ->
+    if @renderDeferred and @renderDeferred.state() == 'pending'
+      return @renderDeferred
+    
+    @renderDeferred = new $.Deferred()
+    
     view = this
-    renderDeferred = new $.Deferred()
     
     if typeof @_template == 'function'
-      @$el.htmll = @_template()
+      @$el.html @_template()
       @trigger('render', this)
-      renderDeferred.resolve()
+      view.renderDeferred.resolve()
     else
       @_getTemplate().done ->
         view.$el.html view._template()
         view.trigger('render', view)
-        renderDeferred.resolve()
+        view.renderDeferred.resolve()
       
-    return renderDeferred
+    return @renderDeferred
 
   _getTemplateURL: ->
     devider = if @options.templateFolder then '/' else ''
@@ -50,13 +54,22 @@ Inn.View = Backbone.View.extend({
     return @options.templateURL
   
   _getTemplate: ->
-    templateDeferred = new $.Deferred()
+    if @templateDeferred and @templateDeferred.state() == 'pending'
+      return @templateDeferred
+    
+    @templateDeferred = new $.Deferred()
     view = this
-    view._template = ->
-      return 'some code'
-    templateDeferred.resolve()
+    
+    $.getScript @_getTemplateURL(), ->
+      view._template = (data)->
+        rendered_html = ''
+        dust.render 'bSomeView', data, (err, text)-> 
+          rendered_html = text
+        return rendered_html
+
+      view.templateDeferred.resolve()
         
-    return templateDeferred
+    return @templateDeferred
 });
 
 ###

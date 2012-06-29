@@ -201,14 +201,14 @@ test 'renders deferred style', 1, ->
   equal typeof @canonical_view.render().done, 'function', 'Функция, рендерящая шаблон должна вернуть deferred-объект, у которого будет метод done'
   
   
-test 'triggers render event on render()', 1, ->
+asyncTest 'triggers render event on render()', 1, ->
   some_variable = false;
   @real_view.on 'render', ->
     some_variable = true
   
-  @real_view.render()
-    
-  ok some_variable, 'View должна триггерить событие render при своем рендеринге'
+  @real_view.render().done ->
+    ok some_variable, 'View должна триггерить событие render при своем рендеринге'
+    start()
 
 
 test '_getTemplateURL()', 2, ->
@@ -230,27 +230,23 @@ test '_getTemplateURL() with folder name and template format', 2, ->
 
 
 asyncTest 'render should define _template', 1, ->
-  render = @canonical_view.render()
+  render = @real_view.render()
   
   test = this
   
   render.done ->
-    ok test.canonical_view._template, 'При рендеренге должна создаваться функция-шаблон'
+    ok test.real_view._template, 'При рендеренге должна создаваться функция-шаблон'
     start()
-    
-  render.resolve()
 
 
 asyncTest 'render should render _template', 1, ->
-  render = @canonical_view.render()
+  render = @real_view.render()
   
   test = this
   
   render.done ->
-    equal test.canonical_view.$el.text(), 'some code', 'Должнен отрендериться временный элемент'
+    equal test.real_view.$el.text(), 'Some content', 'Должнен отрендериться временный элемент'
     start()
-
-  render.resolve()
   
   
 
@@ -315,6 +311,11 @@ module "Inn.Layout",
       
     @orphanView = new Inn.View
       id: 'orphan'
+      
+    @realView = new Inn.View
+      id: 'someView',
+      templateFolder: 'app/templates'
+    
 
   teardown: ->
     delete @dataManager
@@ -330,7 +331,7 @@ module "Inn.Layout",
     delete @collectionView
     delete @collectionSetView
     delete @orphanView
-
+    delete @someView
   
 
 test "Наличие", 1, ->
@@ -448,16 +449,20 @@ test 'addView: bind layout', 1, ->
   strictEqual @layout.getView('tags').options.layout, @layout, 'Добавляя себе view Layout прописывает себя в его options'
 
 
-test 'listen to views render event and call recheckSubViews method', 1, ->
+asyncTest 'listen to views render event and call recheckSubViews method', 1, ->
   some_variable = false
+  
+  test = this
   
   @layout._recheckSubViews = (view)->
     some_variable = view
 
-  @layout.addView @tagsView
+  @layout.addView @realView
   
-  @tagsView.render();
-  strictEqual some_variable, @tagsView, 'Layout должен отслеживать события рендера и вызывать свой метод _recheckSubViews с передачей view в параметре'
+  @realView.render().done ->
+    strictEqual some_variable, test.realView, 'Layout должен отслеживать события рендера и вызывать свой метод _recheckSubViews с передачей view в параметре'
+    start()
+    
 
 test 'recheckSubViews method', 1, ->
   strictEqual typeof @layout._recheckSubViews, 'function', 'Layout должен сожержать метод проверки подвьюшек'
