@@ -51,23 +51,23 @@
     },
     render: function() {
       var view;
-      if (this.renderDeferred && this.renderDeferred.state() === 'pending') {
-        return this.renderDeferred;
+      if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
+        return this._renderDeferred;
       }
-      this.renderDeferred = new $.Deferred();
+      this._renderDeferred = new $.Deferred();
       view = this;
       if (typeof this._template === 'function') {
         this.$el.html(this._template());
         this.trigger('render', this);
-        view.renderDeferred.resolve();
+        view._renderDeferred.resolve();
       } else {
         this._getTemplate().done(function() {
           view.$el.html(view._template());
           view.trigger('render', view);
-          return view.renderDeferred.resolve();
+          return view._renderDeferred.resolve();
         });
       }
-      return this.renderDeferred;
+      return this._renderDeferred;
     },
     _getTemplateURL: function() {
       var devider;
@@ -76,6 +76,9 @@
         return this.options.templateFolder + devider + 'b' + this.id[0].toUpperCase() + this.id.slice(1) + '.' + this.options.templateFormat;
       }
       return this.options.templateURL;
+    },
+    _getTemplateName: function() {
+      return 'b' + this.id[0].toUpperCase() + this.id.slice(1);
     },
     _getTemplate: function() {
       var view;
@@ -88,7 +91,7 @@
         view._template = function(data) {
           var rendered_html;
           rendered_html = '';
-          dust.render('bSomeView', data, function(err, text) {
+          dust.render(view._getTemplateName(), data, function(err, text) {
             return rendered_html = text;
           });
           return rendered_html;
@@ -113,19 +116,35 @@
       }
       this._dataManager = options.dataManager;
       this._views = [];
+      this._routesUnrendered = 0;
       _.extend(this, Backbone.Events);
     }
 
     Layout.prototype.render = function() {
-      return new $.Deferred();
+      var layout;
+      if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
+        return this._renderDeferred;
+      }
+      this._renderDeferred = new $.Deferred();
+      layout = this;
+      _.each(this.options.routes, function(route, name) {
+        if (layout.getView(name)) {
+          layout._routesUnrendered++;
+          return layout.getView(name).render();
+        }
+      });
+      return this._renderDeferred;
     };
 
     Layout.prototype.addView = function(view) {
-      var data;
+      var data, viewInLayout;
       if (!(view instanceof Inn.View)) {
         throw new Inn.Error('view shold be an instance of Inn.View');
       }
-      if (_.indexOf(this._views, view) === -1) {
+      viewInLayout = _.find(this._views, function(existingView) {
+        return existingView.id === view.id;
+      });
+      if (_.indexOf(this._views, view) === -1 && !viewInLayout) {
         this._views.push(view);
       }
       view.options.layout = this;
@@ -174,13 +193,17 @@
     Layout.prototype.processRoutes = function() {
       var layout;
       layout = this;
-      return _.each(this.options.routes, function(route, name) {
+      _.each(this.options.routes, function(route, name) {
         layout.addView(new Inn.View({
           id: name,
-          templateURL: route.template ? route.template : void 0
+          templateURL: route.template ? route.template : void 0,
+          templateFolder: layout.options.templateOptions && layout.options.templateOptions.templateFolder ? layout.options.templateOptions.templateFolder : void 0,
+          templateFormat: layout.options.templateOptions && layout.options.templateOptions.templateFormat ? layout.options.templateOptions.templateFormat : void 0
         }));
+        layout.getView(name).options._routeBranch = route;
         return layout._processPartials(route);
       });
+      return this;
     };
 
     Layout.prototype._processPartials = function(route) {
@@ -190,14 +213,26 @@
         return _.each(route.partials, function(partial, name) {
           layout.addView(new Inn.View({
             id: name,
-            templateURL: partial.template ? partial.template : void 0
+            templateURL: partial.template ? partial.template : void 0,
+            templateFolder: layout.options.templateOptions && layout.options.templateOptions.templateFolder ? layout.options.templateOptions.templateFolder : void 0,
+            templateFormat: layout.options.templateOptions && layout.options.templateOptions.templateFormat ? layout.options.templateOptions.templateFormat : void 0
           }));
+          layout.getView(name).options._routeBranch = partial;
           return layout._processPartials(partial);
         });
       }
     };
 
-    Layout.prototype._recheckSubViews = function(view) {};
+    Layout.prototype._recheckSubViews = function(view) {
+      this._routesUnrendered--;
+      if (!view.el.parentNode) {
+        $('#' + view.id).replaceWith(view.$el);
+      }
+      if (this._routesUnrendered <= 0) {
+        this._routesRendered = 0;
+        return this._renderDeferred.resolve();
+      }
+    };
 
     return Layout;
 

@@ -265,7 +265,8 @@
                 }
               }
             }
-          }
+          },
+          'someView': {}
         },
         dataManager: this.dataManager
       };
@@ -290,6 +291,9 @@
         id: 'userbar',
         model: this.userModel
       });
+      this.userbarCloneView = new Inn.View({
+        id: 'userbar'
+      });
       this.otherUserView = new Inn.View({
         id: 'user',
         model: this.userModel
@@ -304,8 +308,16 @@
       this.orphanView = new Inn.View({
         id: 'orphan'
       });
-      return this.realView = new Inn.View({
+      this.realView = new Inn.View({
         id: 'someView',
+        templateFolder: 'app/templates'
+      });
+      this.contentView = new Inn.View({
+        id: 'content',
+        templateFolder: 'app/templates'
+      });
+      return this.frontpageView = new Inn.View({
+        id: 'frontPageMovies',
         templateFolder: 'app/templates'
       });
     },
@@ -323,7 +335,9 @@
       delete this.collectionView;
       delete this.collectionSetView;
       delete this.orphanView;
-      return delete this.someView;
+      delete this.realView;
+      delete this.contentView;
+      return delete this.frontapageView;
     }
   });
 
@@ -351,7 +365,14 @@
     return equal(typeof this.layout.render().done, 'function', 'Функция, рендерящая мастер-шаблон должна вернуть deferred-объект, у которого будет метод done');
   });
 
-  test('addView', 5, function() {
+  test('render should not create several deferreds until resolve', 1, function() {
+    var first_deferred, second_deferred;
+    first_deferred = this.layout.render();
+    second_deferred = this.layout.render();
+    return strictEqual(first_deferred, second_deferred, 'Если неразрешен первый рендер, то должен возвращаться текущий');
+  });
+
+  test('addView', 6, function() {
     this.layout.addView(this.tagsView);
     strictEqual(this.layout._views[0], this.tagsView, 'Внутри layout view должны храниться внутри массива _views');
     this.layout.addView(this.userbarView);
@@ -360,7 +381,9 @@
     this.layout.addView(this.userbarView);
     strictEqual(this.layout._views[2], void 0, 'Если view уже добавлена, она не должна быть добавлена повторно');
     this.layout.addView(this.tagsView);
-    return strictEqual(this.layout._views[2], void 0, 'Если view уже добавлена, она не должна быть добавлена повторно');
+    strictEqual(this.layout._views[2], void 0, 'Если view уже добавлена, она не должна быть добавлена повторно');
+    this.layout.addView(this.userbarCloneView);
+    return strictEqual(this.layout._views[2], void 0, 'Если view уже добавлена, она не должна быть добавлена повторно если имеет тот же ID');
   });
 
   test('addView: return self', 1, function() {
@@ -452,6 +475,10 @@
     return strictEqual(typeof this.layout._recheckSubViews, 'function', 'Layout должен сожержать метод проверки подвьюшек');
   });
 
+  test('processRoutes: should return self', 1, function() {
+    return strictEqual(this.layout.processRoutes(), this.layout, 'processRoutes должен возвращать себя');
+  });
+
   test('processRoutes: create top views', 3, function() {
     this.layout.processRoutes();
     ok(this.layout.getView('header') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек');
@@ -474,6 +501,104 @@
     strictEqual(this.layout.getView('content')._getTemplateURL(), 'bFrontpage', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
     strictEqual(this.layout.getView('frontPageMovies')._getTemplateURL(), 'bFrontPageMoviesList', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
     return strictEqual(this.layout.getView('pagination')._getTemplateURL(), 'bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
+  });
+
+  test('processRoutes should attach _routeBranch', 3, function() {
+    this.layout.addView(this.realView);
+    this.layout.addView(this.contentView);
+    this.layout.addView(this.frontpageView);
+    this.layout.processRoutes();
+    strictEqual(this.layout.getView('content').options._routeBranch, this.layout.options.routes.content, 'При создании view layout должен сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
+    strictEqual(this.layout.getView('someView').options._routeBranch, this.layout.options.routes.someView, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
+    return strictEqual(this.layout.getView('frontPageMovies').options._routeBranch, this.layout.options.routes.content.partials.frontPageMovies, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
+  });
+
+  module("Inn.Layout Render and such", {
+    setup: function() {
+      $('#header').empty();
+      $('#content').empty();
+      $('#footer').empty();
+      this.dataManager = new Inn.DataManager;
+      this.layout_config = {
+        routes: {
+          'header': {},
+          'footer': {},
+          'content': {
+            template: 'app/templates/bFrontpage.js',
+            partials: {
+              'tags': {},
+              'sortings': {},
+              'promoMovie': {},
+              'frontPageMovies': {
+                partials: {
+                  'pagination': {}
+                }
+              }
+            }
+          },
+          'someView': {}
+        },
+        dataManager: this.dataManager,
+        templateOptions: {
+          templateFolder: 'app/templates',
+          templateFormat: 'js'
+        }
+      };
+      this.layout = new Inn.Layout(this.layout_config);
+      this.layout_config_jade = {
+        routes: {
+          'header': {},
+          'footer': {},
+          'content': {
+            partials: {
+              'tags': {},
+              'sortings': {},
+              'promoMovie': {},
+              'frontPageMovies': {
+                partials: {
+                  'pagination': {}
+                }
+              }
+            }
+          },
+          'someView': {}
+        },
+        dataManager: this.dataManager,
+        templateOptions: {
+          templateFolder: 'app/templates',
+          templateFormat: 'jade'
+        }
+      };
+      return this.layout_jade = new Inn.Layout(this.layout_config_jade);
+    },
+    teardown: function() {
+      delete this.dataManager;
+      delete this.layout_config;
+      delete this.layout;
+      $('#header').empty();
+      $('#content').empty();
+      return $('#footer').empty();
+    }
+  });
+
+  test('layout should create views with default options', 4, function() {
+    this.layout.processRoutes();
+    strictEqual(this.layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
+    strictEqual(this.layout.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
+    this.layout_jade.processRoutes();
+    strictEqual(this.layout_jade.getView('header')._getTemplateURL(), 'app/templates/bHeader.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
+    return strictEqual(this.layout_jade.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
+  });
+
+  asyncTest('layout render should attach views to DOM', 3, function() {
+    var deferred;
+    deferred = this.layout.processRoutes().render();
+    return deferred.done(function() {
+      strictEqual($('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render');
+      strictEqual($('#content').text(), '===Content===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render');
+      strictEqual($('#footer').text(), '===Footer===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render');
+      return start();
+    });
   });
 
 }).call(this);

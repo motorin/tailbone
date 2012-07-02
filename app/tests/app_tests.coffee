@@ -269,7 +269,7 @@ module "Inn.Layout",
               template: 'bFrontPageMoviesList',
               partials: 
                 'pagination': {}
-
+        'someView': {}
       dataManager: @dataManager
       
     @layout = new Inn.Layout @layout_config
@@ -297,6 +297,9 @@ module "Inn.Layout",
       id: 'userbar',
       model: @userModel
       
+    @userbarCloneView = new Inn.View
+      id: 'userbar'
+      
     @otherUserView = new Inn.View
       id: 'user',
       model: @userModel
@@ -316,6 +319,15 @@ module "Inn.Layout",
       id: 'someView',
       templateFolder: 'app/templates'
     
+    @contentView = new Inn.View
+      id: 'content',
+      templateFolder: 'app/templates'
+      
+    @frontpageView = new Inn.View
+      id: 'frontPageMovies',
+      templateFolder: 'app/templates'
+    
+    
 
   teardown: ->
     delete @dataManager
@@ -331,7 +343,9 @@ module "Inn.Layout",
     delete @collectionView
     delete @collectionSetView
     delete @orphanView
-    delete @someView
+    delete @realView
+    delete @contentView
+    delete @frontapageView
   
 
 test "Наличие", 1, ->
@@ -358,7 +372,12 @@ test 'render', 2, ->
   equal typeof @layout.render().done, 'function', 'Функция, рендерящая мастер-шаблон должна вернуть deferred-объект, у которого будет метод done'
 
 
-test 'addView', 5, ->
+test 'render should not create several deferreds until resolve', 1, ->
+  first_deferred = @layout.render()
+  second_deferred = @layout.render()
+  strictEqual first_deferred, second_deferred, 'Если неразрешен первый рендер, то должен возвращаться текущий'
+
+test 'addView', 6, ->
   @layout.addView @tagsView
   strictEqual @layout._views[0], @tagsView, 'Внутри layout view должны храниться внутри массива _views'
 
@@ -371,6 +390,10 @@ test 'addView', 5, ->
     
   @layout.addView @tagsView
   strictEqual @layout._views[2], undefined, 'Если view уже добавлена, она не должна быть добавлена повторно'
+  
+  @layout.addView @userbarCloneView
+  strictEqual @layout._views[2], undefined, 'Если view уже добавлена, она не должна быть добавлена повторно если имеет тот же ID'
+  
 
 
 test 'addView: return self', 1, ->
@@ -400,7 +423,7 @@ test 'add:view event', 1, ->
   @layout.addView @tagsView
     
   strictEqual some_variable, @tagsView, 'Функция Inn.Layout.addView должна вызывать событие "add:view" и передавать в колбек добавленный объект'
-
+  
 
 test 'getView', 2, ->
   @layout.addView @tagsView
@@ -443,6 +466,7 @@ test 'addView and data linking', 5, ->
   @layout.addView @collectionSetView
   strictEqual @layout.getView('collectionSet').collection, @otherCollectionModel, 'Если коллекция задана явно, то она остается'
 
+
 #возможно это не нужно и неправильно TODO
 test 'addView: bind layout', 1, ->
   @layout.addView @tagsView
@@ -466,7 +490,10 @@ asyncTest 'listen to views render event and call recheckSubViews method', 1, ->
 
 test 'recheckSubViews method', 1, ->
   strictEqual typeof @layout._recheckSubViews, 'function', 'Layout должен сожержать метод проверки подвьюшек'
+  
 
+test 'processRoutes: should return self', 1, ->
+  strictEqual @layout.processRoutes(), @layout, 'processRoutes должен возвращать себя'
 
 test 'processRoutes: create top views', 3, ->
   @layout.processRoutes();
@@ -495,5 +522,96 @@ test 'processRoutes: set template names', 4, ->
   strictEqual @layout.getView('pagination')._getTemplateURL(), 'bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
 
 
+test 'processRoutes should attach _routeBranch', 3, ->
+  @layout.addView @realView
+  @layout.addView @contentView
+  @layout.addView @frontpageView
+  
+  @layout.processRoutes()
+  
+  strictEqual @layout.getView('content').options._routeBranch, @layout.options.routes.content, 'При создании view layout должен сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
+  strictEqual @layout.getView('someView').options._routeBranch, @layout.options.routes.someView, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
+  strictEqual @layout.getView('frontPageMovies').options._routeBranch, @layout.options.routes.content.partials.frontPageMovies, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
 
 
+module "Inn.Layout Render and such",
+  setup: ->
+    
+    $('#header').empty()
+    $('#content').empty()
+    $('#footer').empty()
+    
+    
+    @dataManager = new Inn.DataManager
+      
+    @layout_config =
+      routes:
+        'header': {}
+        'footer': {}
+        'content':
+          template: 'app/templates/bFrontpage.js'
+          partials:
+            'tags': {}
+            'sortings': {}
+            'promoMovie': {}
+            'frontPageMovies':
+              partials: 
+                'pagination': {}
+        'someView': {}
+      dataManager: @dataManager,
+      templateOptions:
+        templateFolder: 'app/templates'
+        templateFormat: 'js'
+      
+    @layout = new Inn.Layout @layout_config
+    
+    @layout_config_jade =
+      routes:
+        'header': {}
+        'footer': {}
+        'content':
+          partials:
+            'tags': {}
+            'sortings': {}
+            'promoMovie': {}
+            'frontPageMovies':
+              partials: 
+                'pagination': {}
+        'someView': {}
+      dataManager: @dataManager,
+      templateOptions:
+        templateFolder: 'app/templates'
+        templateFormat: 'jade'
+      
+    @layout_jade = new Inn.Layout @layout_config_jade
+    
+
+  teardown: ->
+    delete @dataManager
+    delete @layout_config
+    delete @layout
+    
+    $('#header').empty()
+    $('#content').empty()
+    $('#footer').empty()
+
+
+test 'layout should create views with default options', 4, ->
+  @layout.processRoutes()
+  
+  strictEqual @layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
+  strictEqual @layout.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
+  
+  @layout_jade.processRoutes()
+  strictEqual @layout_jade.getView('header')._getTemplateURL(), 'app/templates/bHeader.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
+  strictEqual @layout_jade.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
+  
+
+asyncTest 'layout render should attach views to DOM', 3, ->
+  deferred = @layout.processRoutes().render()
+  deferred.done ->
+    strictEqual $('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
+    strictEqual $('#content').text(), '===Content===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
+    strictEqual $('#footer').text(), '===Footer===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
+    start()
+  

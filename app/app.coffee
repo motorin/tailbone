@@ -29,30 +29,33 @@ Inn.View = Backbone.View.extend({
     @options.templateFormat = 'js' unless options.templateFormat
     
   render: ->
-    if @renderDeferred and @renderDeferred.state() == 'pending'
-      return @renderDeferred
+    if @_renderDeferred and @_renderDeferred.state() == 'pending'
+      return @_renderDeferred
     
-    @renderDeferred = new $.Deferred()
+    @_renderDeferred = new $.Deferred()
     
     view = this
     
     if typeof @_template == 'function'
       @$el.html @_template()
       @trigger('render', this)
-      view.renderDeferred.resolve()
+      view._renderDeferred.resolve()
     else
       @_getTemplate().done ->
         view.$el.html view._template()
         view.trigger('render', view)
-        view.renderDeferred.resolve()
+        view._renderDeferred.resolve()
       
-    return @renderDeferred
+    return @_renderDeferred
 
   _getTemplateURL: ->
     devider = if @options.templateFolder then '/' else ''
     return @options.templateFolder+devider+'b'+@id[0].toUpperCase()+@id.slice(1)+'.'+@options.templateFormat if not @options.templateURL?
     return @options.templateURL
   
+  _getTemplateName: ->
+    'b'+@id[0].toUpperCase()+@id.slice(1)
+    
   _getTemplate: ->
     if @templateDeferred and @templateDeferred.state() == 'pending'
       return @templateDeferred
@@ -63,7 +66,7 @@ Inn.View = Backbone.View.extend({
     $.getScript @_getTemplateURL(), ->
       view._template = (data)->
         rendered_html = ''
-        dust.render 'bSomeView', data, (err, text)-> 
+        dust.render view._getTemplateName(), data, (err, text)-> 
           rendered_html = text
         return rendered_html
 
@@ -82,18 +85,33 @@ class Inn.Layout
     
     @_dataManager = options.dataManager
     @_views = []
+    @_routesUnrendered = 0
     
     _.extend(this, Backbone.Events)
 
   render: () ->
-    return new $.Deferred()
+    if @_renderDeferred and @_renderDeferred.state() == 'pending'
+      return @_renderDeferred
     
-
+    @_renderDeferred = new $.Deferred()
+    
+    layout = this
+    
+    _.each @options.routes, (route, name)->
+      if layout.getView(name)
+        layout._routesUnrendered++
+        layout.getView(name).render()
+    
+    return @_renderDeferred
+  
   addView: (view) ->
     
     throw new Inn.Error('view shold be an instance of Inn.View') unless view instanceof Inn.View
     
-    @_views.push(view) if _.indexOf(@_views, view) == -1
+    viewInLayout = _.find @_views, (existingView)->
+      return existingView.id == view.id
+    
+    @_views.push(view) if _.indexOf(@_views, view) == -1 and not viewInLayout
     
     view.options.layout = this
     
@@ -141,8 +159,14 @@ class Inn.Layout
       layout.addView new Inn.View
         id: name
         templateURL: if route.template then route.template else undefined
+        templateFolder: if layout.options.templateOptions and layout.options.templateOptions.templateFolder then layout.options.templateOptions.templateFolder else undefined
+        templateFormat: if layout.options.templateOptions and layout.options.templateOptions.templateFormat then layout.options.templateOptions.templateFormat else undefined
+
+      layout.getView(name).options._routeBranch = route
         
       layout._processPartials(route)
+      
+    return this
 
 
   _processPartials: (route)->
@@ -153,11 +177,23 @@ class Inn.Layout
         layout.addView new Inn.View
           id: name
           templateURL: if partial.template then partial.template else undefined
+          templateFolder: if layout.options.templateOptions and layout.options.templateOptions.templateFolder then layout.options.templateOptions.templateFolder else undefined
+          templateFormat: if layout.options.templateOptions and layout.options.templateOptions.templateFormat then layout.options.templateOptions.templateFormat else undefined
+        
+        layout.getView(name).options._routeBranch = partial
           
         layout._processPartials(partial)
     
   _recheckSubViews: (view)->
+    @_routesUnrendered--
+    unless view.el.parentNode
+      $('#'+view.id).replaceWith view.$el
+    
+    if @_routesUnrendered <= 0
+      @_routesRendered = 0
+      @_renderDeferred.resolve() 
 
+    #console.log(view.options._routeBranch)
   
 ###
 Менеджер данных
