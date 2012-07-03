@@ -1,18 +1,18 @@
 ###
-Проверяем, если наш "неймспейс" и, если его нет, создаем
+Is Inn namespace defined?
 ###
 window.Inn ?= {}
 
 ###
-Модель приложения
+Application Model
 ###
 Inn.Model = Backbone.Model.extend({
   url: ->
-    return '#'
+    return 'app/models/'+@id+'.json'
 });
 
 ###
-Коллекция приложения
+Application Collection
 ###
 Inn.Collection = Backbone.Collection.extend({
   url: ->
@@ -21,26 +21,35 @@ Inn.Collection = Backbone.Collection.extend({
 });
 
 ###
-Стандартная вьюшка приложения
+Application standart View
 ###
 Inn.View = Backbone.View.extend({
   initialize: (options)->
-    @options.templateFolder = '' unless options.templateFolder
-    @options.templateFormat = 'js' unless options.templateFormat
+    #extending defaults
+    @options = $.extend {}, 
+      templateFolder: ''
+      templateFormat: 'js'
+    , options
+    
+    #return this to chaining
+    this
     
   render: ->
+    #if view in rendering state return current render deferred object
     if @_renderDeferred and @_renderDeferred.state() == 'pending'
       return @_renderDeferred
+    
+    @options.layout._viewsUnrendered++ if @options.layout                 #TODO untested and WRONG -- can't easily extend!!
     
     @_renderDeferred = new $.Deferred()
     
     view = this
     
-    if typeof @_template == 'function'
+    if typeof @_template == 'function'          #if @_template already loaded and compiled
       @$el.html @_template()
       @trigger('render', this)
       view._renderDeferred.resolve()
-    else
+    else                                        #else get template
       @_getTemplate().done ->
         view.$el.html view._template()
         view.trigger('render', view)
@@ -50,20 +59,23 @@ Inn.View = Backbone.View.extend({
 
   _getTemplateURL: ->
     devider = if @options.templateFolder then '/' else ''
-    return @options.templateFolder+devider+'b'+@id[0].toUpperCase()+@id.slice(1)+'.'+@options.templateFormat if not @options.templateURL?
+    return @options.templateFolder+devider+@_getTemplateName()+'.'+@options.templateFormat if not @options.templateURL?
     return @options.templateURL
   
   _getTemplateName: ->
-    'b'+@id[0].toUpperCase()+@id.slice(1)
+    return 'b'+@id[0].toUpperCase()+@id.slice(1) unless @options.templateName
+    return @options.templateName
     
   _getTemplate: ->
+    #if template is currently getting template return current template deferred object
     if @templateDeferred and @templateDeferred.state() == 'pending'
       return @templateDeferred
     
     @templateDeferred = new $.Deferred()
+
     view = this
-    
-    $.getScript @_getTemplateURL(), ->
+    $.getScript @_getTemplateURL(), ()->
+      #wrapping dust template in view method
       view._template = (data)->
         rendered_html = ''
         dust.render view._getTemplateName(), data, (err, text)-> 
@@ -73,10 +85,14 @@ Inn.View = Backbone.View.extend({
       view.templateDeferred.resolve()
         
     return @templateDeferred
+    
+  remove: ->
+    @$el.empty()
+    @trigger('remove')
 });
 
 ###
-Менеджер шаблонов
+Template Manager
 ###
 class Inn.Layout
   constructor: (@options) ->
@@ -85,11 +101,13 @@ class Inn.Layout
     
     @_dataManager = options.dataManager
     @_views = []
-    @_routesUnrendered = 0
+    @_viewsUnrendered = 0
     
+    #now Layout can fire Backbone events
     _.extend(this, Backbone.Events)
 
   render: () ->
+    #if view in rendering state return current render deferred object
     if @_renderDeferred and @_renderDeferred.state() == 'pending'
       return @_renderDeferred
     
@@ -99,9 +117,9 @@ class Inn.Layout
     
     _.each @options.routes, (route, name)->
       if layout.getView(name)
-        layout._routesUnrendered++
         layout.getView(name).render()
     
+    #@_renderDeferred would not be resolved until all of the views rendered
     return @_renderDeferred
   
   addView: (view) ->
@@ -127,6 +145,7 @@ class Inn.Layout
         delete view.collection
     
     view.on 'render', _.bind(@_recheckSubViews, this, view)
+    view.on 'remove', _.bind(@_clearSubViews, this, view)
     
     @trigger('add:view', view);
     
@@ -158,7 +177,8 @@ class Inn.Layout
     _.each @options.routes, (route, name)->
       layout.addView new Inn.View
         id: name
-        templateURL: if route.template then route.template else undefined
+        templateName: if route.templateName then route.templateName else undefined
+        templateURL: if route.templateURL then route.templateURL else undefined
         templateFolder: if layout.options.templateOptions and layout.options.templateOptions.templateFolder then layout.options.templateOptions.templateFolder else undefined
         templateFormat: if layout.options.templateOptions and layout.options.templateOptions.templateFormat then layout.options.templateOptions.templateFormat else undefined
 
@@ -176,7 +196,8 @@ class Inn.Layout
       _.each route.partials, (partial, name)->
         layout.addView new Inn.View
           id: name
-          templateURL: if partial.template then partial.template else undefined
+          templateName: if partial.templateName then partial.templateName else undefined
+          templateURL: if partial.templateURL then partial.templateURL else undefined
           templateFolder: if layout.options.templateOptions and layout.options.templateOptions.templateFolder then layout.options.templateOptions.templateFolder else undefined
           templateFormat: if layout.options.templateOptions and layout.options.templateOptions.templateFormat then layout.options.templateOptions.templateFormat else undefined
         
@@ -185,18 +206,30 @@ class Inn.Layout
         layout._processPartials(partial)
     
   _recheckSubViews: (view)->
-    @_routesUnrendered--
+    @_viewsUnrendered--
+    
     unless view.el.parentNode
       $('#'+view.id).replaceWith view.$el
     
-    if @_routesUnrendered <= 0
+    layout = this
+    
+    if view.options._routeBranch.partials
+      _.each view.options._routeBranch.partials, (partial, name)->
+        layout.getView(name).render()
+
+    if @_viewsUnrendered <= 0
       @_routesRendered = 0
       @_renderDeferred.resolve() 
 
-    #console.log(view.options._routeBranch)
+  _clearSubViews: (view)->
+    layout = this
+    
+    if view.options._routeBranch.partials
+      _.each view.options._routeBranch.partials, (partial, name)->
+        layout.getView(name).remove()
   
 ###
-Менеджер данных
+Data Manager
 ###
 class Inn.DataManager
   constructor: () ->    

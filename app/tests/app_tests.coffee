@@ -1,3 +1,110 @@
+###
+Preparing Mockjax
+###
+
+$.mockjax
+  url: 'app/models/model_id.json'
+  contentType: 'json'
+  responseTime: 150
+
+
+$.mockjax
+  url: 'bMovie.js'
+  contentType: 'script'
+  responseTime: 150
+
+$.mockjax
+  url: 'app/templates/bFooter.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write "<div>===Footer===</div>"
+    dust.register "bFooter", body_0
+    return body_0
+
+$.mockjax
+  url: 'app/templates/bFrontpage.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write '===Content===<div id="tags"></div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>'
+    dust.register "bFrontpage", body_0
+    return body_0
+
+$.mockjax
+  url: 'app/templates/bFrontPageMovies.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write '===Frontpage movies===<div id="pagination"></div>'
+    dust.register "bFrontPageMovies", body_0
+    return body_0
+
+$.mockjax
+  url: 'app/templates/bHeader.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write '===Header==='
+    dust.register "bHeader", body_0
+    return body_0
+
+$.mockjax
+  url: 'app/templates/bPagination.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write '===Pagination==='
+    dust.register "bPagination", body_0
+    return body_0
+
+$.mockjax
+  url: 'app/templates/bPromoMovie.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write '===PromoMovie==='
+    dust.register "bPromoMovie", body_0
+    return body_0
+
+$.mockjax
+  url: 'app/templates/bSomeView.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write "<div>Some content</div>"
+    dust.register "bSomeView", body_0
+    return body_0
+
+$.mockjax
+  url: 'app/templates/bSortings.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write "===Sortings==="
+    dust.register "bSortings", body_0
+    return body_0
+
+$.mockjax
+  url: 'app/templates/bTags.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write "===Tags==="
+    dust.register "bTags", body_0
+    return body_0
+
+
+
 module "Inn"
 test "Наличие", 1, ->
   ok Inn, 'Ожидаем наличия нашего неймспейса'
@@ -18,7 +125,6 @@ test 'extends Backbone.Model', 1, ->
 
 test 'fetch.done', 1, ->
   equal typeof @model.fetch().done, 'function', 'Модель должна иметь возвращать deferred-метод "done" при запросе к серверу'
-
 
 
 module "Inn.Collection",
@@ -180,6 +286,7 @@ module "Inn.View",
     
     @overriden_format_and_folder_view = new Inn.View
       id: 'content',
+      templateName: 'bFrontpage'
       templateFolder: 'templates'
       templateFormat: 'jade'
       
@@ -187,6 +294,10 @@ module "Inn.View",
       id: 'someView',
       templateFolder: 'app/templates'
     
+    @template_view = new Inn.View
+      id: 'someView',
+      templateName: 'bFrontpage'
+      templateFolder: 'app/templates'
     
   teardown: ->
     delete @canonical_view
@@ -210,23 +321,31 @@ asyncTest 'triggers render event on render()', 1, ->
     ok some_variable, 'View должна триггерить событие render при своем рендеринге'
     start()
 
-
 test '_getTemplateURL()', 2, ->
-  #по умолчанию название шаблона должно генерироваться на основе ID по схеме "b%ViewId%.js" Если жестко задан параметр "template" то должен браться он
+  #по умолчанию путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%.js" Если жестко задан параметр "templateURL" то должен браться он
   equal @canonical_view._getTemplateURL(), 'bMovie.js', 'Должно вернуть bMovie.js, а вернуло ' + @canonical_view._getTemplateURL()
   equal @overriden_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_view._getTemplateURL()
 
 
 test '_getTemplateURL() with folder name', 2, ->
-  #название шаблона должно генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.js"
+  #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.js"
   equal @folder_view._getTemplateURL(), 'templates/bMovie.js', 'Должно вернуть templates/bMovie.js, а вернуло ' + @folder_view._getTemplateURL()
   equal @overriden_folder_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_folder_view._getTemplateURL()
 
 
 test '_getTemplateURL() with folder name and template format', 2, ->
-  #название шаблона должно генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
+  #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
   equal @format_view._getTemplateURL(), 'bMovie.jade', 'Должно вернуть templates/bMovie.jade, а вернуло ' + @folder_view._getTemplateURL()
-  equal @overriden_format_and_folder_view._getTemplateURL(), 'templates/bContent.jade', 'Должно вернуть templates/bContent.jade, а вернуло ' + @overriden_folder_view._getTemplateURL()
+  equal @overriden_format_and_folder_view._getTemplateURL(), 'templates/bFrontpage.jade', 'Должно вернуть templates/bFrontpage.jade, а вернуло ' + @overriden_folder_view._getTemplateURL()
+
+test '_getTemplateName()', 2, ->
+  #путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%"
+  equal @overriden_format_and_folder_view._getTemplateName(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_format_and_folder_view._getTemplateName()
+  equal @canonical_view._getTemplateName(), 'bMovie', 'Должно вернуть bMovie, а вернуло ' + @canonical_view._getTemplateName()
+
+test '_getTemplateURL() with _getTemplateName()', 1, ->
+  #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
+  equal @template_view._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + @template_view._getTemplateURL()
 
 
 asyncTest 'render should define _template', 1, ->
@@ -248,7 +367,15 @@ asyncTest 'render should render _template', 1, ->
     equal test.real_view.$el.text(), 'Some content', 'Должнен отрендериться временный элемент'
     start()
   
+
+test 'triggers remove event on remove()', 1, ->
+  some_variable = false;
+  @real_view.on 'remove', ->
+    some_variable = true
   
+  @real_view.remove()
+  ok some_variable, 'View должна триггерить событие remove при уничтожении DOM-елемента'
+
 
 module "Inn.Layout",
   setup: ->
@@ -258,15 +385,15 @@ module "Inn.Layout",
       routes:
         'header': {}
         'footer':
-          template: 'bFooter'
+          templateURL: 'bFooter'
         'content':
-          template: 'bFrontpage'
+          templateURL: 'bFrontpage'
           partials:
             'tags': {}
             'sortings': {}
             'promoMovie': {}
             'frontPageMovies':
-              template: 'bFrontPageMoviesList',
+              templateURL: 'bFrontPageMoviesList',
               partials: 
                 'pagination': {}
         'someView': {}
@@ -534,12 +661,17 @@ test 'processRoutes should attach _routeBranch', 3, ->
   strictEqual @layout.getView('frontPageMovies').options._routeBranch, @layout.options.routes.content.partials.frontPageMovies, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
 
 
-module "Inn.Layout Render and such",
+module "Inn.Layout Render remove and so on",
   setup: ->
     
-    $('#header').empty()
-    $('#content').empty()
-    $('#footer').empty()
+    $('#header').remove()
+    $('#content').remove()
+    $('#footer').remove()
+    
+    $('<div id="header"></div>').appendTo('body')
+    $('<div id="content"></div>').appendTo('body')
+    $('<div id="footer"></div>').appendTo('body')
+    
     
     
     @dataManager = new Inn.DataManager
@@ -549,7 +681,8 @@ module "Inn.Layout Render and such",
         'header': {}
         'footer': {}
         'content':
-          template: 'app/templates/bFrontpage.js'
+          templateName: 'bFrontpage'
+          templateURL: 'app/templates/bFrontpage.js'
           partials:
             'tags': {}
             'sortings': {}
@@ -591,9 +724,9 @@ module "Inn.Layout Render and such",
     delete @layout_config
     delete @layout
     
-    $('#header').empty()
-    $('#content').empty()
-    $('#footer').empty()
+    $('#header').remove()
+    $('#content').remove()
+    $('#footer').remove()
 
 
 test 'layout should create views with default options', 4, ->
@@ -605,13 +738,26 @@ test 'layout should create views with default options', 4, ->
   @layout_jade.processRoutes()
   strictEqual @layout_jade.getView('header')._getTemplateURL(), 'app/templates/bHeader.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
   strictEqual @layout_jade.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
-  
 
 asyncTest 'layout render should attach views to DOM', 3, ->
   deferred = @layout.processRoutes().render()
+  
   deferred.done ->
     strictEqual $('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
-    strictEqual $('#content').text(), '===Content===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
+    strictEqual $('#content').html(), '===Content===<div id="tags">===Tags===</div><div id="sortings">===Sortings===</div><div id="promoMovie">===PromoMovie===</div><div id="frontPageMovies">===Frontpage movies===<div id="pagination">===Pagination===</div></div>', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
     strictEqual $('#footer').text(), '===Footer===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
     start()
+
+
+asyncTest 'layout should cleanup nested views references for removed DOM elements', 5, ->
+  test = this
+  deferred = @layout.processRoutes().render()
   
+  deferred.done ->
+    test.layout.getView('content').remove()
+    strictEqual test.layout.getView('tags').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
+    strictEqual test.layout.getView('sortings').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
+    strictEqual test.layout.getView('promoMovie').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
+    strictEqual test.layout.getView('frontPageMovies').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
+    strictEqual test.layout.getView('pagination').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
+    start()
