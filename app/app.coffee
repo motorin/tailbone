@@ -87,6 +87,7 @@ Inn.View = Backbone.View.extend({
     return @templateDeferred
     
   remove: ->
+    @undelegateEvents()
     @$el.empty()
     @trigger('remove')
 });

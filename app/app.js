@@ -106,6 +106,7 @@ Is Inn namespace defined?
       return this.templateDeferred;
     },
     remove: function() {
+      this.undelegateEvents();
       this.$el.empty();
       return this.trigger('remove');
     }
