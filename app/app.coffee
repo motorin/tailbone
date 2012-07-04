@@ -44,16 +44,11 @@ Inn.View = Backbone.View.extend({
     @_renderDeferred = new $.Deferred()
     
     view = this
-    
-    if typeof @_template == 'function'          #if @_template already loaded and compiled
-      @$el.html @_template()
-      @trigger('render', this)
+
+    @_getTemplate().done ->
+      view.$el.html view._template()
+      view.trigger('render', view)
       view._renderDeferred.resolve()
-    else                                        #else get template
-      @_getTemplate().done ->
-        view.$el.html view._template()
-        view.trigger('render', view)
-        view._renderDeferred.resolve()
       
     return @_renderDeferred
 
@@ -72,6 +67,10 @@ Inn.View = Backbone.View.extend({
       return @templateDeferred
     
     @templateDeferred = new $.Deferred()
+
+    if typeof @_template == 'function'
+      @templateDeferred.resolve()
+      return
 
     view = this
     $.getScript @_getTemplateURL(), ()->
@@ -100,9 +99,18 @@ class Inn.Layout
     
     throw new Inn.Error('dataManager should be in options') unless options && options.dataManager && options.dataManager instanceof Inn.DataManager
     
+    @options = $.extend true
+    , {}
+    , templateOptions:
+        templateFolder: ''
+        templateFormat: 'js'
+    , options
+    
     @_dataManager = options.dataManager
     @_views = []
     @_viewsUnrendered = 0
+    
+    @id = if @options.id then @options.id else 'layout'
     
     #now Layout can fire Backbone events
     _.extend(this, Backbone.Events)
@@ -116,13 +124,48 @@ class Inn.Layout
     
     layout = this
     
-    _.each @options.routes, (route, name)->
-      if layout.getView(name)
-        layout.getView(name).render()
-    
+    @_getTemplate().done ->
+      $('#'+layout.id).html layout._template()
+      _.each layout.options.routes, (route, name)->
+        if layout.getView(name)
+          layout.getView(name).render()
+          
     #@_renderDeferred would not be resolved until all of the views rendered
     return @_renderDeferred
   
+  _getTemplateURL: ->
+    devider = if @options.templateOptions.templateFolder then '/' else ''
+    return @options.templateOptions.templateFolder+devider+@_getTemplateName()+'.'+@options.templateOptions.templateFormat if not @options.templateURL?
+    return @options.templateURL
+    
+  _getTemplateName: ->
+    return 'b'+@id[0].toUpperCase()+@id.slice(1) unless @options.templateName
+    return @options.templateName
+    
+  _getTemplate: ->
+    #if template is currently getting template return current template deferred object
+    if @templateDeferred and @templateDeferred.state() == 'pending'
+      return @templateDeferred
+    
+    @templateDeferred = new $.Deferred()
+    
+    if typeof @_template == 'function'
+      @templateDeferred.resolve()
+      return
+    
+    layout = this
+    $.getScript @_getTemplateURL(), ()->
+      #wrapping dust template in view method
+      layout._template = (data)->
+        rendered_html = ''
+        dust.render layout._getTemplateName(), data, (err, text)-> 
+          rendered_html = text
+        return rendered_html
+
+      layout.templateDeferred.resolve()
+        
+    return @templateDeferred
+    
   addView: (view) ->
     
     throw new Inn.Error('view shold be an instance of Inn.View') unless view instanceof Inn.View

@@ -103,6 +103,16 @@ $.mockjax
     dust.register "bTags", body_0
     return body_0
 
+$.mockjax
+  url: 'app/templates/bLayout.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write '<div id="header"></div><div id="content"></div><div id="footer"></div>'
+    dust.register "bLayout", body_0
+    return body_0
+
 
 
 module "Inn"
@@ -398,8 +408,48 @@ module "Inn.Layout",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager
+      templateOptions:
+        templateFolder: 'app/templates'
+      
       
     @layout = new Inn.Layout @layout_config
+    
+    @layout_with_id = new Inn.Layout
+      dataManager: @dataManager
+      id: 'secondLayout'
+    
+    @layout_with_templateFolder = new Inn.Layout
+      dataManager: @dataManager
+      templateOptions:
+        templateFolder: 'app/templates'
+     
+    @layout_with_templateFormat = new Inn.Layout
+      dataManager: @dataManager
+      templateOptions:
+        templateFormat: 'jade'
+
+    @layout_with_templateFormat_and_templateFolder = new Inn.Layout
+      dataManager: @dataManager
+      templateOptions:
+        templateFolder: 'app/templates'
+        templateFormat: 'jade'
+      
+    @layout_with_overriden_templateName = new Inn.Layout
+      dataManager: @dataManager
+      templateName: 'other_layout'    
+      
+    @layout_with_overriden_templateName_and_templateFolder = new Inn.Layout
+      dataManager: @dataManager
+      templateOptions:
+        templateFolder: 'app/templates'
+      templateName: 'other_layout'  
+      
+    @layout_with_overriden_templateName_and_templateFolder_and_templateFormat = new Inn.Layout
+      dataManager: @dataManager
+      templateOptions:
+        templateFormat: 'jade'
+        templateFolder: 'app/templates'
+      templateName: 'other_layout'
 
     @userModel = new Inn.Model
       id: 'user',
@@ -478,6 +528,23 @@ module "Inn.Layout",
 test "Наличие", 1, ->
   ok @layout instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)'
 
+test "id", 2, ->
+  strictEqual @layout.id, 'layout', 'Должен автоматически присвоиться id главного элемента мастер-шаблона'
+  strictEqual @layout_with_id.id, 'secondLayout', 'Должен автоматически присвоиться id главного элемента мастер-шаблона'
+
+test '_getTemplateName()', 2, ->
+  #путь к шаблону должен генерироваться на основе ID по схеме "b%LayoutId%"
+  equal @layout._getTemplateName(), 'bLayout', 'Должно вернуть bLayou, а вернуло ' + @layout._getTemplateName()
+  equal @layout_with_id._getTemplateName(), 'bSecondLayout', 'Должно вернуть bSecondLayout, а вернуло ' + @layout_with_id._getTemplateName()
+
+test '_getTemplateURL()', 7, ->
+  strictEqual @layout._getTemplateURL(), 'app/templates/bLayout.js', 'Должно вернуться bLayout.js'
+  strictEqual @layout_with_id._getTemplateURL(), 'bSecondLayout.js', 'Должно вернуться bSecondLayout.js'
+  strictEqual @layout_with_templateFormat._getTemplateURL(), 'bLayout.jade', 'кастомный путь к шаблону, если он есть в настройках'
+  strictEqual @layout_with_templateFormat_and_templateFolder._getTemplateURL(), 'app/templates/bLayout.jade', 'кастомный путь к шаблону, если он есть в настройках'
+  strictEqual @layout_with_overriden_templateName._getTemplateURL(), 'other_layout.js', 'кастомный путь к шаблону, если он есть в настройках'
+  strictEqual @layout_with_overriden_templateName_and_templateFolder._getTemplateURL(), 'app/templates/other_layout.js', 'кастомный путь к шаблону, если он есть в настройках'
+  strictEqual @layout_with_overriden_templateName_and_templateFolder_and_templateFormat._getTemplateURL(), 'app/templates/other_layout.jade', 'кастомный путь к шаблону, если он есть в настройках'
   
 test "_dataManager link require", 2, ->
   raises ->
@@ -643,10 +710,10 @@ test 'processRoutes: create partial views', 5, ->
 test 'processRoutes: set template names', 4, ->
   @layout.processRoutes();
   
-  strictEqual @layout.getView('header')._getTemplateURL(), 'bHeader.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
+  strictEqual @layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
   strictEqual @layout.getView('content')._getTemplateURL(), 'bFrontpage', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
   strictEqual @layout.getView('frontPageMovies')._getTemplateURL(), 'bFrontPageMoviesList', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
-  strictEqual @layout.getView('pagination')._getTemplateURL(), 'bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
+  strictEqual @layout.getView('pagination')._getTemplateURL(), 'app/templates/bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
 
 
 test 'processRoutes should attach _routeBranch', 3, ->
@@ -667,12 +734,6 @@ module "Inn.Layout Render remove and so on",
     $('#header').remove()
     $('#content').remove()
     $('#footer').remove()
-    
-    $('<div id="header"></div>').appendTo('body')
-    $('<div id="content"></div>').appendTo('body')
-    $('<div id="footer"></div>').appendTo('body')
-    
-    
     
     @dataManager = new Inn.DataManager
       

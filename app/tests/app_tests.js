@@ -145,6 +145,20 @@ Preparing Mockjax
     }
   });
 
+  $.mockjax({
+    url: 'app/templates/bLayout.js',
+    contentType: 'script',
+    responseTime: 150,
+    response: function() {
+      var body_0;
+      body_0 = function(chk, ctx) {
+        return chk.write('<div id="header"></div><div id="content"></div><div id="footer"></div>');
+      };
+      dust.register("bLayout", body_0);
+      return body_0;
+    }
+  });
+
   module("Inn");
 
   test("Наличие", 1, function() {
@@ -437,9 +451,54 @@ Preparing Mockjax
           },
           'someView': {}
         },
-        dataManager: this.dataManager
+        dataManager: this.dataManager,
+        templateOptions: {
+          templateFolder: 'app/templates'
+        }
       };
       this.layout = new Inn.Layout(this.layout_config);
+      this.layout_with_id = new Inn.Layout({
+        dataManager: this.dataManager,
+        id: 'secondLayout'
+      });
+      this.layout_with_templateFolder = new Inn.Layout({
+        dataManager: this.dataManager,
+        templateOptions: {
+          templateFolder: 'app/templates'
+        }
+      });
+      this.layout_with_templateFormat = new Inn.Layout({
+        dataManager: this.dataManager,
+        templateOptions: {
+          templateFormat: 'jade'
+        }
+      });
+      this.layout_with_templateFormat_and_templateFolder = new Inn.Layout({
+        dataManager: this.dataManager,
+        templateOptions: {
+          templateFolder: 'app/templates',
+          templateFormat: 'jade'
+        }
+      });
+      this.layout_with_overriden_templateName = new Inn.Layout({
+        dataManager: this.dataManager,
+        templateName: 'other_layout'
+      });
+      this.layout_with_overriden_templateName_and_templateFolder = new Inn.Layout({
+        dataManager: this.dataManager,
+        templateOptions: {
+          templateFolder: 'app/templates'
+        },
+        templateName: 'other_layout'
+      });
+      this.layout_with_overriden_templateName_and_templateFolder_and_templateFormat = new Inn.Layout({
+        dataManager: this.dataManager,
+        templateOptions: {
+          templateFormat: 'jade',
+          templateFolder: 'app/templates'
+        },
+        templateName: 'other_layout'
+      });
       this.userModel = new Inn.Model({
         id: 'user',
         name: 'user'
@@ -512,6 +571,26 @@ Preparing Mockjax
 
   test("Наличие", 1, function() {
     return ok(this.layout instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)');
+  });
+
+  test("id", 2, function() {
+    strictEqual(this.layout.id, 'layout', 'Должен автоматически присвоиться id главного элемента мастер-шаблона');
+    return strictEqual(this.layout_with_id.id, 'secondLayout', 'Должен автоматически присвоиться id главного элемента мастер-шаблона');
+  });
+
+  test('_getTemplateName()', 2, function() {
+    equal(this.layout._getTemplateName(), 'bLayout', 'Должно вернуть bLayou, а вернуло ' + this.layout._getTemplateName());
+    return equal(this.layout_with_id._getTemplateName(), 'bSecondLayout', 'Должно вернуть bSecondLayout, а вернуло ' + this.layout_with_id._getTemplateName());
+  });
+
+  test('_getTemplateURL()', 7, function() {
+    strictEqual(this.layout._getTemplateURL(), 'app/templates/bLayout.js', 'Должно вернуться bLayout.js');
+    strictEqual(this.layout_with_id._getTemplateURL(), 'bSecondLayout.js', 'Должно вернуться bSecondLayout.js');
+    strictEqual(this.layout_with_templateFormat._getTemplateURL(), 'bLayout.jade', 'кастомный путь к шаблону, если он есть в настройках');
+    strictEqual(this.layout_with_templateFormat_and_templateFolder._getTemplateURL(), 'app/templates/bLayout.jade', 'кастомный путь к шаблону, если он есть в настройках');
+    strictEqual(this.layout_with_overriden_templateName._getTemplateURL(), 'other_layout.js', 'кастомный путь к шаблону, если он есть в настройках');
+    strictEqual(this.layout_with_overriden_templateName_and_templateFolder._getTemplateURL(), 'app/templates/other_layout.js', 'кастомный путь к шаблону, если он есть в настройках');
+    return strictEqual(this.layout_with_overriden_templateName_and_templateFolder_and_templateFormat._getTemplateURL(), 'app/templates/other_layout.jade', 'кастомный путь к шаблону, если он есть в настройках');
   });
 
   test("_dataManager link require", 2, function() {
@@ -666,10 +745,10 @@ Preparing Mockjax
 
   test('processRoutes: set template names', 4, function() {
     this.layout.processRoutes();
-    strictEqual(this.layout.getView('header')._getTemplateURL(), 'bHeader.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
+    strictEqual(this.layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
     strictEqual(this.layout.getView('content')._getTemplateURL(), 'bFrontpage', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
     strictEqual(this.layout.getView('frontPageMovies')._getTemplateURL(), 'bFrontPageMoviesList', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
-    return strictEqual(this.layout.getView('pagination')._getTemplateURL(), 'bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
+    return strictEqual(this.layout.getView('pagination')._getTemplateURL(), 'app/templates/bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
   });
 
   test('processRoutes should attach _routeBranch', 3, function() {
@@ -687,9 +766,6 @@ Preparing Mockjax
       $('#header').remove();
       $('#content').remove();
       $('#footer').remove();
-      $('<div id="header"></div>').appendTo('body');
-      $('<div id="content"></div>').appendTo('body');
-      $('<div id="footer"></div>').appendTo('body');
       this.dataManager = new Inn.DataManager;
       this.layout_config = {
         routes: {

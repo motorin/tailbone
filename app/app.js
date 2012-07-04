@@ -58,17 +58,11 @@ Is Inn namespace defined?
       }
       this._renderDeferred = new $.Deferred();
       view = this;
-      if (typeof this._template === 'function') {
-        this.$el.html(this._template());
-        this.trigger('render', this);
-        view._renderDeferred.resolve();
-      } else {
-        this._getTemplate().done(function() {
-          view.$el.html(view._template());
-          view.trigger('render', view);
-          return view._renderDeferred.resolve();
-        });
-      }
+      this._getTemplate().done(function() {
+        view.$el.html(view._template());
+        view.trigger('render', view);
+        return view._renderDeferred.resolve();
+      });
       return this._renderDeferred;
     },
     _getTemplateURL: function() {
@@ -91,6 +85,10 @@ Is Inn namespace defined?
         return this.templateDeferred;
       }
       this.templateDeferred = new $.Deferred();
+      if (typeof this._template === 'function') {
+        this.templateDeferred.resolve();
+        return;
+      }
       view = this;
       $.getScript(this._getTemplateURL(), function() {
         view._template = function(data) {
@@ -124,9 +122,16 @@ Is Inn namespace defined?
       if (!(options && options.dataManager && options.dataManager instanceof Inn.DataManager)) {
         throw new Inn.Error('dataManager should be in options');
       }
+      this.options = $.extend(true, {}, {
+        templateOptions: {
+          templateFolder: '',
+          templateFormat: 'js'
+        }
+      }, options);
       this._dataManager = options.dataManager;
       this._views = [];
       this._viewsUnrendered = 0;
+      this.id = this.options.id ? this.options.id : 'layout';
       _.extend(this, Backbone.Events);
     }
 
@@ -137,12 +142,56 @@ Is Inn namespace defined?
       }
       this._renderDeferred = new $.Deferred();
       layout = this;
-      _.each(this.options.routes, function(route, name) {
-        if (layout.getView(name)) {
-          return layout.getView(name).render();
-        }
+      this._getTemplate().done(function() {
+        $('#' + layout.id).html(layout._template());
+        return _.each(layout.options.routes, function(route, name) {
+          if (layout.getView(name)) {
+            return layout.getView(name).render();
+          }
+        });
       });
       return this._renderDeferred;
+    };
+
+    Layout.prototype._getTemplateURL = function() {
+      var devider;
+      devider = this.options.templateOptions.templateFolder ? '/' : '';
+      if (!(this.options.templateURL != null)) {
+        return this.options.templateOptions.templateFolder + devider + this._getTemplateName() + '.' + this.options.templateOptions.templateFormat;
+      }
+      return this.options.templateURL;
+    };
+
+    Layout.prototype._getTemplateName = function() {
+      if (!this.options.templateName) {
+        return 'b' + this.id[0].toUpperCase() + this.id.slice(1);
+      }
+      return this.options.templateName;
+    };
+
+    Layout.prototype._getTemplate = function() {
+      var layout;
+      if (this.templateDeferred && this.templateDeferred.state() === 'pending') {
+        return this.templateDeferred;
+      }
+      this.templateDeferred = new $.Deferred();
+      if (typeof this._template === 'function') {
+        this.templateDeferred.resolve();
+        return;
+      }
+      layout = this;
+      $.getScript(this._getTemplateURL(), function() {
+        layout._template = function(data) {
+          var rendered_html;
+          rendered_html = '';
+          dust.render(layout._getTemplateName(), data, function(err, text) {
+            return rendered_html = text;
+          });
+          return rendered_html;
+        };
+        return layout.templateDeferred.resolve();
+      });
+      return this.templateDeferred;
     };
 
     Layout.prototype.addView = function(view) {
