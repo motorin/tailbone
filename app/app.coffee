@@ -87,7 +87,7 @@ Inn.View = Backbone.View.extend({
     
   remove: ->
     @undelegateEvents()
-    @$el.empty()
+    @$el.empty().remove()
     @trigger('remove')
 });
 
@@ -100,7 +100,6 @@ class Inn.Layout
     throw new Inn.Error('dataManager should be in options') unless options && options.dataManager && options.dataManager instanceof Inn.DataManager
     
     @options = $.extend true
-    , {}
     , templateOptions:
         templateFolder: ''
         templateFormat: 'js'
@@ -125,6 +124,10 @@ class Inn.Layout
     layout = this
     
     @_getTemplate().done ->
+      _.each layout.options.routes, (route, name)->
+        if layout.getView(name)
+          layout.getView(name).remove()
+        
       $('#'+layout.id).html layout._template()
       _.each layout.options.routes, (route, name)->
         if layout.getView(name)
@@ -221,13 +224,14 @@ class Inn.Layout
     _.each @options.routes, (route, name)->
       layout.addView new Inn.View
         id: name
-        templateName: if route.templateName then route.templateName else undefined
-        templateURL: if route.templateURL then route.templateURL else undefined
-        templateFolder: if layout.options.templateOptions and layout.options.templateOptions.templateFolder then layout.options.templateOptions.templateFolder else undefined
-        templateFormat: if layout.options.templateOptions and layout.options.templateOptions.templateFormat then layout.options.templateOptions.templateFormat else undefined
 
-      layout.getView(name).options._routeBranch = route
-        
+      view = layout.getView(name)
+      view.options._routeBranch = route
+      view.options.templateName = if route.templateName then route.templateName else undefined
+      view.options.templateURL = if route.templateURL then route.templateURL else undefined
+      view.options.templateFolder = if layout.options.templateOptions and layout.options.templateOptions.templateFolder then layout.options.templateOptions.templateFolder else undefined
+      view.options.templateFormat = if layout.options.templateOptions and layout.options.templateOptions.templateFormat then layout.options.templateOptions.templateFormat else undefined
+
       layout._processPartials(route)
       
     return this
@@ -240,12 +244,14 @@ class Inn.Layout
       _.each route.partials, (partial, name)->
         layout.addView new Inn.View
           id: name
-          templateName: if partial.templateName then partial.templateName else undefined
-          templateURL: if partial.templateURL then partial.templateURL else undefined
-          templateFolder: if layout.options.templateOptions and layout.options.templateOptions.templateFolder then layout.options.templateOptions.templateFolder else undefined
-          templateFormat: if layout.options.templateOptions and layout.options.templateOptions.templateFormat then layout.options.templateOptions.templateFormat else undefined
+          
+        view = layout.getView(name)
         
-        layout.getView(name).options._routeBranch = partial
+        view.options._routeBranch = partial
+        view.options.templateName = if partial.templateName then partial.templateName else undefined
+        view.options.templateURL = if partial.templateURL then partial.templateURL else undefined
+        view.options.templateFolder = if layout.options.templateOptions and layout.options.templateOptions.templateFolder then layout.options.templateOptions.templateFolder else undefined
+        view.options.templateFormat = if layout.options.templateOptions and layout.options.templateOptions.templateFormat then layout.options.templateOptions.templateFormat else undefined
           
         layout._processPartials(partial)
     

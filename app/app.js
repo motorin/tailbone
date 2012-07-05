@@ -105,7 +105,7 @@ Is Inn namespace defined?
     },
     remove: function() {
       this.undelegateEvents();
-      this.$el.empty();
+      this.$el.empty().remove();
       return this.trigger('remove');
     }
   });
@@ -122,7 +122,7 @@ Is Inn namespace defined?
       if (!(options && options.dataManager && options.dataManager instanceof Inn.DataManager)) {
         throw new Inn.Error('dataManager should be in options');
       }
-      this.options = $.extend(true, {}, {
+      this.options = $.extend(true, {
         templateOptions: {
           templateFolder: '',
           templateFormat: 'js'
@@ -143,6 +143,11 @@ Is Inn namespace defined?
       this._renderDeferred = new $.Deferred();
       layout = this;
       this._getTemplate().done(function() {
+        _.each(layout.options.routes, function(route, name) {
+          if (layout.getView(name)) {
+            return layout.getView(name).remove();
+          }
+        });
         $('#' + layout.id).html(layout._template());
         return _.each(layout.options.routes, function(route, name) {
           if (layout.getView(name)) {
@@ -253,14 +258,16 @@ Is Inn namespace defined?
       var layout;
       layout = this;
       _.each(this.options.routes, function(route, name) {
+        var view;
         layout.addView(new Inn.View({
-          id: name,
-          templateName: route.templateName ? route.templateName : void 0,
-          templateURL: route.templateURL ? route.templateURL : void 0,
-          templateFolder: layout.options.templateOptions && layout.options.templateOptions.templateFolder ? layout.options.templateOptions.templateFolder : void 0,
-          templateFormat: layout.options.templateOptions && layout.options.templateOptions.templateFormat ? layout.options.templateOptions.templateFormat : void 0
+          id: name
         }));
-        layout.getView(name).options._routeBranch = route;
+        view = layout.getView(name);
+        view.options._routeBranch = route;
+        view.options.templateName = route.templateName ? route.templateName : void 0;
+        view.options.templateURL = route.templateURL ? route.templateURL : void 0;
+        view.options.templateFolder = layout.options.templateOptions && layout.options.templateOptions.templateFolder ? layout.options.templateOptions.templateFolder : void 0;
+        view.options.templateFormat = layout.options.templateOptions && layout.options.templateOptions.templateFormat ? layout.options.templateOptions.templateFormat : void 0;
         return layout._processPartials(route);
       });
       return this;
@@ -271,14 +278,16 @@ Is Inn namespace defined?
       if (route.partials) {
         layout = this;
         return _.each(route.partials, function(partial, name) {
+          var view;
           layout.addView(new Inn.View({
-            id: name,
-            templateName: partial.templateName ? partial.templateName : void 0,
-            templateURL: partial.templateURL ? partial.templateURL : void 0,
-            templateFolder: layout.options.templateOptions && layout.options.templateOptions.templateFolder ? layout.options.templateOptions.templateFolder : void 0,
-            templateFormat: layout.options.templateOptions && layout.options.templateOptions.templateFormat ? layout.options.templateOptions.templateFormat : void 0
+            id: name
           }));
-          layout.getView(name).options._routeBranch = partial;
+          view = layout.getView(name);
+          view.options._routeBranch = partial;
+          view.options.templateName = partial.templateName ? partial.templateName : void 0;
+          view.options.templateURL = partial.templateURL ? partial.templateURL : void 0;
+          view.options.templateFolder = layout.options.templateOptions && layout.options.templateOptions.templateFolder ? layout.options.templateOptions.templateFolder : void 0;
+          view.options.templateFormat = layout.options.templateOptions && layout.options.templateOptions.templateFormat ? layout.options.templateOptions.templateFormat : void 0;
           return layout._processPartials(partial);
         });
       }
