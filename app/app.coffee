@@ -31,7 +31,7 @@ Inn.View = Backbone.View.extend({
       templateFormat: 'js'
     , options
     
-    #return this to chaining
+    #return this for chaining
     this
     
   render: ->
@@ -77,7 +77,7 @@ Inn.View = Backbone.View.extend({
       #wrapping dust template in view method
       view._template = (data)->
         rendered_html = ''
-        dust.render view._getTemplateName(), data, (err, text)-> 
+        dust.render this._getTemplateName(), data, (err, text)-> 
           rendered_html = text
         return rendered_html
 
@@ -89,6 +89,7 @@ Inn.View = Backbone.View.extend({
     @undelegateEvents()
     @$el.empty().remove()
     @trigger('remove')
+    @options.isInDOM = false
 });
 
 ###
@@ -124,14 +125,9 @@ class Inn.Layout
     layout = this
     
     @_getTemplate().done ->
-      _.each layout.options.partials, (partial, name)->
-        if layout.getView(name)
-          layout.getView(name).remove()
-        
       $('#'+layout.id).html layout._template()
       _.each layout.options.partials, (partial, name)->
-        if layout.getView(name)
-          layout.getView(name).render()
+        layout.getView(name).render() if layout.getView(name)
           
     #@_renderDeferred would not be resolved until all of the views rendered
     return @_renderDeferred
@@ -193,6 +189,7 @@ class Inn.Layout
     
     view.on 'render', _.bind(@_recheckSubViews, this, view)
     view.on 'remove', _.bind(@_clearSubViews, this, view)
+    view.on 'remove', _.bind(@_onViewRemovedFromDOM, this, view)
     
     @trigger('add:view', view);
     
@@ -241,8 +238,9 @@ class Inn.Layout
   _recheckSubViews: (view)->
     @_viewsUnrendered--
     
-    unless view.el.parentNode
+    if view.el.parentNode == null and $('#'+view.id).length
       $('#'+view.id).replaceWith view.$el
+      view.options.isInDOM = true
     
     layout = this
     
@@ -256,9 +254,37 @@ class Inn.Layout
   _clearSubViews: (view)->
     layout = this
     
+    @_destroyDeferred.notify() if @_destroyDeferred
+    
     if view.options._viewBranch.partials
       _.each view.options._viewBranch.partials, (partial, name)->
         layout.getView(name).remove()
+
+  _onViewRemovedFromDOM: (view)->
+
+  
+  destroy: ->
+    $('#'+@id).empty()
+    
+    layout = this
+    
+    @_destroyDeferred = new $.Deferred()
+
+    @_destroyDeferred.progress ->
+
+      viewsInDOM = _.filter layout._views, (view)->
+        return view.options.isInDOM
+      
+      this.resolve() if viewsInDOM.length == 0
+
+    @_destroyDeferred.done ->
+      _.each layout._views, (view)->
+        layout.removeView(view.id)
+    
+    _.each layout.options.partials, (partial, name)->
+      layout.getView(name).remove()
+    
+    return @_destroyDeferred
   
 ###
 Data Manager

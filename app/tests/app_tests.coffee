@@ -1,123 +1,6 @@
-###
-Preparing Mockjax
-###
-
-$.mockjax
-  url: 'app/models/model_id.json'
-  contentType: 'json'
-  responseTime: 150
-
-
-$.mockjax
-  url: 'bMovie.js'
-  contentType: 'script'
-  responseTime: 150
-
-$.mockjax
-  url: 'app/templates/bFooter.js'
-  contentType: 'script'
-  responseTime: 150
-  response: ->
-    body_0 = (chk, ctx)->
-      return chk.write "<div>===Footer===</div>"
-    dust.register "bFooter", body_0
-    return body_0
-
-$.mockjax
-  url: 'app/templates/bFrontpage.js'
-  contentType: 'script'
-  responseTime: 150
-  response: ->
-    body_0 = (chk, ctx)->
-      return chk.write '===Content===<div id="tags"></div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>'
-    dust.register "bFrontpage", body_0
-    return body_0
-
-$.mockjax
-  url: 'app/templates/bFrontPageMovies.js'
-  contentType: 'script'
-  responseTime: 150
-  response: ->
-    body_0 = (chk, ctx)->
-      return chk.write '===Frontpage movies===<div id="pagination"></div>'
-    dust.register "bFrontPageMovies", body_0
-    return body_0
-
-$.mockjax
-  url: 'app/templates/bHeader.js'
-  contentType: 'script'
-  responseTime: 150
-  response: ->
-    body_0 = (chk, ctx)->
-      return chk.write '===Header==='
-    dust.register "bHeader", body_0
-    return body_0
-
-$.mockjax
-  url: 'app/templates/bPagination.js'
-  contentType: 'script'
-  responseTime: 150
-  response: ->
-    body_0 = (chk, ctx)->
-      return chk.write '===Pagination==='
-    dust.register "bPagination", body_0
-    return body_0
-
-$.mockjax
-  url: 'app/templates/bPromoMovie.js'
-  contentType: 'script'
-  responseTime: 150
-  response: ->
-    body_0 = (chk, ctx)->
-      return chk.write '===PromoMovie==='
-    dust.register "bPromoMovie", body_0
-    return body_0
-
-$.mockjax
-  url: 'app/templates/bSomeView.js'
-  contentType: 'script'
-  responseTime: 150
-  response: ->
-    body_0 = (chk, ctx)->
-      return chk.write "<div>Some content</div>"
-    dust.register "bSomeView", body_0
-    return body_0
-
-$.mockjax
-  url: 'app/templates/bSortings.js'
-  contentType: 'script'
-  responseTime: 150
-  response: ->
-    body_0 = (chk, ctx)->
-      return chk.write "===Sortings==="
-    dust.register "bSortings", body_0
-    return body_0
-
-$.mockjax
-  url: 'app/templates/bTags.js'
-  contentType: 'script'
-  responseTime: 150
-  response: ->
-    body_0 = (chk, ctx)->
-      return chk.write "===Tags==="
-    dust.register "bTags", body_0
-    return body_0
-
-$.mockjax
-  url: 'app/templates/bLayout.js'
-  contentType: 'script'
-  responseTime: 150
-  response: ->
-    body_0 = (chk, ctx)->
-      return chk.write '<div id="header"></div><div id="content"></div><div id="footer"></div>'
-    dust.register "bLayout", body_0
-    return body_0
-
-
-
 module "Inn"
-test "Наличие", 1, ->
-  ok Inn, 'Ожидаем наличия нашего неймспейса'
+test "Existance", 1, ->
+  ok Inn, 'Check existance of Inn namespace'
 
 
 
@@ -131,10 +14,10 @@ module "Inn.Model",
     delete @model
   
 test 'extends Backbone.Model', 1, ->
-  ok @model instanceof Backbone.Model, 'Модель должна наследоваться от Backbone.Model'
+  ok @model instanceof Backbone.Model, 'Model should extend Backbone.Model'
 
 test 'fetch.done', 1, ->
-  equal typeof @model.fetch().done, 'function', 'Модель должна иметь возвращать deferred-метод "done" при запросе к серверу'
+  equal typeof @model.fetch().done, 'function', 'Model should perform fetch in deferred manner'
 
 
 module "Inn.Collection",
@@ -822,3 +705,58 @@ asyncTest 'layout should cleanup nested views references for removed DOM element
     strictEqual test.layout.getView('frontPageMovies').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
     strictEqual test.layout.getView('pagination').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
     start()
+
+
+
+module "Inn.Layout Destroy",
+  setup: ->
+    $('#layout').empty()
+    
+    @dataManager = new Inn.DataManager
+      
+    @layout_config =
+      partials:
+        'header': {}
+        'footer': {}
+        'content':
+          templateName: 'bFrontpage'
+          templateURL: 'app/templates/bFrontpage.js'
+          partials:
+            'tags': {}
+            'sortings': {}
+            'promoMovie': {}
+            'frontPageMovies':
+              partials: 
+                'pagination': {}
+        'someView': {}
+      dataManager: @dataManager,
+      templateOptions:
+        templateFolder: 'app/templates'
+        templateFormat: 'js'
+      
+    @layout = new Inn.Layout @layout_config
+    
+  teardown: ->
+    delete @dataManager
+    delete @layout_config
+    delete @layout
+    
+    $('#layout').empty()
+
+
+asyncTest 'layout should remove all views from self', 6, ->
+  test = this
+  deferred = @layout.processPartials().render()
+
+  
+  deferred.done ->
+    test.layout.destroy().done ->
+      strictEqual test.layout.getView('tags'), null, 'layout should remove all views from self'
+      strictEqual test.layout.getView('sortings'), null, 'layout should remove all views from self'
+      strictEqual test.layout.getView('promoMovie'), null, 'layout should remove all views from self'
+      strictEqual test.layout.getView('frontPageMovies'), null, 'layout should remove all views from self'
+      strictEqual test.layout.getView('pagination'), null, 'layout should remove all views from self'
+      strictEqual test.layout.getView('someView'), null, 'layout should remove all views from self'
+    
+      start()
+

@@ -94,7 +94,7 @@ Is Inn namespace defined?
         view._template = function(data) {
           var rendered_html;
           rendered_html = '';
-          dust.render(view._getTemplateName(), data, function(err, text) {
+          dust.render(this._getTemplateName(), data, function(err, text) {
             return rendered_html = text;
           });
           return rendered_html;
@@ -106,7 +106,8 @@ Is Inn namespace defined?
     remove: function() {
       this.undelegateEvents();
       this.$el.empty().remove();
-      return this.trigger('remove');
+      this.trigger('remove');
+      return this.options.isInDOM = false;
     }
   });
 
@@ -143,11 +144,6 @@ Is Inn namespace defined?
       this._renderDeferred = new $.Deferred();
       layout = this;
       this._getTemplate().done(function() {
-        _.each(layout.options.partials, function(partial, name) {
-          if (layout.getView(name)) {
-            return layout.getView(name).remove();
-          }
-        });
         $('#' + layout.id).html(layout._template());
         return _.each(layout.options.partials, function(partial, name) {
           if (layout.getView(name)) {
@@ -227,6 +223,7 @@ Is Inn namespace defined?
       }
       view.on('render', _.bind(this._recheckSubViews, this, view));
       view.on('remove', _.bind(this._clearSubViews, this, view));
+      view.on('remove', _.bind(this._onViewRemovedFromDOM, this, view));
       this.trigger('add:view', view);
       return this;
     };
@@ -289,8 +286,9 @@ Is Inn namespace defined?
     Layout.prototype._recheckSubViews = function(view) {
       var layout;
       this._viewsUnrendered--;
-      if (!view.el.parentNode) {
+      if (view.el.parentNode === null && $('#' + view.id).length) {
         $('#' + view.id).replaceWith(view.$el);
+        view.options.isInDOM = true;
       }
       layout = this;
       if (view.options._viewBranch.partials) {
@@ -306,11 +304,41 @@ Is Inn namespace defined?
     Layout.prototype._clearSubViews = function(view) {
       var layout;
       layout = this;
+      if (this._destroyDeferred) {
+        this._destroyDeferred.notify();
+      }
       if (view.options._viewBranch.partials) {
         return _.each(view.options._viewBranch.partials, function(partial, name) {
           return layout.getView(name).remove();
         });
       }
+    };
+
+    Layout.prototype._onViewRemovedFromDOM = function(view) {};
+
+    Layout.prototype.destroy = function() {
+      var layout;
+      $('#' + this.id).empty();
+      layout = this;
+      this._destroyDeferred = new $.Deferred();
+      this._destroyDeferred.progress(function() {
+        var viewsInDOM;
+        viewsInDOM = _.filter(layout._views, function(view) {
+          return view.options.isInDOM;
+        });
+        if (viewsInDOM.length === 0) {
+          return this.resolve();
+        }
+      });
+      this._destroyDeferred.done(function() {
+        return _.each(layout._views, function(view) {
+          return layout.removeView(view.id);
+        });
+      });
+      _.each(layout.options.partials, function(partial, name) {
+        return layout.getView(name).remove();
+      });
+      return this._destroyDeferred;
     };
 
     return Layout;
