@@ -430,7 +430,7 @@ Preparing Mockjax
     setup: function() {
       this.dataManager = new Inn.DataManager;
       this.layout_config = {
-        routes: {
+        partials: {
           'header': {},
           'footer': {
             templateURL: 'bFooter'
@@ -723,19 +723,19 @@ Preparing Mockjax
     return strictEqual(typeof this.layout._recheckSubViews, 'function', 'Layout должен сожержать метод проверки подвьюшек');
   });
 
-  test('processRoutes: should return self', 1, function() {
-    return strictEqual(this.layout.processRoutes(), this.layout, 'processRoutes должен возвращать себя');
+  test('processPartials: should return self', 1, function() {
+    return strictEqual(this.layout.processPartials(), this.layout, 'processPartials должен возвращать себя');
   });
 
-  test('processRoutes: create top views', 3, function() {
-    this.layout.processRoutes();
+  test('processPartials: create top views', 3, function() {
+    this.layout.processPartials();
     ok(this.layout.getView('header') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек');
     ok(this.layout.getView('footer') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек');
     return ok(this.layout.getView('content') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек');
   });
 
-  test('processRoutes: create partial views', 5, function() {
-    this.layout.processRoutes();
+  test('processPartials: create partial views', 5, function() {
+    this.layout.processPartials();
     ok(this.layout.getView('tags') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек');
     ok(this.layout.getView('sortings') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек');
     ok(this.layout.getView('promoMovie') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек');
@@ -743,22 +743,22 @@ Preparing Mockjax
     return ok(this.layout.getView('pagination') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек');
   });
 
-  test('processRoutes: set template names', 4, function() {
-    this.layout.processRoutes();
+  test('processPartials: set template names', 4, function() {
+    this.layout.processPartials();
     strictEqual(this.layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
     strictEqual(this.layout.getView('content')._getTemplateURL(), 'bFrontpage', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
     strictEqual(this.layout.getView('frontPageMovies')._getTemplateURL(), 'bFrontPageMoviesList', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
     return strictEqual(this.layout.getView('pagination')._getTemplateURL(), 'app/templates/bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
   });
 
-  test('processRoutes should attach _routeBranch', 3, function() {
+  test('processPartials should attach _viewBranch', 3, function() {
     this.layout.addView(this.realView);
     this.layout.addView(this.contentView);
     this.layout.addView(this.frontpageView);
-    this.layout.processRoutes();
-    strictEqual(this.layout.getView('content').options._routeBranch, this.layout.options.routes.content, 'При создании view layout должен сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
-    strictEqual(this.layout.getView('someView').options._routeBranch, this.layout.options.routes.someView, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
-    return strictEqual(this.layout.getView('frontPageMovies').options._routeBranch, this.layout.options.routes.content.partials.frontPageMovies, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
+    this.layout.processPartials();
+    strictEqual(this.layout.getView('content').options._viewBranch, this.layout.options.partials.content, 'При создании view layout должен сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
+    strictEqual(this.layout.getView('someView').options._viewBranch, this.layout.options.partials.someView, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
+    return strictEqual(this.layout.getView('frontPageMovies').options._viewBranch, this.layout.options.partials.content.partials.frontPageMovies, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
   });
 
   module("Inn.Layout Render remove and so on", {
@@ -768,7 +768,7 @@ Preparing Mockjax
       $('#footer').remove();
       this.dataManager = new Inn.DataManager;
       this.layout_config = {
-        routes: {
+        partials: {
           'header': {},
           'footer': {},
           'content': {
@@ -795,7 +795,7 @@ Preparing Mockjax
       };
       this.layout = new Inn.Layout(this.layout_config);
       this.layout_config_jade = {
-        routes: {
+        partials: {
           'header': {},
           'footer': {},
           'content': {
@@ -831,17 +831,17 @@ Preparing Mockjax
   });
 
   test('layout should create views with default options', 4, function() {
-    this.layout.processRoutes();
+    this.layout.processPartials();
     strictEqual(this.layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
     strictEqual(this.layout.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
-    this.layout_jade.processRoutes();
+    this.layout_jade.processPartials();
     strictEqual(this.layout_jade.getView('header')._getTemplateURL(), 'app/templates/bHeader.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
     return strictEqual(this.layout_jade.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
   });
 
   asyncTest('layout render should attach views to DOM', 3, function() {
     var deferred;
-    deferred = this.layout.processRoutes().render();
+    deferred = this.layout.processPartials().render();
     return deferred.done(function() {
       strictEqual($('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render');
       strictEqual($('#content').html(), '===Content===<div id="tags">===Tags===</div><div id="sortings">===Sortings===</div><div id="promoMovie">===PromoMovie===</div><div id="frontPageMovies">===Frontpage movies===<div id="pagination">===Pagination===</div></div>', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render');
@@ -853,7 +853,7 @@ Preparing Mockjax
   asyncTest('layout should cleanup nested views references for removed DOM elements', 5, function() {
     var deferred, test;
     test = this;
-    deferred = this.layout.processRoutes().render();
+    deferred = this.layout.processPartials().render();
     return deferred.done(function() {
       test.layout.getView('content').remove();
       strictEqual(test.layout.getView('tags').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements');

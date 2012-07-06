@@ -124,12 +124,12 @@ class Inn.Layout
     layout = this
     
     @_getTemplate().done ->
-      _.each layout.options.routes, (route, name)->
+      _.each layout.options.partials, (partial, name)->
         if layout.getView(name)
           layout.getView(name).remove()
         
       $('#'+layout.id).html layout._template()
-      _.each layout.options.routes, (route, name)->
+      _.each layout.options.partials, (partial, name)->
         if layout.getView(name)
           layout.getView(name).render()
           
@@ -218,42 +218,25 @@ class Inn.Layout
     @trigger('remove:view')
   
   
-  processRoutes: ->
+  processPartials: (partials)->
     layout = this
     
-    _.each @options.routes, (route, name)->
+    partials = @options.partials unless partials
+    
+    _.each partials, (partial, name)->
       layout.addView new Inn.View
         id: name
 
       view = layout.getView(name)
-      view.options._routeBranch = route
-      view.options.templateName = if route.templateName then route.templateName else undefined
-      view.options.templateURL = if route.templateURL then route.templateURL else undefined
-      view.options.templateFolder = if layout.options.templateOptions and layout.options.templateOptions.templateFolder then layout.options.templateOptions.templateFolder else undefined
-      view.options.templateFormat = if layout.options.templateOptions and layout.options.templateOptions.templateFormat then layout.options.templateOptions.templateFormat else undefined
+      view.options._viewBranch = partial
+      view.options.templateName = partial.templateName if partial.templateName
+      view.options.templateURL = partial.templateURL if partial.templateURL
+      view.options.templateFolder = layout.options.templateOptions.templateFolder if layout.options.templateOptions and layout.options.templateOptions.templateFolder
+      view.options.templateFormat = layout.options.templateOptions.templateFormat if layout.options.templateOptions and layout.options.templateOptions.templateFormat
 
-      layout._processPartials(route)
+      layout.processPartials(partial.partials) if partial.partials
       
     return this
-
-
-  _processPartials: (route)->
-    if route.partials
-      layout = this
-      
-      _.each route.partials, (partial, name)->
-        layout.addView new Inn.View
-          id: name
-          
-        view = layout.getView(name)
-        
-        view.options._routeBranch = partial
-        view.options.templateName = if partial.templateName then partial.templateName else undefined
-        view.options.templateURL = if partial.templateURL then partial.templateURL else undefined
-        view.options.templateFolder = if layout.options.templateOptions and layout.options.templateOptions.templateFolder then layout.options.templateOptions.templateFolder else undefined
-        view.options.templateFormat = if layout.options.templateOptions and layout.options.templateOptions.templateFormat then layout.options.templateOptions.templateFormat else undefined
-          
-        layout._processPartials(partial)
     
   _recheckSubViews: (view)->
     @_viewsUnrendered--
@@ -263,19 +246,18 @@ class Inn.Layout
     
     layout = this
     
-    if view.options._routeBranch.partials
-      _.each view.options._routeBranch.partials, (partial, name)->
+    if view.options._viewBranch.partials
+      _.each view.options._viewBranch.partials, (partial, name)->
         layout.getView(name).render()
 
     if @_viewsUnrendered <= 0
-      @_routesRendered = 0
       @_renderDeferred.resolve() 
 
   _clearSubViews: (view)->
     layout = this
     
-    if view.options._routeBranch.partials
-      _.each view.options._routeBranch.partials, (partial, name)->
+    if view.options._viewBranch.partials
+      _.each view.options._viewBranch.partials, (partial, name)->
         layout.getView(name).remove()
   
 ###

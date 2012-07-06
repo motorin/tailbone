@@ -83,7 +83,7 @@ Extends Backbone.Events
 
 Requires an instance of Inn.DataManager as *options.dataManager*
 
-Requiers *options.routes* object
+Requiers *options.partials* object
 
 `
   'header': {}
@@ -102,7 +102,7 @@ Requiers *options.routes* object
   'someView': {}
 `
 
-For each index of routes processRoutes function creates or associates view by the name if the index
+For each index of partials processRoutes function creates or associates view by the name if the index
 
 templateName overrides view's templateName
 
@@ -137,13 +137,13 @@ Renders layout and appends it to #%layout.id% element on page
 Then renders all of the views defined in layout_config object
 
 
-**processRoutes**
+**processPartials**
 
-Parsed options.routes and assocciates each view with corresponding options.routes branch
+Parsed options.partials and assocciates each view with corresponding options.partials branch
 
 If view with needed index is not added to layout, it is created autamatically
 
-For all already defined and added views template options are set according to options.routes object
+For all already defined and added views template options are set according to options.partials object
 
 
 **addView(view)**

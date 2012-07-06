@@ -143,13 +143,13 @@ Is Inn namespace defined?
       this._renderDeferred = new $.Deferred();
       layout = this;
       this._getTemplate().done(function() {
-        _.each(layout.options.routes, function(route, name) {
+        _.each(layout.options.partials, function(partial, name) {
           if (layout.getView(name)) {
             return layout.getView(name).remove();
           }
         });
         $('#' + layout.id).html(layout._template());
-        return _.each(layout.options.routes, function(route, name) {
+        return _.each(layout.options.partials, function(partial, name) {
           if (layout.getView(name)) {
             return layout.getView(name).render();
           }
@@ -254,43 +254,36 @@ Is Inn namespace defined?
       return this.trigger('remove:view');
     };
 
-    Layout.prototype.processRoutes = function() {
+    Layout.prototype.processPartials = function(partials) {
       var layout;
       layout = this;
-      _.each(this.options.routes, function(route, name) {
+      if (!partials) {
+        partials = this.options.partials;
+      }
+      _.each(partials, function(partial, name) {
         var view;
         layout.addView(new Inn.View({
           id: name
         }));
         view = layout.getView(name);
-        view.options._routeBranch = route;
-        view.options.templateName = route.templateName ? route.templateName : void 0;
-        view.options.templateURL = route.templateURL ? route.templateURL : void 0;
-        view.options.templateFolder = layout.options.templateOptions && layout.options.templateOptions.templateFolder ? layout.options.templateOptions.templateFolder : void 0;
-        view.options.templateFormat = layout.options.templateOptions && layout.options.templateOptions.templateFormat ? layout.options.templateOptions.templateFormat : void 0;
-        return layout._processPartials(route);
+        view.options._viewBranch = partial;
+        if (partial.templateName) {
+          view.options.templateName = partial.templateName;
+        }
+        if (partial.templateURL) {
+          view.options.templateURL = partial.templateURL;
+        }
+        if (layout.options.templateOptions && layout.options.templateOptions.templateFolder) {
+          view.options.templateFolder = layout.options.templateOptions.templateFolder;
+        }
+        if (layout.options.templateOptions && layout.options.templateOptions.templateFormat) {
+          view.options.templateFormat = layout.options.templateOptions.templateFormat;
+        }
+        if (partial.partials) {
+          return layout.processPartials(partial.partials);
+        }
       });
       return this;
-    };
-
-    Layout.prototype._processPartials = function(route) {
-      var layout;
-      if (route.partials) {
-        layout = this;
-        return _.each(route.partials, function(partial, name) {
-          var view;
-          layout.addView(new Inn.View({
-            id: name
-          }));
-          view = layout.getView(name);
-          view.options._routeBranch = partial;
-          view.options.templateName = partial.templateName ? partial.templateName : void 0;
-          view.options.templateURL = partial.templateURL ? partial.templateURL : void 0;
-          view.options.templateFolder = layout.options.templateOptions && layout.options.templateOptions.templateFolder ? layout.options.templateOptions.templateFolder : void 0;
-          view.options.templateFormat = layout.options.templateOptions && layout.options.templateOptions.templateFormat ? layout.options.templateOptions.templateFormat : void 0;
-          return layout._processPartials(partial);
-        });
-      }
     };
 
     Layout.prototype._recheckSubViews = function(view) {
@@ -300,13 +293,12 @@ Is Inn namespace defined?
         $('#' + view.id).replaceWith(view.$el);
       }
       layout = this;
-      if (view.options._routeBranch.partials) {
-        _.each(view.options._routeBranch.partials, function(partial, name) {
+      if (view.options._viewBranch.partials) {
+        _.each(view.options._viewBranch.partials, function(partial, name) {
           return layout.getView(name).render();
         });
       }
       if (this._viewsUnrendered <= 0) {
-        this._routesRendered = 0;
         return this._renderDeferred.resolve();
       }
     };
@@ -314,8 +306,8 @@ Is Inn namespace defined?
     Layout.prototype._clearSubViews = function(view) {
       var layout;
       layout = this;
-      if (view.options._routeBranch.partials) {
-        return _.each(view.options._routeBranch.partials, function(partial, name) {
+      if (view.options._viewBranch.partials) {
+        return _.each(view.options._viewBranch.partials, function(partial, name) {
           return layout.getView(name).remove();
         });
       }

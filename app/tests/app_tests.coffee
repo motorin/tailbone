@@ -392,7 +392,7 @@ module "Inn.Layout",
     @dataManager = new Inn.DataManager
       
     @layout_config =
-      routes:
+      partials:
         'header': {}
         'footer':
           templateURL: 'bFooter'
@@ -686,19 +686,19 @@ test 'recheckSubViews method', 1, ->
   strictEqual typeof @layout._recheckSubViews, 'function', 'Layout должен сожержать метод проверки подвьюшек'
   
 
-test 'processRoutes: should return self', 1, ->
-  strictEqual @layout.processRoutes(), @layout, 'processRoutes должен возвращать себя'
+test 'processPartials: should return self', 1, ->
+  strictEqual @layout.processPartials(), @layout, 'processPartials должен возвращать себя'
 
-test 'processRoutes: create top views', 3, ->
-  @layout.processRoutes();
+test 'processPartials: create top views', 3, ->
+  @layout.processPartials();
   
   ok @layout.getView('header') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
   ok @layout.getView('footer') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
   ok @layout.getView('content') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
 
 
-test 'processRoutes: create partial views', 5, ->
-  @layout.processRoutes();
+test 'processPartials: create partial views', 5, ->
+  @layout.processPartials();
   
   ok @layout.getView('tags') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
   ok @layout.getView('sortings') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
@@ -707,8 +707,8 @@ test 'processRoutes: create partial views', 5, ->
   ok @layout.getView('pagination') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
   
   
-test 'processRoutes: set template names', 4, ->
-  @layout.processRoutes();
+test 'processPartials: set template names', 4, ->
+  @layout.processPartials();
   
   strictEqual @layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
   strictEqual @layout.getView('content')._getTemplateURL(), 'bFrontpage', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
@@ -716,16 +716,16 @@ test 'processRoutes: set template names', 4, ->
   strictEqual @layout.getView('pagination')._getTemplateURL(), 'app/templates/bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
 
 
-test 'processRoutes should attach _routeBranch', 3, ->
+test 'processPartials should attach _viewBranch', 3, ->
   @layout.addView @realView
   @layout.addView @contentView
   @layout.addView @frontpageView
   
-  @layout.processRoutes()
+  @layout.processPartials()
   
-  strictEqual @layout.getView('content').options._routeBranch, @layout.options.routes.content, 'При создании view layout должен сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
-  strictEqual @layout.getView('someView').options._routeBranch, @layout.options.routes.someView, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
-  strictEqual @layout.getView('frontPageMovies').options._routeBranch, @layout.options.routes.content.partials.frontPageMovies, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
+  strictEqual @layout.getView('content').options._viewBranch, @layout.options.partials.content, 'При создании view layout должен сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
+  strictEqual @layout.getView('someView').options._viewBranch, @layout.options.partials.someView, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
+  strictEqual @layout.getView('frontPageMovies').options._viewBranch, @layout.options.partials.content.partials.frontPageMovies, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
 
 
 module "Inn.Layout Render remove and so on",
@@ -738,7 +738,7 @@ module "Inn.Layout Render remove and so on",
     @dataManager = new Inn.DataManager
       
     @layout_config =
-      routes:
+      partials:
         'header': {}
         'footer': {}
         'content':
@@ -760,7 +760,7 @@ module "Inn.Layout Render remove and so on",
     @layout = new Inn.Layout @layout_config
     
     @layout_config_jade =
-      routes:
+      partials:
         'header': {}
         'footer': {}
         'content':
@@ -791,17 +791,17 @@ module "Inn.Layout Render remove and so on",
 
 
 test 'layout should create views with default options', 4, ->
-  @layout.processRoutes()
+  @layout.processPartials()
   
   strictEqual @layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
   strictEqual @layout.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
   
-  @layout_jade.processRoutes()
+  @layout_jade.processPartials()
   strictEqual @layout_jade.getView('header')._getTemplateURL(), 'app/templates/bHeader.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
   strictEqual @layout_jade.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
 
 asyncTest 'layout render should attach views to DOM', 3, ->
-  deferred = @layout.processRoutes().render()
+  deferred = @layout.processPartials().render()
   
   deferred.done ->
     strictEqual $('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
@@ -812,7 +812,7 @@ asyncTest 'layout render should attach views to DOM', 3, ->
 
 asyncTest 'layout should cleanup nested views references for removed DOM elements', 5, ->
   test = this
-  deferred = @layout.processRoutes().render()
+  deferred = @layout.processPartials().render()
   
   deferred.done ->
     test.layout.getView('content').remove()
