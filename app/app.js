@@ -397,6 +397,14 @@ Is Inn namespace defined?
       return this.trigger('remove:dataAsset');
     };
 
+    DataManager.prototype.destroy = function() {
+      var dataManager;
+      dataManager = this;
+      return _.each(this._dataSets, function(dataAsset) {
+        return dataManager.removeDataAsset(dataAsset.id);
+      });
+    };
+
     return DataManager;
 
   })();

@@ -332,3 +332,9 @@ class Inn.DataManager
     
     @trigger('remove:dataAsset')
 
+  destroy: ->
+    dataManager = this
+    
+    _.each @_dataSets, (dataAsset)->
+      dataManager.removeDataAsset dataAsset.id
+    

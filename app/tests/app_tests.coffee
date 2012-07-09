@@ -154,6 +154,18 @@ test 'remove:dataAsset event', 1, ->
   strictEqual some_variable, true, 'Функция Inn.DataManager.removeDataAsset должна вызывать событие "remove:dataAsset"'
 
 
+test 'destroy', 3, ->
+  
+  @dataManager.addDataAsset @model
+  @dataManager.addDataAsset @model_2
+  @dataManager.addDataAsset @collectionModel, 'collection'
+  
+  @dataManager.destroy()
+  
+  strictEqual @dataManager.getDataAsset('data_id'), null, 'Destroy should remove links for all dataAssets"'
+  strictEqual @dataManager.getDataAsset('data_id2'), null, 'Destroy should remove links for all dataAssets"'
+  strictEqual @dataManager.getDataAsset('collection'), null, 'Destroy should remove links for all dataAssets"'
+
 
 module "Inn.View",
   setup: ->

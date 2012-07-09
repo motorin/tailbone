@@ -150,6 +150,16 @@
     return strictEqual(some_variable, true, 'Функция Inn.DataManager.removeDataAsset должна вызывать событие "remove:dataAsset"');
   });
 
+  test('destroy', 3, function() {
+    this.dataManager.addDataAsset(this.model);
+    this.dataManager.addDataAsset(this.model_2);
+    this.dataManager.addDataAsset(this.collectionModel, 'collection');
+    this.dataManager.destroy();
+    strictEqual(this.dataManager.getDataAsset('data_id'), null, 'Destroy should remove links for all dataAssets"');
+    strictEqual(this.dataManager.getDataAsset('data_id2'), null, 'Destroy should remove links for all dataAssets"');
+    return strictEqual(this.dataManager.getDataAsset('collection'), null, 'Destroy should remove links for all dataAssets"');
+  });
+
   module("Inn.View", {
     setup: function() {
       this.canonical_view = new Inn.View({

@@ -165,3 +165,7 @@ If view is not found returns null
 Removes view from layout by name
 
 If view is not found returns null
+
+**destroy**
+
+Clears all views and removes links to them
