@@ -282,6 +282,12 @@ test 'triggers remove event on remove()', 1, ->
   ok some_variable, 'View должна триггерить событие remove при уничтожении DOM-елемента'
 
 
+test 'getDataForView', 1, ->
+  @real_view.remove()
+  strictEqual typeof @real_view.getDataForView, 'function', 'View should have getDataForView method'
+
+
+
 module "Inn.Layout",
   setup: ->
     @dataManager = new Inn.DataManager

@@ -38,6 +38,12 @@ Uses attached model as data source
 Undelegates all event listeners and clears view.el to its initial state
 
 
+**getDataForView**
+
+returns this.model.toJSON() if this.model
+
+You should override this method if custom model-to-view data conversion required
+
 
 Inn.Model
 ---------

@@ -66,7 +66,7 @@ Is Inn namespace defined?
             view.$el.attr(view.attributes);
           }
         }
-        view.$el.html(view._template());
+        view.$el.html(view._template(view.getDataForView()));
         view.trigger('render', view);
         return view._renderDeferred.resolve();
       });
@@ -109,6 +109,11 @@ Is Inn namespace defined?
         return view.templateDeferred.resolve();
       });
       return this.templateDeferred;
+    },
+    getDataForView: function() {
+      if (this.model) {
+        return this.model.toJSON();
+      }
     },
     remove: function() {
       this.undelegateEvents();

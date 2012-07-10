@@ -51,7 +51,7 @@ Inn.View = Backbone.View.extend({
           view.$el.attr(view.attributes())
         else
           view.$el.attr(view.attributes)
-      view.$el.html view._template()
+      view.$el.html view._template(view.getDataForView())
       view.trigger('render', view)
       view._renderDeferred.resolve()
       
@@ -89,7 +89,10 @@ Inn.View = Backbone.View.extend({
       view.templateDeferred.resolve()
         
     return @templateDeferred
-    
+  
+  getDataForView: ->
+    return this.model.toJSON() if this.model
+  
   remove: ->
     @undelegateEvents()
     @$el.empty().remove()

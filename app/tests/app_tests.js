@@ -278,6 +278,11 @@
     return ok(some_variable, 'View должна триггерить событие remove при уничтожении DOM-елемента');
   });
 
+  test('getDataForView', 1, function() {
+    this.real_view.remove();
+    return strictEqual(typeof this.real_view.getDataForView, 'function', 'View should have getDataForView method');
+  });
+
   module("Inn.Layout", {
     setup: function() {
       this.dataManager = new Inn.DataManager;
