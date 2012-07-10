@@ -46,6 +46,11 @@ Inn.View = Backbone.View.extend({
     view = this
 
     @_getTemplate().done ->
+      if view.attributes
+        if typeof view.attributes == 'function'
+          view.$el.attr(view.attributes())
+        else
+          view.$el.attr(view.attributes)
       view.$el.html view._template()
       view.trigger('render', view)
       view._renderDeferred.resolve()
@@ -70,7 +75,7 @@ Inn.View = Backbone.View.extend({
 
     if typeof @_template == 'function'
       @templateDeferred.resolve()
-      return
+      return @templateDeferred
 
     view = this
     $.getScript @_getTemplateURL(), ()->
@@ -230,6 +235,8 @@ class Inn.Layout
       view.options.templateURL = partial.templateURL if partial.templateURL
       view.options.templateFolder = layout.options.templateOptions.templateFolder if layout.options.templateOptions and layout.options.templateOptions.templateFolder
       view.options.templateFormat = layout.options.templateOptions.templateFormat if layout.options.templateOptions and layout.options.templateOptions.templateFormat
+      
+      view.attributes = partial.attributes
 
       layout.processPartials(partial.partials) if partial.partials
       

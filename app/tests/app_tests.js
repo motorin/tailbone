@@ -774,4 +774,61 @@
     });
   });
 
+  module("Inn.Layout View attributes", {
+    setup: function() {
+      $('#layout').empty();
+      this.dataManager = new Inn.DataManager;
+      this.layout_config = {
+        partials: {
+          'header': {
+            attributes: {
+              'class': 'bHeader',
+              'data-some': 'some_data'
+            }
+          },
+          'footer': {},
+          'content': {
+            templateName: 'bFrontpage',
+            templateURL: 'app/templates/bFrontpage.js',
+            partials: {
+              'tags': {},
+              'sortings': {},
+              'promoMovie': {},
+              'frontPageMovies': {
+                partials: {
+                  'pagination': {}
+                }
+              }
+            }
+          },
+          'someView': {}
+        },
+        dataManager: this.dataManager,
+        templateOptions: {
+          templateFolder: 'app/templates',
+          templateFormat: 'js'
+        }
+      };
+      return this.layout = new Inn.Layout(this.layout_config);
+    },
+    teardown: function() {
+      delete this.dataManager;
+      delete this.layout_config;
+      delete this.layout;
+      return $('#layout').empty();
+    }
+  });
+
+  asyncTest('layout should pass view attributes to View constructor', 2, function() {
+    var deferred, test;
+    test = this;
+    deferred = this.layout.processPartials().render();
+    return deferred.done(function() {
+      console.log(test.layout.getView('header'));
+      strictEqual(test.layout.getView('header').$el.attr('class'), 'bHeader', 'layout should pass view attributes to View constructor');
+      strictEqual(test.layout.getView('header').$el.data('some'), 'some_data', 'layout should pass view attributes to View constructor');
+      return start();
+    });
+  });
+
 }).call(this);

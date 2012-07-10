@@ -59,6 +59,13 @@ Is Inn namespace defined?
       this._renderDeferred = new $.Deferred();
       view = this;
       this._getTemplate().done(function() {
+        if (view.attributes) {
+          if (typeof view.attributes === 'function') {
+            view.$el.attr(view.attributes());
+          } else {
+            view.$el.attr(view.attributes);
+          }
+        }
         view.$el.html(view._template());
         view.trigger('render', view);
         return view._renderDeferred.resolve();
@@ -87,7 +94,7 @@ Is Inn namespace defined?
       this.templateDeferred = new $.Deferred();
       if (typeof this._template === 'function') {
         this.templateDeferred.resolve();
-        return;
+        return this.templateDeferred;
       }
       view = this;
       $.getScript(this._getTemplateURL(), function() {
@@ -276,6 +283,7 @@ Is Inn namespace defined?
         if (layout.options.templateOptions && layout.options.templateOptions.templateFormat) {
           view.options.templateFormat = layout.options.templateOptions.templateFormat;
         }
+        view.attributes = partial.attributes;
         if (partial.partials) {
           return layout.processPartials(partial.partials);
         }

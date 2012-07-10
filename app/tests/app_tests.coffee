@@ -772,3 +772,54 @@ asyncTest 'layout should remove all views from self', 6, ->
     
       start()
 
+
+module "Inn.Layout View attributes",
+  setup: ->
+    $('#layout').empty()
+    
+    @dataManager = new Inn.DataManager
+      
+    @layout_config =
+      partials:
+        'header':
+          attributes:
+            'class': 'bHeader'
+            'data-some': 'some_data'
+        'footer': {}
+        'content':
+          templateName: 'bFrontpage'
+          templateURL: 'app/templates/bFrontpage.js'
+          partials:
+            'tags': {}
+            'sortings': {}
+            'promoMovie': {}
+            'frontPageMovies':
+              partials: 
+                'pagination': {}
+        'someView': {}
+      dataManager: @dataManager,
+      templateOptions:
+        templateFolder: 'app/templates'
+        templateFormat: 'js'
+      
+    @layout = new Inn.Layout @layout_config
+    
+  teardown: ->
+    delete @dataManager
+    delete @layout_config
+    delete @layout
+    
+    $('#layout').empty()
+
+
+asyncTest 'layout should pass view attributes to View constructor', 2, ->
+  test = this
+  deferred = @layout.processPartials().render()
+  
+  deferred.done ->
+    console.log(test.layout.getView('header'))
+    strictEqual test.layout.getView('header').$el.attr('class'), 'bHeader', 'layout should pass view attributes to View constructor'
+    strictEqual test.layout.getView('header').$el.data('some'), 'some_data', 'layout should pass view attributes to View constructor'
+      
+    start()
+

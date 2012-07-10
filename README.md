@@ -88,16 +88,19 @@ Requiers *options.partials* object
 `
   'header': {}
   'footer':
-    templateURL: 'bFooter'
+    'attributes':
+      'class': 'bHeader'
+      'data-some': 'some_data'
+    'templateURL': 'bFooter'
   'content':
-    templateURL: 'bFrontpage'
-    partials:
+    'templateURL': 'bFrontpage'
+    'partials':
       'tags': {}
       'sortings': {}
       'promoMovie': {}
       'frontPageMovies':
-        templateURL: 'bFrontPageMoviesList',
-        partials:
+        'templateURL': 'bFrontPageMoviesList',
+        'partials':
           'pagination': {}
   'someView': {}
 `
@@ -115,6 +118,8 @@ Each partial can also have partials
 For each parital processRoutes function created or associated view by it's name (index in object)
 
 Routes and partials should have unique names
+
+Attributes object will be passed to Inn.View constructor on processPartials
 
 
 **Accepts**
