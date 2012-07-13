@@ -587,19 +587,19 @@ test 'recheckSubViews method', 1, ->
   strictEqual typeof @layout._recheckSubViews, 'function', 'Layout должен сожержать метод проверки подвьюшек'
   
 
-test 'processPartials: should return self', 1, ->
-  strictEqual @layout.processPartials(), @layout, 'processPartials должен возвращать себя'
+test '_processPartials: should return self', 1, ->
+  strictEqual @layout._processPartials(), @layout, '_processPartials должен возвращать себя'
 
-test 'processPartials: create top views', 3, ->
-  @layout.processPartials();
+test '_processPartials: create top views', 3, ->
+  @layout._processPartials();
   
   ok @layout.getView('header') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
   ok @layout.getView('footer') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
   ok @layout.getView('content') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
 
 
-test 'processPartials: create partial views', 5, ->
-  @layout.processPartials();
+test '_processPartials: create partial views', 5, ->
+  @layout._processPartials();
   
   ok @layout.getView('tags') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
   ok @layout.getView('sortings') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
@@ -608,8 +608,8 @@ test 'processPartials: create partial views', 5, ->
   ok @layout.getView('pagination') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
   
   
-test 'processPartials: set template names', 4, ->
-  @layout.processPartials();
+test '_processPartials: set template names', 4, ->
+  @layout._processPartials();
   
   strictEqual @layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
   strictEqual @layout.getView('content')._getTemplateURL(), 'bFrontpage', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
@@ -617,12 +617,12 @@ test 'processPartials: set template names', 4, ->
   strictEqual @layout.getView('pagination')._getTemplateURL(), 'app/templates/bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
 
 
-test 'processPartials should attach _viewBranch', 3, ->
+test '_processPartials should attach _viewBranch', 3, ->
   @layout.addView @realView
   @layout.addView @contentView
   @layout.addView @frontpageView
   
-  @layout.processPartials()
+  @layout._processPartials()
   
   strictEqual @layout.getView('content').options._viewBranch, @layout.options.partials.content, 'При создании view layout должен сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
   strictEqual @layout.getView('someView').options._viewBranch, @layout.options.partials.someView, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
@@ -692,17 +692,17 @@ module "Inn.Layout Render remove and so on",
 
 
 test 'layout should create views with default options', 4, ->
-  @layout.processPartials()
+  @layout._processPartials()
   
   strictEqual @layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
   strictEqual @layout.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
   
-  @layout_jade.processPartials()
+  @layout_jade._processPartials()
   strictEqual @layout_jade.getView('header')._getTemplateURL(), 'app/templates/bHeader.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
   strictEqual @layout_jade.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
 
 asyncTest 'layout render should attach views to DOM', 3, ->
-  deferred = @layout.processPartials().render()
+  deferred = @layout.render()
   
   deferred.done ->
     strictEqual $('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
@@ -713,7 +713,7 @@ asyncTest 'layout render should attach views to DOM', 3, ->
 
 asyncTest 'layout should cleanup nested views references for removed DOM elements', 5, ->
   test = this
-  deferred = @layout.processPartials().render()
+  deferred = @layout.render()
   
   deferred.done ->
     test.layout.getView('content').remove()
@@ -764,7 +764,7 @@ module "Inn.Layout Destroy",
 
 asyncTest 'layout should remove all views from self', 6, ->
   test = this
-  deferred = @layout.processPartials().render()
+  deferred = @layout.render()
 
   
   deferred.done ->
@@ -820,12 +820,78 @@ module "Inn.Layout View attributes",
 
 asyncTest 'layout should pass view attributes to View constructor', 2, ->
   test = this
-  deferred = @layout.processPartials().render()
+  deferred = @layout.render()
   
   deferred.done ->
-    console.log(test.layout.getView('header'))
     strictEqual test.layout.getView('header').$el.attr('class'), 'bHeader', 'layout should pass view attributes to View constructor'
     strictEqual test.layout.getView('header').$el.data('some'), 'some_data', 'layout should pass view attributes to View constructor'
       
     start()
 
+
+module "Inn.Layout automatic partials processing",
+  setup: ->
+    $('#layout').empty()
+    @dataManager = new Inn.DataManager
+      
+    @layout_config =
+      partials:
+        'header':
+          attributes:
+            'class': 'bHeader'
+            'data-some': 'some_data'
+        'footer': {}
+        'content':
+          templateName: 'bFrontpage'
+          templateURL: 'app/templates/bFrontpage.js'
+          partials:
+            'tags': {}
+            'sortings': {}
+            'promoMovie': {}
+            'frontPageMovies':
+              partials: 
+                'pagination': {}
+        'someView': {}
+      dataManager: @dataManager,
+      templateOptions:
+        templateFolder: 'app/templates'
+        templateFormat: 'js'
+      
+    @layout = new Inn.Layout @layout_config
+    
+    @layout_config2 =
+      dataManager: @dataManager,
+      placeholderClassName: 'otherPlaceholder'
+      templateOptions:
+        templateFolder: 'app/templates'
+        templateFormat: 'js'
+    
+    
+    @layout2 = new Inn.Layout @layout_config2
+    
+  teardown: ->
+    delete @dataManager
+    delete @layout_config
+    delete @layout
+    
+    $('#layout').empty()
+
+test 'Layout should have placeholderClassName option', 2, ->
+  strictEqual @layout.options.placeholderClassName, 'layoutPlaceholder', 'Layout should have default placeholderClassName option'
+  strictEqual @layout2.options.placeholderClassName, 'otherPlaceholder', 'Layout should have placeholderClassName option'
+
+
+asyncTest 'layout should automatically parse for placeholder and subviews', 5, ->
+  test = this
+  deferred = @layout2.render()
+  
+  deferred.done ->
+    notStrictEqual test.layout2.getView('footer'), null, 'layout should automatically create top-level views'
+    notStrictEqual test.layout2.getView('tags'), null, 'layout should automatically create subviews'
+    notStrictEqual test.layout2.getView('pagination'), null, 'layout should automatically create subviews'
+    
+    deepEqual test.layout2.getView('content').options._viewBranch, {"partials": {"frontPageMovies": {}, "promoMovie": {}, "sortings": {}, "tags":  {}}}, 'layout should automatically create subviews'
+    
+    deepEqual test.layout2.getView('frontPageMovies').options._viewBranch, {"partials": {"pagination": {}}}, 'layout should automatically create subviews'
+    
+    start()

@@ -48,13 +48,27 @@ Preparing Mockjax
   });
 
   $.mockjax({
+    url: 'app/templates/bContent.js',
+    contentType: 'script',
+    responseTime: 150,
+    response: function() {
+      var body_0;
+      body_0 = function(chk, ctx) {
+        return chk.write('===Content===<div id="tags" class="otherPlaceholder"></div><div id="sortings" class="otherPlaceholder"></div><div id="promoMovie" class="otherPlaceholder"></div><div id="frontPageMovies" class="otherPlaceholder"></div>');
+      };
+      dust.register("bContent", body_0);
+      return body_0;
+    }
+  });
+
+  $.mockjax({
     url: 'app/templates/bFrontPageMovies.js',
     contentType: 'script',
     responseTime: 150,
     response: function() {
       var body_0;
       body_0 = function(chk, ctx) {
-        return chk.write('===Frontpage movies===<div id="pagination"></div>');
+        return chk.write('===Frontpage movies===<div id="pagination" class="otherPlaceholder"></div>');
       };
       dust.register("bFrontPageMovies", body_0);
       return body_0;
@@ -152,7 +166,7 @@ Preparing Mockjax
     response: function() {
       var body_0;
       body_0 = function(chk, ctx) {
-        return chk.write('<div id="header"></div><div id="content"></div><div id="footer"></div>');
+        return chk.write('<div id="header" class="otherPlaceholder"></div><div id="content" class="otherPlaceholder"></div><div id="footer" class="otherPlaceholder"></div>');
       };
       dust.register("bLayout", body_0);
       return body_0;

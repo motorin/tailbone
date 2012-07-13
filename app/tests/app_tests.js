@@ -580,19 +580,19 @@
     return strictEqual(typeof this.layout._recheckSubViews, 'function', 'Layout должен сожержать метод проверки подвьюшек');
   });
 
-  test('processPartials: should return self', 1, function() {
-    return strictEqual(this.layout.processPartials(), this.layout, 'processPartials должен возвращать себя');
+  test('_processPartials: should return self', 1, function() {
+    return strictEqual(this.layout._processPartials(), this.layout, '_processPartials должен возвращать себя');
   });
 
-  test('processPartials: create top views', 3, function() {
-    this.layout.processPartials();
+  test('_processPartials: create top views', 3, function() {
+    this.layout._processPartials();
     ok(this.layout.getView('header') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек');
     ok(this.layout.getView('footer') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек');
     return ok(this.layout.getView('content') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек');
   });
 
-  test('processPartials: create partial views', 5, function() {
-    this.layout.processPartials();
+  test('_processPartials: create partial views', 5, function() {
+    this.layout._processPartials();
     ok(this.layout.getView('tags') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек');
     ok(this.layout.getView('sortings') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек');
     ok(this.layout.getView('promoMovie') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек');
@@ -600,19 +600,19 @@
     return ok(this.layout.getView('pagination') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек');
   });
 
-  test('processPartials: set template names', 4, function() {
-    this.layout.processPartials();
+  test('_processPartials: set template names', 4, function() {
+    this.layout._processPartials();
     strictEqual(this.layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
     strictEqual(this.layout.getView('content')._getTemplateURL(), 'bFrontpage', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
     strictEqual(this.layout.getView('frontPageMovies')._getTemplateURL(), 'bFrontPageMoviesList', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
     return strictEqual(this.layout.getView('pagination')._getTemplateURL(), 'app/templates/bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках');
   });
 
-  test('processPartials should attach _viewBranch', 3, function() {
+  test('_processPartials should attach _viewBranch', 3, function() {
     this.layout.addView(this.realView);
     this.layout.addView(this.contentView);
     this.layout.addView(this.frontpageView);
-    this.layout.processPartials();
+    this.layout._processPartials();
     strictEqual(this.layout.getView('content').options._viewBranch, this.layout.options.partials.content, 'При создании view layout должен сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
     strictEqual(this.layout.getView('someView').options._viewBranch, this.layout.options.partials.someView, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
     return strictEqual(this.layout.getView('frontPageMovies').options._viewBranch, this.layout.options.partials.content.partials.frontPageMovies, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view');
@@ -688,17 +688,17 @@
   });
 
   test('layout should create views with default options', 4, function() {
-    this.layout.processPartials();
+    this.layout._processPartials();
     strictEqual(this.layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
     strictEqual(this.layout.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
-    this.layout_jade.processPartials();
+    this.layout_jade._processPartials();
     strictEqual(this.layout_jade.getView('header')._getTemplateURL(), 'app/templates/bHeader.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
     return strictEqual(this.layout_jade.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор');
   });
 
   asyncTest('layout render should attach views to DOM', 3, function() {
     var deferred;
-    deferred = this.layout.processPartials().render();
+    deferred = this.layout.render();
     return deferred.done(function() {
       strictEqual($('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render');
       strictEqual($('#content').html(), '===Content===<div id="tags">===Tags===</div><div id="sortings">===Sortings===</div><div id="promoMovie">===PromoMovie===</div><div id="frontPageMovies">===Frontpage movies===<div id="pagination">===Pagination===</div></div>', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render');
@@ -710,7 +710,7 @@
   asyncTest('layout should cleanup nested views references for removed DOM elements', 5, function() {
     var deferred, test;
     test = this;
-    deferred = this.layout.processPartials().render();
+    deferred = this.layout.render();
     return deferred.done(function() {
       test.layout.getView('content').remove();
       strictEqual(test.layout.getView('tags').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements');
@@ -765,7 +765,7 @@
   asyncTest('layout should remove all views from self', 6, function() {
     var deferred, test;
     test = this;
-    deferred = this.layout.processPartials().render();
+    deferred = this.layout.render();
     return deferred.done(function() {
       return test.layout.destroy().done(function() {
         strictEqual(test.layout.getView('tags'), null, 'layout should remove all views from self');
@@ -827,11 +827,94 @@
   asyncTest('layout should pass view attributes to View constructor', 2, function() {
     var deferred, test;
     test = this;
-    deferred = this.layout.processPartials().render();
+    deferred = this.layout.render();
     return deferred.done(function() {
-      console.log(test.layout.getView('header'));
       strictEqual(test.layout.getView('header').$el.attr('class'), 'bHeader', 'layout should pass view attributes to View constructor');
       strictEqual(test.layout.getView('header').$el.data('some'), 'some_data', 'layout should pass view attributes to View constructor');
+      return start();
+    });
+  });
+
+  module("Inn.Layout automatic partials processing", {
+    setup: function() {
+      $('#layout').empty();
+      this.dataManager = new Inn.DataManager;
+      this.layout_config = {
+        partials: {
+          'header': {
+            attributes: {
+              'class': 'bHeader',
+              'data-some': 'some_data'
+            }
+          },
+          'footer': {},
+          'content': {
+            templateName: 'bFrontpage',
+            templateURL: 'app/templates/bFrontpage.js',
+            partials: {
+              'tags': {},
+              'sortings': {},
+              'promoMovie': {},
+              'frontPageMovies': {
+                partials: {
+                  'pagination': {}
+                }
+              }
+            }
+          },
+          'someView': {}
+        },
+        dataManager: this.dataManager,
+        templateOptions: {
+          templateFolder: 'app/templates',
+          templateFormat: 'js'
+        }
+      };
+      this.layout = new Inn.Layout(this.layout_config);
+      this.layout_config2 = {
+        dataManager: this.dataManager,
+        placeholderClassName: 'otherPlaceholder',
+        templateOptions: {
+          templateFolder: 'app/templates',
+          templateFormat: 'js'
+        }
+      };
+      return this.layout2 = new Inn.Layout(this.layout_config2);
+    },
+    teardown: function() {
+      delete this.dataManager;
+      delete this.layout_config;
+      delete this.layout;
+      return $('#layout').empty();
+    }
+  });
+
+  test('Layout should have placeholderClassName option', 2, function() {
+    strictEqual(this.layout.options.placeholderClassName, 'layoutPlaceholder', 'Layout should have default placeholderClassName option');
+    return strictEqual(this.layout2.options.placeholderClassName, 'otherPlaceholder', 'Layout should have placeholderClassName option');
+  });
+
+  asyncTest('layout should automatically parse for placeholder and subviews', 5, function() {
+    var deferred, test;
+    test = this;
+    deferred = this.layout2.render();
+    return deferred.done(function() {
+      notStrictEqual(test.layout2.getView('footer'), null, 'layout should automatically create top-level views');
+      notStrictEqual(test.layout2.getView('tags'), null, 'layout should automatically create subviews');
+      notStrictEqual(test.layout2.getView('pagination'), null, 'layout should automatically create subviews');
+      deepEqual(test.layout2.getView('content').options._viewBranch, {
+        "partials": {
+          "frontPageMovies": {},
+          "promoMovie": {},
+          "sortings": {},
+          "tags": {}
+        }
+      }, 'layout should automatically create subviews');
+      deepEqual(test.layout2.getView('frontPageMovies').options._viewBranch, {
+        "partials": {
+          "pagination": {}
+        }
+      }, 'layout should automatically create subviews');
       return start();
     });
   });

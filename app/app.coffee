@@ -10,7 +10,6 @@ Inn.Model = Backbone.Model.extend({
   url: ->
     return 'app/models/'+@id+'.json'
 });
-
 ###
 Application Collection
 ###
@@ -109,7 +108,9 @@ class Inn.Layout
     throw new Inn.Error('dataManager should be in options') unless options && options.dataManager && options.dataManager instanceof Inn.DataManager
     
     @options = $.extend true
-    , templateOptions:
+    ,
+      placeholderClassName: 'layoutPlaceholder'
+      templateOptions:
         templateFolder: ''
         templateFormat: 'js'
     , options
@@ -134,6 +135,11 @@ class Inn.Layout
     
     @_getTemplate().done ->
       $('#'+layout.id).html layout._template()
+      
+      layout._processPartials()
+      
+      layout._parsePartials()
+      
       _.each layout.options.partials, (partial, name)->
         layout.getView(name).render() if layout.getView(name)
           
@@ -223,7 +229,7 @@ class Inn.Layout
     @trigger('remove:view')
   
   
-  processPartials: (partials)->
+  _processPartials: (partials)->
     layout = this
     
     partials = @options.partials unless partials
@@ -241,10 +247,28 @@ class Inn.Layout
       
       view.attributes = partial.attributes
 
-      layout.processPartials(partial.partials) if partial.partials
+      layout._processPartials(partial.partials) if partial.partials
       
     return this
     
+  _parsePartials: (partialContent)->
+    layout = this
+    
+    partialContent = $('#'+layout.id) unless partialContent
+    partialId = partialContent.attr('id')
+    
+    partialsObject = {partials: {}}
+      
+    $(partialContent).children('.'+@options.placeholderClassName).each ->
+      partialsObject.partials[$(this).attr('id')] = {}
+    
+    if not @options.partials
+      @_processPartials partialsObject.partials
+      @getView(partialId).options._viewBranch = partialsObject if @getView(partialId)
+      _.each partialsObject.partials, (partial, name)->
+        layout.getView(name).render() if layout.getView(name)
+      
+  
   _recheckSubViews: (view)->
     @_viewsUnrendered--
     
@@ -253,6 +277,8 @@ class Inn.Layout
       view.options.isInDOM = true
     
     layout = this
+    
+    @_parsePartials view.$el unless view.options._viewBranch.partials
     
     if view.options._viewBranch.partials
       _.each view.options._viewBranch.partials, (partial, name)->
@@ -268,9 +294,10 @@ class Inn.Layout
     
     if view.options._viewBranch.partials
       _.each view.options._viewBranch.partials, (partial, name)->
-        layout.getView(name).remove()
+        layout.getView(name).remove() if layout.getView(name)
 
   _onViewRemovedFromDOM: (view)->
+
 
   
   destroy: ->
@@ -292,7 +319,7 @@ class Inn.Layout
         layout.removeView(view.id)
     
     _.each layout.options.partials, (partial, name)->
-      layout.getView(name).remove()
+      layout.getView(name).remove() if layout.getView(name)
     
     return @_destroyDeferred
   

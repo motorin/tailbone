@@ -136,6 +136,7 @@ Is Inn namespace defined?
         throw new Inn.Error('dataManager should be in options');
       }
       this.options = $.extend(true, {
+        placeholderClassName: 'layoutPlaceholder',
         templateOptions: {
           templateFolder: '',
           templateFormat: 'js'
@@ -157,6 +158,8 @@ Is Inn namespace defined?
       layout = this;
       this._getTemplate().done(function() {
         $('#' + layout.id).html(layout._template());
+        layout._processPartials();
+        layout._parsePartials();
         return _.each(layout.options.partials, function(partial, name) {
           if (layout.getView(name)) {
             return layout.getView(name).render();
@@ -263,7 +266,7 @@ Is Inn namespace defined?
       return this.trigger('remove:view');
     };
 
-    Layout.prototype.processPartials = function(partials) {
+    Layout.prototype._processPartials = function(partials) {
       var layout;
       layout = this;
       if (!partials) {
@@ -290,10 +293,36 @@ Is Inn namespace defined?
         }
         view.attributes = partial.attributes;
         if (partial.partials) {
-          return layout.processPartials(partial.partials);
+          return layout._processPartials(partial.partials);
         }
       });
       return this;
+    };
+
+    Layout.prototype._parsePartials = function(partialContent) {
+      var layout, partialId, partialsObject;
+      layout = this;
+      if (!partialContent) {
+        partialContent = $('#' + layout.id);
+      }
+      partialId = partialContent.attr('id');
+      partialsObject = {
+        partials: {}
+      };
+      $(partialContent).children('.' + this.options.placeholderClassName).each(function() {
+        return partialsObject.partials[$(this).attr('id')] = {};
+      });
+      if (!this.options.partials) {
+        this._processPartials(partialsObject.partials);
+        if (this.getView(partialId)) {
+          this.getView(partialId).options._viewBranch = partialsObject;
+        }
+        return _.each(partialsObject.partials, function(partial, name) {
+          if (layout.getView(name)) {
+            return layout.getView(name).render();
+          }
+        });
+      }
     };
 
     Layout.prototype._recheckSubViews = function(view) {
@@ -304,6 +333,9 @@ Is Inn namespace defined?
         view.options.isInDOM = true;
       }
       layout = this;
+      if (!view.options._viewBranch.partials) {
+        this._parsePartials(view.$el);
+      }
       if (view.options._viewBranch.partials) {
         _.each(view.options._viewBranch.partials, function(partial, name) {
           return layout.getView(name).render();
@@ -322,7 +354,9 @@ Is Inn namespace defined?
       }
       if (view.options._viewBranch.partials) {
         return _.each(view.options._viewBranch.partials, function(partial, name) {
-          return layout.getView(name).remove();
+          if (layout.getView(name)) {
+            return layout.getView(name).remove();
+          }
         });
       }
     };
@@ -349,7 +383,9 @@ Is Inn namespace defined?
         });
       });
       _.each(layout.options.partials, function(partial, name) {
-        return layout.getView(name).remove();
+        if (layout.getView(name)) {
+          return layout.getView(name).remove();
+        }
       });
       return this._destroyDeferred;
     };
