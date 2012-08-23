@@ -28,10 +28,10 @@ module.exports = function(grunt) {
 
     meta: {
       banner: [
-        '/* ',
-        ' <%= pkg.title || pkg.name %> - v<%= pkg.version %> - ',
-        ' <%= grunt.template.today("yyyy-mm-dd") %>',
-        ' */'
+        '/*',
+        '   <%= pkg.title || pkg.name %> - v<%= pkg.version %>',
+        '   <%= grunt.template.today("yyyy-mm-dd") %>',
+        '*/'
       ].join('\n')
     },
 
