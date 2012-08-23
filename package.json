@@ -1,0 +1,19 @@
+{
+  "name": "app-dust-backbone",
+  "version": "0.0.0",
+  "description": "Client-side application on backbone.js and dust.js. With ideas of placeholders based templates.",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Motorin/app-dust-backbone.git"
+  },
+  "dependencies": {
+    "grunt-clean": ">= 0.3.0",
+    "grunt-coffee": ">= 0.0.5"
+  },
+  "author": "",
+  "license": ""
+}
