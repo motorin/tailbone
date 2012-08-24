@@ -1,20 +1,9 @@
-
-/*
-Is Inn namespace defined?
-*/
-
-
 (function() {
   var _ref;
 
   if ((_ref = window.Inn) == null) {
     window.Inn = {};
   }
-
-  /*
-  Template Manager
-  */
-
 
   Inn.Layout = (function() {
 

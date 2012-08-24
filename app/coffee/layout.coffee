@@ -1,12 +1,17 @@
-###
-Is Inn namespace defined?
-###
 window.Inn ?= {}
 
-###
-Template Manager
-###
+#### *class* Inn.Layout
+#
+#---
+# Менеджер представлений
+# 
 class Inn.Layout
+
+
+  ##### constructor( *@options* )
+  #
+  #---
+  # Создаёт экземпляр менеджера представлений
   constructor: (@options) ->
     
     throw new Inn.Error('dataManager should be in options') unless options && options.dataManager && options.dataManager instanceof Inn.DataManager
@@ -25,11 +30,15 @@ class Inn.Layout
     
     @id = if @options.id then @options.id else 'layout'
     
-    #now Layout can fire Backbone events
+    # Умееть генерировать события (Backbone.Events)
     _.extend(this, Backbone.Events)
 
-  render: () ->
-    #if view in rendering state return current render deferred object
+  ##### render()
+  #
+  #---
+  # Рендерит шаблон, возврашает deferred object
+  render: ->
+    # Если представления уже рендерятся, вернёт deferred object с текущим состоянием
     if @_renderDeferred and @_renderDeferred.state() == 'pending'
       return @_renderDeferred
     
@@ -47,20 +56,31 @@ class Inn.Layout
       _.each layout.options.partials, (partial, name)->
         layout.getView(name).render() if layout.getView(name)
           
-    #@_renderDeferred would not be resolved until all of the views rendered
     return @_renderDeferred
   
+  ##### _getTemplateURL()
+  #
+  #---
+  # Определяет URL шаблона layout-а
   _getTemplateURL: ->
     devider = if @options.templateOptions.templateFolder then '/' else ''
     return @options.templateOptions.templateFolder+devider+@_getTemplateName()+'.'+@options.templateOptions.templateFormat unless @options.templateURL?
     return @options.templateURL
     
+  ##### _getTemplateName()
+  #
+  #---
+  # Определяет имя шаблона layout-а
   _getTemplateName: ->
     return 'b'+@id[0].toUpperCase()+@id.slice(1) unless @options.templateName
     return @options.templateName
     
+  ##### _getTemplate()
+  #
+  #---
+  # Загружает шаблон layout-а, возвращает deferred object
   _getTemplate: ->
-    #if template is currently getting template return current template deferred object
+    # если шаблон уже грузится, вернёт deferred object 
     if @templateDeferred and @templateDeferred.state() == 'pending'
       return @templateDeferred
     
@@ -72,7 +92,7 @@ class Inn.Layout
     
     layout = this
     $.getScript @_getTemplateURL(), ()->
-      #wrapping dust template in view method
+      # оборачивает загруженный шаблон во внутреннюю функцию
       layout._template = (data)->
         rendered_html = ''
         dust.render layout._getTemplateName(), data, (err, text)-> 
@@ -83,6 +103,10 @@ class Inn.Layout
         
     return @templateDeferred
     
+  ##### addView( *view* )
+  #
+  #---
+  # Добавляет вью в список
   addView: (view) ->
     
     throw new Inn.Error('view shold be an instance of Inn.View') unless view instanceof Inn.View
@@ -105,14 +129,20 @@ class Inn.Layout
         delete view.model
         delete view.collection
     
+    # Вешает обработчики на системные события
     view.on 'render', _.bind(@_recheckSubViews, this, view)
     view.on 'remove', _.bind(@_clearSubViews, this, view)
     view.on 'remove', _.bind(@_onViewRemovedFromDOM, this, view)
     
+    # Генерирует событие **"add:view"**
     @trigger('add:view', view);
     
     return this
     
+  ##### getView( *name* )
+  #
+  #---
+  # Возвращает вью с именем **name**
   getView: (name) ->
     found = _.find @_views, (view) ->
       return view.id == name
@@ -121,6 +151,10 @@ class Inn.Layout
     
     return null
     
+  ##### removeView( *name* )
+  #
+  #---
+  # Удаляет вью с именем **name**
   removeView: (name) ->
     
     survived = _.reject @_views, (view) ->
@@ -130,9 +164,13 @@ class Inn.Layout
     
     @_views = survived
     
+    # Генерирует событие **"remove:view"**
     @trigger('remove:view')
   
-  
+  ##### _processPartials( *partials* )
+  #
+  #---
+  # Обрабатывает partials и превращает их во вью
   _processPartials: (partials)->
     layout = this
     
@@ -155,6 +193,10 @@ class Inn.Layout
       
     return this
     
+  ##### Генерирует( *partialContent* )
+  #
+  #---
+  # Генерирует список partial-ов текущего layout-а
   _parsePartials: (partialContent)->
     layout = this
     
@@ -172,7 +214,10 @@ class Inn.Layout
       _.each partialsObject.partials, (partial, name)->
         layout.getView(name).render() if layout.getView(name)
       
-  
+  ##### _recheckSubViews( *view* )
+  #
+  #---
+  # 
   _recheckSubViews: (view)->
     @_viewsUnrendered--
     
@@ -191,6 +236,10 @@ class Inn.Layout
     if @_viewsUnrendered <= 0
       @_renderDeferred.resolve() 
 
+  ##### _clearSubViews( *view* )
+  #
+  #---
+  # Вызывает метод .remove() у дочерних вью
   _clearSubViews: (view)->
     layout = this
     
@@ -200,10 +249,16 @@ class Inn.Layout
       _.each view.options._viewBranch.partials, (partial, name)->
         layout.getView(name).remove() if layout.getView(name)
 
+  ##### _onViewRemovedFromDOM( *view* )
+  #
+  #---
+  # Обработчик события удаления вью
   _onViewRemovedFromDOM: (view)->
 
-
-  
+  ##### destroy()
+  #
+  #---
+  # Уничтожает layout
   destroy: ->
     $('#'+@id).empty()
     
