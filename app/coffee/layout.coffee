@@ -107,26 +107,23 @@ Inn.Layout = Inn.View.extend
   #---
   # Обрабатывает partials и превращает их во вью
   _processPartials: (partials)->
-    layout = this
-    
     partials = @options.partials unless partials
     
-    _.each partials, (partial, name)->
-      layout.addView new Inn.View
-        id: name
+    for name, partial of partials
+      @addView new Inn.View id: name
 
-      view = layout.getView(name)
+      view = @getView(name)
       view.options._viewBranch = partial
       view.options.templateName = partial.templateName if partial.templateName
       view.options.templateURL = partial.templateURL if partial.templateURL
-      view.options.templateFolder = layout.options.templateFolder if layout.options and layout.options.templateFolder
-      view.options.templateFormat = layout.options.templateFormat if layout.options and layout.options.templateFormat
+      view.options.templateFolder = @options.templateFolder if @options and @options.templateFolder
+      view.options.templateFormat = @options.templateFormat if @options and @options.templateFormat
       
       view.attributes = partial.attributes
 
-      layout._processPartials(partial.partials) if partial.partials
+      @_processPartials(partial.partials) if partial.partials
       
-    return this
+    @
     
   ##### Генерирует( *partialContent* )
   #

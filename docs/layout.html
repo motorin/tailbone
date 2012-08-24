@@ -82,26 +82,23 @@
 <hr />
 
 <p>Обрабатывает partials и превращает их во вью</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_processPartials: </span><span class="nf">(partials)-&gt;</span>
-    <span class="nv">layout = </span><span class="k">this</span>
-    
     <span class="nv">partials = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">partials</span> <span class="nx">unless</span> <span class="nx">partials</span>
     
-    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">partials</span><span class="p">,</span> <span class="nf">(partial, name)-&gt;</span>
-      <span class="nx">layout</span><span class="p">.</span><span class="nx">addView</span> <span class="k">new</span> <span class="nx">Inn</span><span class="p">.</span><span class="nx">View</span>
-        <span class="nv">id: </span><span class="nx">name</span>
+    <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">partial</span> <span class="k">of</span> <span class="nx">partials</span>
+      <span class="nx">@addView</span> <span class="k">new</span> <span class="nx">Inn</span><span class="p">.</span><span class="nx">View</span> <span class="nv">id: </span><span class="nx">name</span>
 
-      <span class="nv">view = </span><span class="nx">layout</span><span class="p">.</span><span class="nx">getView</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
+      <span class="nv">view = </span><span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
       <span class="nv">view.options._viewBranch = </span><span class="nx">partial</span>
       <span class="nv">view.options.templateName = </span><span class="nx">partial</span><span class="p">.</span><span class="nx">templateName</span> <span class="k">if</span> <span class="nx">partial</span><span class="p">.</span><span class="nx">templateName</span>
       <span class="nv">view.options.templateURL = </span><span class="nx">partial</span><span class="p">.</span><span class="nx">templateURL</span> <span class="k">if</span> <span class="nx">partial</span><span class="p">.</span><span class="nx">templateURL</span>
-      <span class="nv">view.options.templateFolder = </span><span class="nx">layout</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">templateFolder</span> <span class="k">if</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">options</span> <span class="o">and</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">templateFolder</span>
-      <span class="nv">view.options.templateFormat = </span><span class="nx">layout</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">templateFormat</span> <span class="k">if</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">options</span> <span class="o">and</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">templateFormat</span>
+      <span class="nv">view.options.templateFolder = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">templateFolder</span> <span class="k">if</span> <span class="nx">@options</span> <span class="o">and</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateFolder</span>
+      <span class="nv">view.options.templateFormat = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">templateFormat</span> <span class="k">if</span> <span class="nx">@options</span> <span class="o">and</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateFormat</span>
       
       <span class="nv">view.attributes = </span><span class="nx">partial</span><span class="p">.</span><span class="nx">attributes</span>
 
-      <span class="nx">layout</span><span class="p">.</span><span class="nx">_processPartials</span><span class="p">(</span><span class="nx">partial</span><span class="p">.</span><span class="nx">partials</span><span class="p">)</span> <span class="k">if</span> <span class="nx">partial</span><span class="p">.</span><span class="nx">partials</span>
+      <span class="nx">@_processPartials</span><span class="p">(</span><span class="nx">partial</span><span class="p">.</span><span class="nx">partials</span><span class="p">)</span> <span class="k">if</span> <span class="nx">partial</span><span class="p">.</span><span class="nx">partials</span>
       
-    <span class="k">return</span> <span class="k">this</span>
+    <span class="nx">@</span>
     </pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <h4>Генерирует( <em>partialContent</em> )</h4>
 
 <hr />

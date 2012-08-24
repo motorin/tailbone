@@ -212,17 +212,16 @@
       return this.trigger('remove:view');
     },
     _processPartials: function(partials) {
-      var layout;
-      layout = this;
+      var name, partial, view;
       if (!partials) {
         partials = this.options.partials;
       }
-      _.each(partials, function(partial, name) {
-        var view;
-        layout.addView(new Inn.View({
+      for (name in partials) {
+        partial = partials[name];
+        this.addView(new Inn.View({
           id: name
         }));
-        view = layout.getView(name);
+        view = this.getView(name);
         view.options._viewBranch = partial;
         if (partial.templateName) {
           view.options.templateName = partial.templateName;
@@ -230,17 +229,17 @@
         if (partial.templateURL) {
           view.options.templateURL = partial.templateURL;
         }
-        if (layout.options && layout.options.templateFolder) {
-          view.options.templateFolder = layout.options.templateFolder;
+        if (this.options && this.options.templateFolder) {
+          view.options.templateFolder = this.options.templateFolder;
         }
-        if (layout.options && layout.options.templateFormat) {
-          view.options.templateFormat = layout.options.templateFormat;
+        if (this.options && this.options.templateFormat) {
+          view.options.templateFormat = this.options.templateFormat;
         }
         view.attributes = partial.attributes;
         if (partial.partials) {
-          return layout._processPartials(partial.partials);
+          this._processPartials(partial.partials);
         }
-      });
+      }
       return this;
     },
     _parsePartials: function(partialContent) {
