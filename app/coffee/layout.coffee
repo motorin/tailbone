@@ -88,24 +88,14 @@ Inn.Layout = Inn.View.extend
   #
   #---
   # Возвращает вью с именем **name**
-  getView: (name) ->
-    found = _.find @_views, (view) ->
-      return view.id == name
-    
-    return found if found?
-    
-    return null
-    
+  getView: (name) -> (_.find @_views, (view) -> view.id is name) ? null
+        
   ##### removeView( *name* )
   #
   #---
   # Удаляет вью с именем **name**
   removeView: (name) ->
-    
-    survived = _.reject @_views, (view) ->
-      return view.id == name
-    
-    return null if @_views.length == survived.length
+    return null if (survived = _.reject @_views, (view) -> view.id is name).length is @_views.length
     
     @_views = survived
     

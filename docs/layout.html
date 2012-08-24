@@ -67,23 +67,13 @@
 
 <hr />
 
-<p>Возвращает вью с именем <strong>name</strong></p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">getView: </span><span class="nf">(name) -&gt;</span>
-    <span class="nv">found = </span><span class="nx">_</span><span class="p">.</span><span class="nx">find</span> <span class="nx">@_views</span><span class="p">,</span> <span class="nf">(view) -&gt;</span>
-      <span class="k">return</span> <span class="nx">view</span><span class="p">.</span><span class="nx">id</span> <span class="o">==</span> <span class="nx">name</span>
-    
-    <span class="k">return</span> <span class="nx">found</span> <span class="k">if</span> <span class="nx">found</span><span class="o">?</span>
-    
-    <span class="k">return</span> <span class="kc">null</span>
-    </pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <h4>removeView( <em>name</em> )</h4>
+<p>Возвращает вью с именем <strong>name</strong></p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">getView: </span><span class="nf">(name) -&gt;</span> <span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">find</span> <span class="nx">@_views</span><span class="p">,</span> <span class="nf">(view) -&gt;</span> <span class="nx">view</span><span class="p">.</span><span class="nx">id</span> <span class="o">is</span> <span class="nx">name</span><span class="p">)</span> <span class="o">?</span> <span class="kc">null</span>
+        </pre></div>             </td>           </tr>                               <tr id="section-12">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-12">&#182;</a>               </div>               <h4>removeView( <em>name</em> )</h4>
 
 <hr />
 
 <p>Удаляет вью с именем <strong>name</strong></p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">removeView: </span><span class="nf">(name) -&gt;</span>
-    
-    <span class="nv">survived = </span><span class="nx">_</span><span class="p">.</span><span class="nx">reject</span> <span class="nx">@_views</span><span class="p">,</span> <span class="nf">(view) -&gt;</span>
-      <span class="k">return</span> <span class="nx">view</span><span class="p">.</span><span class="nx">id</span> <span class="o">==</span> <span class="nx">name</span>
-    
-    <span class="k">return</span> <span class="kc">null</span> <span class="k">if</span> <span class="nx">@_views</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="nx">survived</span><span class="p">.</span><span class="nx">length</span>
+    <span class="k">return</span> <span class="kc">null</span> <span class="k">if</span> <span class="p">(</span><span class="nv">survived = </span><span class="nx">_</span><span class="p">.</span><span class="nx">reject</span> <span class="nx">@_views</span><span class="p">,</span> <span class="nf">(view) -&gt;</span> <span class="nx">view</span><span class="p">.</span><span class="nx">id</span> <span class="o">is</span> <span class="nx">name</span><span class="p">).</span><span class="nx">length</span> <span class="o">is</span> <span class="nx">@_views</span><span class="p">.</span><span class="nx">length</span>
     
     <span class="vi">@_views = </span><span class="nx">survived</span>
     </pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <p>Генерирует событие <strong>"remove:view"</strong></p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">@trigger</span><span class="p">(</span><span class="s">&#39;remove:view&#39;</span><span class="p">)</span>

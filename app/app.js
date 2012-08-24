@@ -196,21 +196,16 @@
       return this;
     },
     getView: function(name) {
-      var found;
-      found = _.find(this._views, function(view) {
+      var _ref1;
+      return (_ref1 = _.find(this._views, function(view) {
         return view.id === name;
-      });
-      if (found != null) {
-        return found;
-      }
-      return null;
+      })) != null ? _ref1 : null;
     },
     removeView: function(name) {
       var survived;
-      survived = _.reject(this._views, function(view) {
+      if ((survived = _.reject(this._views, function(view) {
         return view.id === name;
-      });
-      if (this._views.length === survived.length) {
+      })).length === this._views.length) {
         return null;
       }
       this._views = survived;
