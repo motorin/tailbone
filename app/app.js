@@ -1,6 +1,5 @@
 /*
    app-dust-backbone - v0.0.0
-   2012-08-23
 */
 
 

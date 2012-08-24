@@ -22,20 +22,27 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: '<json:package.json>',
 
+    // @todo: write own clean task
     clean: {
       folder: 'app/js/'
     },
 
     meta: {
+
+
       banner: [
         '/*',
         '   <%= pkg.title || pkg.name %> - v<%= pkg.version %>',
-        '   <%= grunt.template.today("yyyy-mm-dd") %>',
+        // '   <%= grunt.template.today("yyyy-mm-dd") %>',
         '*/'
       ].join('\n')
+
+
     },
 
     coffee: {
+
+
       app: {
         src: ['app/coffee/*.coffee'],
         dest: 'app/js/',
@@ -44,16 +51,20 @@ module.exports = function(grunt) {
         }
       },
 
-    tests: {
+      tests: {
         src: ['app/tests/*.coffee'],
         dest: 'app/tests/',
         options: {
             bare: false
         }
       }
+
+
     },
 
     concat: {
+
+
       app: {
         src: [
           '<banner:meta.banner>',
@@ -64,22 +75,45 @@ module.exports = function(grunt) {
           'app/js/data-manager.js'
         ],
         dest: 'app/app.js'
+      },
+
+      utils: {
+        src: [
+          '<banner:meta.banner>',
+          'app/js/utils.js'
+        ],
+        dest: 'app/utils.js'
       }
+
+
     },
 
     min: {
-      dist: {
+
+
+      app: {
         src: [
             '<banner:meta.banner>',
             '<config:concat.app.dest>'
           ],
           dest: 'app/app.min.js'
-        }
       },
+
+      utils: {
+        src: [
+            '<banner:meta.banner>',
+            '<config:concat.utils.dest>'
+          ],
+          dest: 'app/utils.min.js'
+      }
+
+
+    },
 
     lint: {
       files: [
-        'app/js/*.js'
+        'app/js/*.js',
+        'app/app.js.bak'
         // 'app/tests/*.js' // Из-за хитрости тестов было много хинтов, решили отключить
       ]
     },
@@ -90,6 +124,11 @@ module.exports = function(grunt) {
         '<config:coffee.tests.src>'
       ],
       tasks: 'rebuild'
+    },
+
+    server: {
+      port: 3000,
+      base: '.'
     }
 
   });
