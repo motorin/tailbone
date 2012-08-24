@@ -16,13 +16,7 @@ Inn.Layout = Inn.View.extend
     
     throw new Inn.Error('dataManager should be in options') unless options && options.dataManager && options.dataManager instanceof Inn.DataManager
     
-    @options = $.extend true
-    ,
-      placeholderClassName: 'layoutPlaceholder'
-      templateFolder: ''
-      templateFormat: 'js'
-    , options
-    
+    @options = $.extend true, {}, Inn.Layout.defaults, options
     @_dataManager = options.dataManager
     @_views = []
     @_viewsUnrendered = 0
@@ -43,19 +37,16 @@ Inn.Layout = Inn.View.extend
     
     @_renderDeferred = new $.Deferred()
     
-    layout = this
-    
-    @_getTemplate().done ->
-      $('#'+layout.id).html layout._template()
+    @_getTemplate().done =>
+      $("##{@id}").html @_template()
       
-      layout._processPartials()
+      @_processPartials()
+      @_parsePartials()
       
-      layout._parsePartials()
-      
-      _.each layout.options.partials, (partial, name)->
-        layout.getView(name).render() if layout.getView(name)
+      _.each @options.partials, (partial, name) =>
+        @getView(name).render() if @getView(name)
           
-    return @_renderDeferred
+    @_renderDeferred
 
   ##### addView( *view* )
   #
@@ -65,15 +56,15 @@ Inn.Layout = Inn.View.extend
     
     throw new Inn.Error('view shold be an instance of Inn.View') unless view instanceof Inn.View
     
-    viewInLayout = _.find @_views, (existingView)->
-      return existingView.id == view.id
+    viewInLayout = _.find @_views, (existingView)-> existingView.id == view.id
+    # _.indexOf(@_views, view) == -1
+    @_views.push(view) unless view in @_views or viewInLayout
     
-    @_views.push(view) if _.indexOf(@_views, view) == -1 and not viewInLayout
-    
-    view.options.layout = this
+    view.options.layout = @
     
     unless view.model or view.collection
-      data = @_dataManager.getDataAsset(view.id)
+      data = @_dataManager.getDataAsset view.id
+
       if data
         if data instanceof Inn.Model
           view.model = data
@@ -84,14 +75,14 @@ Inn.Layout = Inn.View.extend
         delete view.collection
     
     # Вешает обработчики на системные события
-    view.on 'render', _.bind(@_recheckSubViews, this, view)
-    view.on 'remove', _.bind(@_clearSubViews, this, view)
-    view.on 'remove', _.bind(@_onViewRemovedFromDOM, this, view)
+    view.on 'render', _.bind @_recheckSubViews, this, view
+    view.on 'remove', _.bind @_clearSubViews, this, view
+    view.on 'remove', _.bind @_onViewRemovedFromDOM, this, view
     
     # Генерирует событие **"add:view"**
-    @trigger('add:view', view);
+    @trigger 'add:view', view
     
-    return this
+    @
     
   ##### getView( *name* )
   #
@@ -235,4 +226,12 @@ Inn.Layout = Inn.View.extend
       layout.getView(name).remove() if layout.getView(name)
     
     return @_destroyDeferred
-  
+
+##### @defaults
+#
+#---
+# Опции layout-а по умолчанию
+Inn.Layout.defaults = 
+  placeholderClassName: 'layoutPlaceholder'
+  templateFolder: ''
+  templateFormat: 'js'

@@ -126,7 +126,8 @@
 }).call(this);
 
 (function() {
-  var _ref;
+  var _ref,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   if ((_ref = window.Inn) == null) {
     window.Inn = {};
@@ -137,11 +138,7 @@
       if (!(options && options.dataManager && options.dataManager instanceof Inn.DataManager)) {
         throw new Inn.Error('dataManager should be in options');
       }
-      this.options = $.extend(true, {
-        placeholderClassName: 'layoutPlaceholder',
-        templateFolder: '',
-        templateFormat: 'js'
-      }, options);
+      this.options = $.extend(true, {}, Inn.Layout.defaults, options);
       this._dataManager = options.dataManager;
       this._views = [];
       this._viewsUnrendered = 0;
@@ -149,19 +146,18 @@
       return _.extend(this, Backbone.Events);
     },
     render: function() {
-      var layout;
+      var _this = this;
       if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
         return this._renderDeferred;
       }
       this._renderDeferred = new $.Deferred();
-      layout = this;
       this._getTemplate().done(function() {
-        $('#' + layout.id).html(layout._template());
-        layout._processPartials();
-        layout._parsePartials();
-        return _.each(layout.options.partials, function(partial, name) {
-          if (layout.getView(name)) {
-            return layout.getView(name).render();
+        $("#" + _this.id).html(_this._template());
+        _this._processPartials();
+        _this._parsePartials();
+        return _.each(_this.options.partials, function(partial, name) {
+          if (_this.getView(name)) {
+            return _this.getView(name).render();
           }
         });
       });
@@ -175,7 +171,7 @@
       viewInLayout = _.find(this._views, function(existingView) {
         return existingView.id === view.id;
       });
-      if (_.indexOf(this._views, view) === -1 && !viewInLayout) {
+      if (!(__indexOf.call(this._views, view) >= 0 || viewInLayout)) {
         this._views.push(view);
       }
       view.options.layout = this;
@@ -339,6 +335,12 @@
       return this._destroyDeferred;
     }
   });
+
+  Inn.Layout.defaults = {
+    placeholderClassName: 'layoutPlaceholder',
+    templateFolder: '',
+    templateFormat: 'js'
+  };
 
 }).call(this);
 
