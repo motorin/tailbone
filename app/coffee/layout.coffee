@@ -132,19 +132,20 @@ Inn.Layout = Inn.View.extend
   _parsePartials: (partialContent)->
     layout = this
     
-    partialContent = $('#'+layout.id) unless partialContent
+    partialContent = $("##{@id}") unless partialContent
     partialId = partialContent.attr('id')
     
-    partialsObject = {partials: {}}
+    partialsObject = partials: {}
       
-    $(partialContent).children('.'+@options.placeholderClassName).each ->
-      partialsObject.partials[$(this).attr('id')] = {}
-    
-    if not @options.partials
+    for element, idx in $(partialContent).children(".#{@options.placeholderClassName}")
+      partialsObject.partials[$(element).attr('id')] = {}
+
+    unless @options.partials?
       @_processPartials partialsObject.partials
       @getView(partialId).options._viewBranch = partialsObject if @getView(partialId)
-      _.each partialsObject.partials, (partial, name)->
-        layout.getView(name).render() if layout.getView(name)
+
+      for name, partial of partialsObject.partials
+        @getView(name).render() if @getView(name)
       
   ##### _recheckSubViews( *view* )
   #

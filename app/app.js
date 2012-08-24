@@ -243,28 +243,36 @@
       return this;
     },
     _parsePartials: function(partialContent) {
-      var layout, partialId, partialsObject;
+      var element, idx, layout, name, partial, partialId, partialsObject, _i, _len, _ref1, _ref2, _results;
       layout = this;
       if (!partialContent) {
-        partialContent = $('#' + layout.id);
+        partialContent = $("#" + this.id);
       }
       partialId = partialContent.attr('id');
       partialsObject = {
         partials: {}
       };
-      $(partialContent).children('.' + this.options.placeholderClassName).each(function() {
-        return partialsObject.partials[$(this).attr('id')] = {};
-      });
-      if (!this.options.partials) {
+      _ref1 = $(partialContent).children("." + this.options.placeholderClassName);
+      for (idx = _i = 0, _len = _ref1.length; _i < _len; idx = ++_i) {
+        element = _ref1[idx];
+        partialsObject.partials[$(element).attr('id')] = {};
+      }
+      if (this.options.partials == null) {
         this._processPartials(partialsObject.partials);
         if (this.getView(partialId)) {
           this.getView(partialId).options._viewBranch = partialsObject;
         }
-        return _.each(partialsObject.partials, function(partial, name) {
-          if (layout.getView(name)) {
-            return layout.getView(name).render();
+        _ref2 = partialsObject.partials;
+        _results = [];
+        for (name in _ref2) {
+          partial = _ref2[name];
+          if (this.getView(name)) {
+            _results.push(this.getView(name).render());
+          } else {
+            _results.push(void 0);
           }
-        });
+        }
+        return _results;
       }
     },
     _recheckSubViews: function(view) {
