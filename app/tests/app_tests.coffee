@@ -309,8 +309,7 @@ module "Inn.Layout",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager
-      templateOptions:
-        templateFolder: 'app/templates'
+      templateFolder: 'app/templates'
       
       
     @layout = new Inn.Layout @layout_config
@@ -321,19 +320,16 @@ module "Inn.Layout",
     
     @layout_with_templateFolder = new Inn.Layout
       dataManager: @dataManager
-      templateOptions:
-        templateFolder: 'app/templates'
+      templateFolder: 'app/templates'
      
     @layout_with_templateFormat = new Inn.Layout
       dataManager: @dataManager
-      templateOptions:
-        templateFormat: 'jade'
+      templateFormat: 'jade'
 
     @layout_with_templateFormat_and_templateFolder = new Inn.Layout
       dataManager: @dataManager
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'jade'
+      templateFolder: 'app/templates'
+      templateFormat: 'jade'
       
     @layout_with_overriden_templateName = new Inn.Layout
       dataManager: @dataManager
@@ -341,15 +337,13 @@ module "Inn.Layout",
       
     @layout_with_overriden_templateName_and_templateFolder = new Inn.Layout
       dataManager: @dataManager
-      templateOptions:
-        templateFolder: 'app/templates'
+      templateFolder: 'app/templates'
       templateName: 'other_layout'  
       
     @layout_with_overriden_templateName_and_templateFolder_and_templateFormat = new Inn.Layout
       dataManager: @dataManager
-      templateOptions:
-        templateFormat: 'jade'
-        templateFolder: 'app/templates'
+      templateFormat: 'jade'
+      templateFolder: 'app/templates'
       templateName: 'other_layout'
 
     @userModel = new Inn.Model
@@ -425,6 +419,8 @@ module "Inn.Layout",
     delete @contentView
     delete @frontapageView
   
+test 'extends Inn.View', 1, ->
+  ok @layout instanceof Inn.View, 'Layout should extend View'
 
 test "Наличие", 1, ->
   ok @layout instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)'
@@ -654,10 +650,9 @@ module "Inn.Layout Render remove and so on",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'js'
-      
+      templateFolder: 'app/templates'
+      templateFormat: 'js'
+    
     @layout = new Inn.Layout @layout_config
     
     @layout_config_jade =
@@ -674,9 +669,8 @@ module "Inn.Layout Render remove and so on",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'jade'
+      templateFolder: 'app/templates'
+      templateFormat: 'jade'
       
     @layout_jade = new Inn.Layout @layout_config_jade
     
@@ -748,9 +742,8 @@ module "Inn.Layout Destroy",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'js'
+      templateFolder: 'app/templates'
+      templateFormat: 'js'
       
     @layout = new Inn.Layout @layout_config
     
@@ -804,9 +797,8 @@ module "Inn.Layout View attributes",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'js'
+      templateFolder: 'app/templates'
+      templateFormat: 'js'
       
     @layout = new Inn.Layout @layout_config
     
@@ -853,18 +845,16 @@ module "Inn.Layout automatic partials processing",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'js'
+      templateFolder: 'app/templates'
+      templateFormat: 'js'
       
     @layout = new Inn.Layout @layout_config
     
     @layout_config2 =
       dataManager: @dataManager,
       placeholderClassName: 'otherPlaceholder'
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'js'
+      templateFolder: 'app/templates'
+      templateFormat: 'js'
     
     
     @layout2 = new Inn.Layout @layout_config2

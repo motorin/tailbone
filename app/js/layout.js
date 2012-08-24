@@ -5,28 +5,23 @@
     window.Inn = {};
   }
 
-  Inn.Layout = (function() {
-
-    function Layout(options) {
-      this.options = options;
+  Inn.Layout = Inn.View.extend({
+    initialize: function(options) {
       if (!(options && options.dataManager && options.dataManager instanceof Inn.DataManager)) {
         throw new Inn.Error('dataManager should be in options');
       }
       this.options = $.extend(true, {
         placeholderClassName: 'layoutPlaceholder',
-        templateOptions: {
-          templateFolder: '',
-          templateFormat: 'js'
-        }
+        templateFolder: '',
+        templateFormat: 'js'
       }, options);
       this._dataManager = options.dataManager;
       this._views = [];
       this._viewsUnrendered = 0;
       this.id = this.options.id ? this.options.id : 'layout';
-      _.extend(this, Backbone.Events);
-    }
-
-    Layout.prototype.render = function() {
+      return _.extend(this, Backbone.Events);
+    },
+    render: function() {
       var layout;
       if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
         return this._renderDeferred;
@@ -44,50 +39,8 @@
         });
       });
       return this._renderDeferred;
-    };
-
-    Layout.prototype._getTemplateURL = function() {
-      var devider;
-      devider = this.options.templateOptions.templateFolder ? '/' : '';
-      if (this.options.templateURL == null) {
-        return this.options.templateOptions.templateFolder + devider + this._getTemplateName() + '.' + this.options.templateOptions.templateFormat;
-      }
-      return this.options.templateURL;
-    };
-
-    Layout.prototype._getTemplateName = function() {
-      if (!this.options.templateName) {
-        return 'b' + this.id[0].toUpperCase() + this.id.slice(1);
-      }
-      return this.options.templateName;
-    };
-
-    Layout.prototype._getTemplate = function() {
-      var layout;
-      if (this.templateDeferred && this.templateDeferred.state() === 'pending') {
-        return this.templateDeferred;
-      }
-      this.templateDeferred = new $.Deferred();
-      if (typeof this._template === 'function') {
-        this.templateDeferred.resolve();
-        return;
-      }
-      layout = this;
-      $.getScript(this._getTemplateURL(), function() {
-        layout._template = function(data) {
-          var rendered_html;
-          rendered_html = '';
-          dust.render(layout._getTemplateName(), data, function(err, text) {
-            return rendered_html = text;
-          });
-          return rendered_html;
-        };
-        return layout.templateDeferred.resolve();
-      });
-      return this.templateDeferred;
-    };
-
-    Layout.prototype.addView = function(view) {
+    },
+    addView: function(view) {
       var data, viewInLayout;
       if (!(view instanceof Inn.View)) {
         throw new Inn.Error('view shold be an instance of Inn.View');
@@ -118,9 +71,8 @@
       view.on('remove', _.bind(this._onViewRemovedFromDOM, this, view));
       this.trigger('add:view', view);
       return this;
-    };
-
-    Layout.prototype.getView = function(name) {
+    },
+    getView: function(name) {
       var found;
       found = _.find(this._views, function(view) {
         return view.id === name;
@@ -129,9 +81,8 @@
         return found;
       }
       return null;
-    };
-
-    Layout.prototype.removeView = function(name) {
+    },
+    removeView: function(name) {
       var survived;
       survived = _.reject(this._views, function(view) {
         return view.id === name;
@@ -141,9 +92,8 @@
       }
       this._views = survived;
       return this.trigger('remove:view');
-    };
-
-    Layout.prototype._processPartials = function(partials) {
+    },
+    _processPartials: function(partials) {
       var layout;
       layout = this;
       if (!partials) {
@@ -162,11 +112,11 @@
         if (partial.templateURL) {
           view.options.templateURL = partial.templateURL;
         }
-        if (layout.options.templateOptions && layout.options.templateOptions.templateFolder) {
-          view.options.templateFolder = layout.options.templateOptions.templateFolder;
+        if (layout.options && layout.options.templateFolder) {
+          view.options.templateFolder = layout.options.templateFolder;
         }
-        if (layout.options.templateOptions && layout.options.templateOptions.templateFormat) {
-          view.options.templateFormat = layout.options.templateOptions.templateFormat;
+        if (layout.options && layout.options.templateFormat) {
+          view.options.templateFormat = layout.options.templateFormat;
         }
         view.attributes = partial.attributes;
         if (partial.partials) {
@@ -174,9 +124,8 @@
         }
       });
       return this;
-    };
-
-    Layout.prototype._parsePartials = function(partialContent) {
+    },
+    _parsePartials: function(partialContent) {
       var layout, partialId, partialsObject;
       layout = this;
       if (!partialContent) {
@@ -200,9 +149,8 @@
           }
         });
       }
-    };
-
-    Layout.prototype._recheckSubViews = function(view) {
+    },
+    _recheckSubViews: function(view) {
       var layout;
       this._viewsUnrendered--;
       if (view.el.parentNode === null && $('#' + view.id).length) {
@@ -221,9 +169,8 @@
       if (this._viewsUnrendered <= 0) {
         return this._renderDeferred.resolve();
       }
-    };
-
-    Layout.prototype._clearSubViews = function(view) {
+    },
+    _clearSubViews: function(view) {
       var layout;
       layout = this;
       if (this._destroyDeferred) {
@@ -236,11 +183,9 @@
           }
         });
       }
-    };
-
-    Layout.prototype._onViewRemovedFromDOM = function(view) {};
-
-    Layout.prototype.destroy = function() {
+    },
+    _onViewRemovedFromDOM: function(view) {},
+    destroy: function() {
       var layout;
       $('#' + this.id).empty();
       layout = this;
@@ -265,10 +210,7 @@
         }
       });
       return this._destroyDeferred;
-    };
-
-    return Layout;
-
-  })();
+    }
+  });
 
 }).call(this);

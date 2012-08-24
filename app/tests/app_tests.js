@@ -308,9 +308,7 @@
           'someView': {}
         },
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFolder: 'app/templates'
-        }
+        templateFolder: 'app/templates'
       };
       this.layout = new Inn.Layout(this.layout_config);
       this.layout_with_id = new Inn.Layout({
@@ -319,22 +317,16 @@
       });
       this.layout_with_templateFolder = new Inn.Layout({
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFolder: 'app/templates'
-        }
+        templateFolder: 'app/templates'
       });
       this.layout_with_templateFormat = new Inn.Layout({
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFormat: 'jade'
-        }
+        templateFormat: 'jade'
       });
       this.layout_with_templateFormat_and_templateFolder = new Inn.Layout({
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFolder: 'app/templates',
-          templateFormat: 'jade'
-        }
+        templateFolder: 'app/templates',
+        templateFormat: 'jade'
       });
       this.layout_with_overriden_templateName = new Inn.Layout({
         dataManager: this.dataManager,
@@ -342,17 +334,13 @@
       });
       this.layout_with_overriden_templateName_and_templateFolder = new Inn.Layout({
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFolder: 'app/templates'
-        },
+        templateFolder: 'app/templates',
         templateName: 'other_layout'
       });
       this.layout_with_overriden_templateName_and_templateFolder_and_templateFormat = new Inn.Layout({
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFormat: 'jade',
-          templateFolder: 'app/templates'
-        },
+        templateFormat: 'jade',
+        templateFolder: 'app/templates',
         templateName: 'other_layout'
       });
       this.userModel = new Inn.Model({
@@ -423,6 +411,10 @@
       delete this.contentView;
       return delete this.frontapageView;
     }
+  });
+
+  test('extends Inn.View', 1, function() {
+    return ok(this.layout instanceof Inn.View, 'Layout should extend View');
   });
 
   test("Наличие", 1, function() {
@@ -644,10 +636,8 @@
           'someView': {}
         },
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFolder: 'app/templates',
-          templateFormat: 'js'
-        }
+        templateFolder: 'app/templates',
+        templateFormat: 'js'
       };
       this.layout = new Inn.Layout(this.layout_config);
       this.layout_config_jade = {
@@ -669,10 +659,8 @@
           'someView': {}
         },
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFolder: 'app/templates',
-          templateFormat: 'jade'
-        }
+        templateFolder: 'app/templates',
+        templateFormat: 'jade'
       };
       return this.layout_jade = new Inn.Layout(this.layout_config_jade);
     },
@@ -746,10 +734,8 @@
           'someView': {}
         },
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFolder: 'app/templates',
-          templateFormat: 'js'
-        }
+        templateFolder: 'app/templates',
+        templateFormat: 'js'
       };
       return this.layout = new Inn.Layout(this.layout_config);
     },
@@ -808,10 +794,8 @@
           'someView': {}
         },
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFolder: 'app/templates',
-          templateFormat: 'js'
-        }
+        templateFolder: 'app/templates',
+        templateFormat: 'js'
       };
       return this.layout = new Inn.Layout(this.layout_config);
     },
@@ -864,19 +848,15 @@
           'someView': {}
         },
         dataManager: this.dataManager,
-        templateOptions: {
-          templateFolder: 'app/templates',
-          templateFormat: 'js'
-        }
+        templateFolder: 'app/templates',
+        templateFormat: 'js'
       };
       this.layout = new Inn.Layout(this.layout_config);
       this.layout_config2 = {
         dataManager: this.dataManager,
         placeholderClassName: 'otherPlaceholder',
-        templateOptions: {
-          templateFolder: 'app/templates',
-          templateFormat: 'js'
-        }
+        templateFolder: 'app/templates',
+        templateFormat: 'js'
       };
       return this.layout2 = new Inn.Layout(this.layout_config2);
     },

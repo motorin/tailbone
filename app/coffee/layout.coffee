@@ -5,23 +5,22 @@ window.Inn ?= {}
 #---
 # Менеджер представлений
 # 
-class Inn.Layout
+Inn.Layout = Inn.View.extend
 
 
-  ##### constructor( *@options* )
+  ##### initialize( *options* )
   #
   #---
   # Создаёт экземпляр менеджера представлений
-  constructor: (@options) ->
+  initialize: (options) ->
     
     throw new Inn.Error('dataManager should be in options') unless options && options.dataManager && options.dataManager instanceof Inn.DataManager
     
     @options = $.extend true
     ,
       placeholderClassName: 'layoutPlaceholder'
-      templateOptions:
-        templateFolder: ''
-        templateFormat: 'js'
+      templateFolder: ''
+      templateFormat: 'js'
     , options
     
     @_dataManager = options.dataManager
@@ -57,52 +56,7 @@ class Inn.Layout
         layout.getView(name).render() if layout.getView(name)
           
     return @_renderDeferred
-  
-  ##### _getTemplateURL()
-  #
-  #---
-  # Определяет URL шаблона layout-а
-  _getTemplateURL: ->
-    devider = if @options.templateOptions.templateFolder then '/' else ''
-    return @options.templateOptions.templateFolder+devider+@_getTemplateName()+'.'+@options.templateOptions.templateFormat unless @options.templateURL?
-    return @options.templateURL
-    
-  ##### _getTemplateName()
-  #
-  #---
-  # Определяет имя шаблона layout-а
-  _getTemplateName: ->
-    return 'b'+@id[0].toUpperCase()+@id.slice(1) unless @options.templateName
-    return @options.templateName
-    
-  ##### _getTemplate()
-  #
-  #---
-  # Загружает шаблон layout-а, возвращает deferred object
-  _getTemplate: ->
-    # если шаблон уже грузится, вернёт deferred object 
-    if @templateDeferred and @templateDeferred.state() == 'pending'
-      return @templateDeferred
-    
-    @templateDeferred = new $.Deferred()
-    
-    if typeof @_template == 'function'
-      @templateDeferred.resolve()
-      return
-    
-    layout = this
-    $.getScript @_getTemplateURL(), ()->
-      # оборачивает загруженный шаблон во внутреннюю функцию
-      layout._template = (data)->
-        rendered_html = ''
-        dust.render layout._getTemplateName(), data, (err, text)-> 
-          rendered_html = text
-        return rendered_html
 
-      layout.templateDeferred.resolve()
-        
-    return @templateDeferred
-    
   ##### addView( *view* )
   #
   #---
@@ -184,8 +138,8 @@ class Inn.Layout
       view.options._viewBranch = partial
       view.options.templateName = partial.templateName if partial.templateName
       view.options.templateURL = partial.templateURL if partial.templateURL
-      view.options.templateFolder = layout.options.templateOptions.templateFolder if layout.options.templateOptions and layout.options.templateOptions.templateFolder
-      view.options.templateFormat = layout.options.templateOptions.templateFormat if layout.options.templateOptions and layout.options.templateOptions.templateFormat
+      view.options.templateFolder = layout.options.templateFolder if layout.options and layout.options.templateFolder
+      view.options.templateFormat = layout.options.templateFormat if layout.options and layout.options.templateFormat
       
       view.attributes = partial.attributes
 
