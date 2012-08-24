@@ -1,7 +1,3 @@
-/*
-   app-dust-backbone - v0.0.0
-*/
-
 (function() {
   var _ref,
     __hasProp = {}.hasOwnProperty,

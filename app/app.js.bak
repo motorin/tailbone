@@ -7,13 +7,13 @@ var layout = {
   },
   'content': {
   }
-}
+};
 
 
 var Router = Backbone.Router.extend({
 
   routes: {
-    "":                 "frontpage",
+    "": "frontpage"
   },
   
   frontpage: function(){
@@ -67,7 +67,7 @@ var innApp = {
   },
   
   getViewByName: function(name){
-    var view = this.views['name'];
+    var view = this.views[name];
     if(view){
       return view;
     }
@@ -78,7 +78,7 @@ var innApp = {
     if(!this.viewConstructors[name]){
       return new InnView();
     }
-    return new this.viewConstructors[name];
+    return new this.viewConstructors[name]();
   },
   
   addView: function(view){
@@ -97,7 +97,7 @@ var innApp = {
   registerViewConstructor: function(name, constructor){
     return this.viewConstructors[name] = constructor;
   }
-}
+};
 
 
 
@@ -112,7 +112,7 @@ function recursion(layout){
         recursion(this);
       });
     }
-  })
+  });
 }
 
 Backbone.history.start();
