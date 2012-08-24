@@ -4,102 +4,6 @@ Is Inn namespace defined?
 window.Inn ?= {}
 
 ###
-Application Model
-###
-Inn.Model = Backbone.Model.extend({
-  url: ->
-    return 'app/models/'+@id+'.json'
-});
-###
-Application Collection
-###
-Inn.Collection = Backbone.Collection.extend({
-  url: ->
-    return '#'
-  model: Inn.Model
-});
-
-###
-Application standart View
-###
-Inn.View = Backbone.View.extend({
-  initialize: (options)->
-    #extending defaults
-    @options = $.extend {}, 
-      templateFolder: ''
-      templateFormat: 'js'
-    , options
-    
-    #return this for chaining
-    this
-    
-  render: ->
-    #if view in rendering state return current render deferred object
-    if @_renderDeferred and @_renderDeferred.state() == 'pending'
-      return @_renderDeferred
-    
-    @options.layout._viewsUnrendered++ if @options.layout                 #TODO untested and WRONG -- can't easily extend!!
-    
-    @_renderDeferred = new $.Deferred()
-    
-    view = this
-
-    @_getTemplate().done ->
-      if view.attributes
-        if typeof view.attributes == 'function'
-          view.$el.attr(view.attributes())
-        else
-          view.$el.attr(view.attributes)
-      view.$el.html view._template(view.getDataForView())
-      view.trigger('render', view)
-      view._renderDeferred.resolve()
-      
-    return @_renderDeferred
-
-  _getTemplateURL: ->
-    devider = if @options.templateFolder then '/' else ''
-    return @options.templateFolder+devider+@_getTemplateName()+'.'+@options.templateFormat if not @options.templateURL?
-    return @options.templateURL
-  
-  _getTemplateName: ->
-    return 'b'+@id[0].toUpperCase()+@id.slice(1) unless @options.templateName
-    return @options.templateName
-    
-  _getTemplate: ->
-    #if template is currently getting template return current template deferred object
-    if @templateDeferred and @templateDeferred.state() == 'pending'
-      return @templateDeferred
-    
-    @templateDeferred = new $.Deferred()
-
-    if typeof @_template == 'function'
-      @templateDeferred.resolve()
-      return @templateDeferred
-
-    view = this
-    $.getScript @_getTemplateURL(), ()->
-      #wrapping dust template in view method
-      view._template = (data)->
-        rendered_html = ''
-        dust.render this._getTemplateName(), data, (err, text)-> 
-          rendered_html = text
-        return rendered_html
-
-      view.templateDeferred.resolve()
-        
-    return @templateDeferred
-  
-  getDataForView: ->
-    return this.model.toJSON() if this.model
-  
-  remove: ->
-    @undelegateEvents()
-    @$el.empty().remove()
-    @trigger('remove')
-    @options.isInDOM = false
-});
-
-###
 Template Manager
 ###
 class Inn.Layout
@@ -148,7 +52,7 @@ class Inn.Layout
   
   _getTemplateURL: ->
     devider = if @options.templateOptions.templateFolder then '/' else ''
-    return @options.templateOptions.templateFolder+devider+@_getTemplateName()+'.'+@options.templateOptions.templateFormat if not @options.templateURL?
+    return @options.templateOptions.templateFolder+devider+@_getTemplateName()+'.'+@options.templateOptions.templateFormat unless @options.templateURL?
     return @options.templateURL
     
   _getTemplateName: ->
@@ -323,55 +227,3 @@ class Inn.Layout
     
     return @_destroyDeferred
   
-###
-Data Manager
-###
-class Inn.DataManager
-  constructor: () ->    
-    @_dataSets = []
-    
-    _.extend(this, Backbone.Events)
-    
-  
-  addDataAsset: (dataAsset, id) ->
-    
-    throw new Inn.Error('dataAsset shold be an instance of Inn.Model or Inn.Collection') unless dataAsset instanceof Inn.Model or dataAsset instanceof Inn.Collection
-    throw new Inn.Error('dataAsset id is required') unless dataAsset.id or id
-    
-    dataAsset.id = id if id
-
-    #do not add same data twice
-    @_dataSets.push(dataAsset) if _.indexOf(@_dataSets, dataAsset) == -1
-    
-    @trigger('add:dataAsset', dataAsset);
-    
-    return this
-  
-  
-  getDataAsset: (name) ->
-    
-    found = _.find @_dataSets, (dataSet) ->
-      return dataSet.id == name
-    
-    return found if found?
-    
-    return null
-    
-    
-  removeDataAsset: (name) ->
-    
-    survived = _.reject @_dataSets, (dataSet) ->
-      return dataSet.id == name
-    
-    return null if @_dataSets.length == survived.length
-    
-    @_dataSets = survived
-    
-    @trigger('remove:dataAsset')
-
-  destroy: ->
-    dataManager = this
-    
-    _.each @_dataSets, (dataAsset)->
-      dataManager.removeDataAsset dataAsset.id
-    
