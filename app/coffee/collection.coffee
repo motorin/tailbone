@@ -1,13 +1,20 @@
-###
-Is Inn namespace defined?
-###
 window.Inn ?= {}
 
-###
-Application Collection
-###
+#### Classname
+# Класс коллекции
+# 
 Inn.Collection = Backbone.Collection.extend({
-  url: ->
-    return '#'
+
+  ##### url()
+  #
+  #---
+  # Возвращает URL, по которому доступна коллекция
+  url: -> '#'
+
+  ##### model
+  # 
+  #---
+  # Модель коллекции
   model: Inn.Model
-});
+  
+})

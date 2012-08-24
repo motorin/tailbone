@@ -2,12 +2,6 @@
    app-dust-backbone - v0.0.0
 */
 
-
-/*
-Is Inn namespace defined?
-*/
-
-
 (function() {
   var _ref;
 
@@ -15,36 +9,20 @@ Is Inn namespace defined?
     window.Inn = {};
   }
 
-  /*
-  Application Model
-  */
-
-
   Inn.Model = Backbone.Model.extend({
     url: function() {
-      return 'app/models/' + this.id + '.json';
+      return "app/models/" + this.id + ".json";
     }
   });
 
 }).call(this);
 
-
-/*
-Is Inn namespace defined?
-*/
-
-
 (function() {
   var _ref;
 
   if ((_ref = window.Inn) == null) {
     window.Inn = {};
   }
-
-  /*
-  Application Collection
-  */
-
 
   Inn.Collection = Backbone.Collection.extend({
     url: function() {
@@ -158,23 +136,12 @@ Is Inn namespace defined?
 
 }).call(this);
 
-
-/*
-Is Inn namespace defined?
-*/
-
-
 (function() {
   var _ref;
 
   if ((_ref = window.Inn) == null) {
     window.Inn = {};
   }
-
-  /*
-  Template Manager
-  */
-
 
   Inn.Layout = (function() {
 
