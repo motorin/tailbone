@@ -1,20 +1,9 @@
-
-/*
-Is Inn namespace defined?
-*/
-
-
 (function() {
   var _ref;
 
   if ((_ref = window.Inn) == null) {
     window.Inn = {};
   }
-
-  /*
-  Application standart View
-  */
-
 
   Inn.View = Backbone.View.extend({
     initialize: function(options) {

@@ -1,24 +1,32 @@
-###
-Is Inn namespace defined?
-###
 window.Inn ?= {}
 
-###
-Application standart View
-###
+#### *class* Inn.View
+#
+#---
+# Класс представления
+# 
 Inn.View = Backbone.View.extend({
+
+  ##### initialize( *options* )
+  #
+  #---
+  # Конструктор
   initialize: (options)->
-    #extending defaults
+    # наследует настройки по умолчанию
     @options = $.extend {}, 
       templateFolder: ''
       templateFormat: 'js'
     , options
     
-    #return this for chaining
+    # поддерживает "чейнинг"
     this
-    
+
+  ##### render()
+  #
+  #---
+  # Рендерит шаблон, возвращает deferred object
   render: ->
-    #if view in rendering state return current render deferred object
+    # Если в данный момент шаблон уже рендерится, вернёт deferred object с текущим состоянием
     if @_renderDeferred and @_renderDeferred.state() == 'pending'
       return @_renderDeferred
     
@@ -40,17 +48,29 @@ Inn.View = Backbone.View.extend({
       
     return @_renderDeferred
 
+  ##### _getTemplateURL()
+  #
+  #---
+  # Определяет URL шаблона
   _getTemplateURL: ->
     devider = if @options.templateFolder then '/' else ''
     return @options.templateFolder+devider+@_getTemplateName()+'.'+@options.templateFormat unless @options.templateURL?
     return @options.templateURL
   
+  ##### _getTemplateName()
+  #
+  #---
+  # Определяет название шаблона
   _getTemplateName: ->
     return 'b'+@id[0].toUpperCase()+@id.slice(1) unless @options.templateName
     return @options.templateName
     
+  ##### _getTemplate()
+  #
+  #---
+  # Загружает шаблон, возвращает deferred object
   _getTemplate: ->
-    #if template is currently getting template return current template deferred object
+    # Если в данный момент шаблон уже грузится, вернёт deferred object с текущим состоянием
     if @templateDeferred and @templateDeferred.state() == 'pending'
       return @templateDeferred
     
@@ -62,7 +82,7 @@ Inn.View = Backbone.View.extend({
 
     view = this
     $.getScript @_getTemplateURL(), ()->
-      #wrapping dust template in view method
+      # Оборачивает загруженный шаблон во внутреннюю функцию
       view._template = (data)->
         rendered_html = ''
         dust.render this._getTemplateName(), data, (err, text)->
@@ -73,12 +93,23 @@ Inn.View = Backbone.View.extend({
         
     return @templateDeferred
   
+  ##### getDataForView()
+  #
+  #---
+  # Достаёт данные из модели
   getDataForView: ->
     return this.model.toJSON() if this.model
   
+  ##### remove()
+  #
+  #---
+  # Удаляет вью из DOM верева
   remove: ->
+    # Отписывается от событий
     @undelegateEvents()
     @$el.empty().remove()
+    # Генерирует событие **"remove"**
     @trigger('remove')
+    # Устанавливает заначение опции isInDom в false
     @options.isInDOM = false
 });
