@@ -165,7 +165,7 @@ module.exports = function(grunt) {
 
   // Default task.
   registerTask('default', 'coffee lint concat min docco');
-  registerTask('rebuild', 'coffee lint concat min docco')
+  registerTask('rebuild', 'coffee lint concat docco')
   registerTask('test', 'qunit')
 
 };

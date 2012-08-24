@@ -31,7 +31,7 @@
       <span class="nx">@_processPartials</span><span class="p">()</span>
       <span class="nx">@_parsePartials</span><span class="p">()</span>
       
-      <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">partials</span><span class="p">,</span> <span class="p">(</span><span class="nx">partial</span><span class="p">,</span> <span class="nx">name</span><span class="p">)</span> <span class="o">=&gt;</span>
+      <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">partial</span> <span class="k">of</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">partials</span>
         <span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">render</span><span class="p">()</span> <span class="k">if</span> <span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
           
     <span class="nx">@_renderDeferred</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <h4>addView( <em>view</em> )</h4>

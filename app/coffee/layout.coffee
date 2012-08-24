@@ -43,7 +43,7 @@ Inn.Layout = Inn.View.extend
       @_processPartials()
       @_parsePartials()
       
-      _.each @options.partials, (partial, name) =>
+      for name, partial of @options.partials
         @getView(name).render() if @getView(name)
           
     @_renderDeferred
