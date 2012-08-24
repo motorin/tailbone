@@ -5,6 +5,9 @@ module.exports = function(grunt) {
   // CoffeeScript plugin
   grunt.loadNpmTasks('grunt-coffee');
 
+  // Docco plugin
+  grunt.loadNpmTasks('grunt-docco');
+
   // Clean plugin
   grunt.loadNpmTasks('grunt-clean');
 
@@ -40,6 +43,18 @@ module.exports = function(grunt) {
 
 
     },
+
+
+    docco: {
+      app: {
+        src: [
+          'app/coffee/*.coffee'
+        ]
+      }
+
+      // 'app/tests/*.coffee'
+    },
+
 
     coffee: {
 
@@ -149,8 +164,8 @@ module.exports = function(grunt) {
   });
 
   // Default task.
-  registerTask('default', 'coffee concat min lint');
-  registerTask('rebuild', 'coffee concat min')
+  registerTask('default', 'coffee lint concat min docco');
+  registerTask('rebuild', 'coffee concat min docco')
   registerTask('test', 'qunit')
 
 };

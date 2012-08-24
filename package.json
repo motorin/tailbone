@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "grunt-clean": ">= 0.3.0",
+    "grunt-docco": ">= 0.1.1",
     "grunt-coffee": ">= 0.0.5"
   },
   "author": "",
