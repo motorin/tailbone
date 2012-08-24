@@ -184,34 +184,32 @@ Inn.Layout = Inn.View.extend
   #
   #---
   # Обработчик события удаления вью
-  _onViewRemovedFromDOM: (view)->
+  _onViewRemovedFromDOM: (view) ->
 
   ##### destroy()
   #
   #---
   # Уничтожает layout
   destroy: ->
-    $('#'+@id).empty()
+    $("##{@id}").empty()
     
-    layout = this
+    layout = @
     
     @_destroyDeferred = new $.Deferred()
 
     @_destroyDeferred.progress ->
 
-      viewsInDOM = _.filter layout._views, (view)->
-        return view.options.isInDOM
+      viewsInDOM = _.filter layout._views, (view)-> view.options.isInDOM
       
-      this.resolve() if viewsInDOM.length == 0
+      @resolve() if viewsInDOM.length == 0
 
-    @_destroyDeferred.done ->
-      _.each layout._views, (view)->
-        layout.removeView(view.id)
+    @_destroyDeferred.done =>
+      @removeView(view.id) for view in layout._views
+
+    for name, partial of @options.partials
+      @getView(name).remove() if @getView(name)
     
-    _.each layout.options.partials, (partial, name)->
-      layout.getView(name).remove() if layout.getView(name)
-    
-    return @_destroyDeferred
+    @_destroyDeferred
 
 ##### @defaults
 #

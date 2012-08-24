@@ -318,8 +318,9 @@
     },
     _onViewRemovedFromDOM: function(view) {},
     destroy: function() {
-      var layout;
-      $('#' + this.id).empty();
+      var layout, name, partial, _ref1,
+        _this = this;
+      $("#" + this.id).empty();
       layout = this;
       this._destroyDeferred = new $.Deferred();
       this._destroyDeferred.progress(function() {
@@ -332,15 +333,22 @@
         }
       });
       this._destroyDeferred.done(function() {
-        return _.each(layout._views, function(view) {
-          return layout.removeView(view.id);
-        });
-      });
-      _.each(layout.options.partials, function(partial, name) {
-        if (layout.getView(name)) {
-          return layout.getView(name).remove();
+        var view, _i, _len, _ref1, _results;
+        _ref1 = layout._views;
+        _results = [];
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          view = _ref1[_i];
+          _results.push(_this.removeView(view.id));
         }
+        return _results;
       });
+      _ref1 = this.options.partials;
+      for (name in _ref1) {
+        partial = _ref1[name];
+        if (this.getView(name)) {
+          this.getView(name).remove();
+        }
+      }
       return this._destroyDeferred;
     }
   });

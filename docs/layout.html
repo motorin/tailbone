@@ -151,32 +151,30 @@
 
 <hr />
 
-<p>Обработчик события удаления вью</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_onViewRemovedFromDOM: </span><span class="nf">(view)-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-19">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-19">&#182;</a>               </div>               <h4>destroy()</h4>
+<p>Обработчик события удаления вью</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_onViewRemovedFromDOM: </span><span class="nf">(view) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-19">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-19">&#182;</a>               </div>               <h4>destroy()</h4>
 
 <hr />
 
 <p>Уничтожает layout</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">destroy: </span><span class="o">-&gt;</span>
-    <span class="nx">$</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="o">+</span><span class="nx">@id</span><span class="p">).</span><span class="nx">empty</span><span class="p">()</span>
+    <span class="nx">$</span><span class="p">(</span><span class="s">&quot;</span><span class="err">#</span><span class="si">#{</span><span class="nx">@id</span><span class="si">}</span><span class="s">&quot;</span><span class="p">).</span><span class="nx">empty</span><span class="p">()</span>
     
-    <span class="nv">layout = </span><span class="k">this</span>
+    <span class="nv">layout = </span><span class="nx">@</span>
     
     <span class="vi">@_destroyDeferred = </span><span class="k">new</span> <span class="nx">$</span><span class="p">.</span><span class="nx">Deferred</span><span class="p">()</span>
 
     <span class="nx">@_destroyDeferred</span><span class="p">.</span><span class="nx">progress</span> <span class="o">-&gt;</span>
 
-      <span class="nv">viewsInDOM = </span><span class="nx">_</span><span class="p">.</span><span class="nx">filter</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">_views</span><span class="p">,</span> <span class="nf">(view)-&gt;</span>
-        <span class="k">return</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">isInDOM</span>
+      <span class="nv">viewsInDOM = </span><span class="nx">_</span><span class="p">.</span><span class="nx">filter</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">_views</span><span class="p">,</span> <span class="nf">(view)-&gt;</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">isInDOM</span>
       
-      <span class="k">this</span><span class="p">.</span><span class="nx">resolve</span><span class="p">()</span> <span class="k">if</span> <span class="nx">viewsInDOM</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">0</span>
+      <span class="nx">@resolve</span><span class="p">()</span> <span class="k">if</span> <span class="nx">viewsInDOM</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">0</span>
 
-    <span class="nx">@_destroyDeferred</span><span class="p">.</span><span class="nx">done</span> <span class="o">-&gt;</span>
-      <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">_views</span><span class="p">,</span> <span class="nf">(view)-&gt;</span>
-        <span class="nx">layout</span><span class="p">.</span><span class="nx">removeView</span><span class="p">(</span><span class="nx">view</span><span class="p">.</span><span class="nx">id</span><span class="p">)</span>
+    <span class="nx">@_destroyDeferred</span><span class="p">.</span><span class="nx">done</span> <span class="o">=&gt;</span>
+      <span class="nx">@removeView</span><span class="p">(</span><span class="nx">view</span><span class="p">.</span><span class="nx">id</span><span class="p">)</span> <span class="k">for</span> <span class="nx">view</span> <span class="k">in</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">_views</span>
+
+    <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">partial</span> <span class="k">of</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">partials</span>
+      <span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">remove</span><span class="p">()</span> <span class="k">if</span> <span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
     
-    <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">partials</span><span class="p">,</span> <span class="nf">(partial, name)-&gt;</span>
-      <span class="nx">layout</span><span class="p">.</span><span class="nx">getView</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">remove</span><span class="p">()</span> <span class="k">if</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">getView</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="nx">@_destroyDeferred</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <h4>@defaults</h4>
+    <span class="nx">@_destroyDeferred</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <h4>@defaults</h4>
 
 <hr />
 
