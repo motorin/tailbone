@@ -1,6 +1,8 @@
 window.Inn ?= {}
 
-#### Classname
+#### *class* Inn.Collection
+#
+#---
 # Класс коллекции
 # 
 Inn.Collection = Backbone.Collection.extend({

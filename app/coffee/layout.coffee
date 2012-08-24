@@ -1,6 +1,8 @@
 window.Inn ?= {}
 
-#### Inn.Layout
+#### *class* Inn.Layout
+#
+#---
 # Менеджер представлений
 # 
 class Inn.Layout

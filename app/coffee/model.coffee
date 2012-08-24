@@ -1,6 +1,8 @@
 window.Inn ?= {}
 
-#### Classname
+#### *class* Inn.model
+#
+#---
 # Класс модели
 # 
 Inn.Model = Backbone.Model.extend({
