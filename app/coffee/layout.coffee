@@ -154,33 +154,31 @@ Inn.Layout = Inn.View.extend
   _recheckSubViews: (view)->
     @_viewsUnrendered--
     
-    if view.el.parentNode == null and $('#'+view.id).length
-      $('#'+view.id).replaceWith view.$el
-      view.options.isInDOM = true
-    
-    layout = this
+    if view.el.parentNode is null and $("##{view.id}").length
+      $("##{view.id}").replaceWith view.$el
+      view.options.isInDOM = on
     
     @_parsePartials view.$el unless view.options._viewBranch.partials
     
     if view.options._viewBranch.partials
-      _.each view.options._viewBranch.partials, (partial, name)->
-        layout.getView(name).render()
+      for name, partial of view.options._viewBranch.partials
+        @getView(name).render()
 
     if @_viewsUnrendered <= 0
-      @_renderDeferred.resolve() 
+      @_renderDeferred.resolve()
+
+    @
 
   ##### _clearSubViews( *view* )
   #
   #---
   # Вызывает метод .remove() у дочерних вью
   _clearSubViews: (view)->
-    layout = this
-    
     @_destroyDeferred.notify() if @_destroyDeferred
     
     if view.options._viewBranch.partials
-      _.each view.options._viewBranch.partials, (partial, name)->
-        layout.getView(name).remove() if layout.getView(name)
+      for name, partial of view.options._viewBranch.partials
+        @getView(name).remove() if @getView(name)
 
   ##### _onViewRemovedFromDOM( *view* )
   #

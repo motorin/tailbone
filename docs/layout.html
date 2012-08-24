@@ -125,31 +125,29 @@
 <hr />             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_recheckSubViews: </span><span class="nf">(view)-&gt;</span>
     <span class="nx">@_viewsUnrendered</span><span class="o">--</span>
     
-    <span class="k">if</span> <span class="nx">view</span><span class="p">.</span><span class="nx">el</span><span class="p">.</span><span class="nx">parentNode</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">and</span> <span class="nx">$</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="o">+</span><span class="nx">view</span><span class="p">.</span><span class="nx">id</span><span class="p">).</span><span class="nx">length</span>
-      <span class="nx">$</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="o">+</span><span class="nx">view</span><span class="p">.</span><span class="nx">id</span><span class="p">).</span><span class="nx">replaceWith</span> <span class="nx">view</span><span class="p">.</span><span class="nx">$el</span>
-      <span class="nv">view.options.isInDOM = </span><span class="kc">true</span>
-    
-    <span class="nv">layout = </span><span class="k">this</span>
+    <span class="k">if</span> <span class="nx">view</span><span class="p">.</span><span class="nx">el</span><span class="p">.</span><span class="nx">parentNode</span> <span class="o">is</span> <span class="kc">null</span> <span class="o">and</span> <span class="nx">$</span><span class="p">(</span><span class="s">&quot;</span><span class="err">#</span><span class="si">#{</span><span class="nx">view</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">&quot;</span><span class="p">).</span><span class="nx">length</span>
+      <span class="nx">$</span><span class="p">(</span><span class="s">&quot;</span><span class="err">#</span><span class="si">#{</span><span class="nx">view</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">&quot;</span><span class="p">).</span><span class="nx">replaceWith</span> <span class="nx">view</span><span class="p">.</span><span class="nx">$el</span>
+      <span class="nv">view.options.isInDOM = </span><span class="kc">on</span>
     
     <span class="nx">@_parsePartials</span> <span class="nx">view</span><span class="p">.</span><span class="nx">$el</span> <span class="nx">unless</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">_viewBranch</span><span class="p">.</span><span class="nx">partials</span>
     
     <span class="k">if</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">_viewBranch</span><span class="p">.</span><span class="nx">partials</span>
-      <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">_viewBranch</span><span class="p">.</span><span class="nx">partials</span><span class="p">,</span> <span class="nf">(partial, name)-&gt;</span>
-        <span class="nx">layout</span><span class="p">.</span><span class="nx">getView</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">render</span><span class="p">()</span>
+      <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">partial</span> <span class="k">of</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">_viewBranch</span><span class="p">.</span><span class="nx">partials</span>
+        <span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">render</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="nx">@_viewsUnrendered</span> <span class="o">&lt;=</span> <span class="mi">0</span>
-      <span class="nx">@_renderDeferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">()</span> </pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <h4>_clearSubViews( <em>view</em> )</h4>
+      <span class="nx">@_renderDeferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">()</span>
+
+    <span class="nx">@</span></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <h4>_clearSubViews( <em>view</em> )</h4>
 
 <hr />
 
 <p>Вызывает метод .remove() у дочерних вью</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_clearSubViews: </span><span class="nf">(view)-&gt;</span>
-    <span class="nv">layout = </span><span class="k">this</span>
-    
     <span class="nx">@_destroyDeferred</span><span class="p">.</span><span class="nx">notify</span><span class="p">()</span> <span class="k">if</span> <span class="nx">@_destroyDeferred</span>
     
     <span class="k">if</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">_viewBranch</span><span class="p">.</span><span class="nx">partials</span>
-      <span class="nx">_</span><span class="p">.</span><span class="nx">each</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">_viewBranch</span><span class="p">.</span><span class="nx">partials</span><span class="p">,</span> <span class="nf">(partial, name)-&gt;</span>
-        <span class="nx">layout</span><span class="p">.</span><span class="nx">getView</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">remove</span><span class="p">()</span> <span class="k">if</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">getView</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <h4>_onViewRemovedFromDOM( <em>view</em> )</h4>
+      <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">partial</span> <span class="k">of</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">_viewBranch</span><span class="p">.</span><span class="nx">partials</span>
+        <span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">remove</span><span class="p">()</span> <span class="k">if</span> <span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <h4>_onViewRemovedFromDOM( <em>view</em> )</h4>
 
 <hr />
 

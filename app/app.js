@@ -276,37 +276,44 @@
       }
     },
     _recheckSubViews: function(view) {
-      var layout;
+      var name, partial, _ref1;
       this._viewsUnrendered--;
-      if (view.el.parentNode === null && $('#' + view.id).length) {
-        $('#' + view.id).replaceWith(view.$el);
+      if (view.el.parentNode === null && $("#" + view.id).length) {
+        $("#" + view.id).replaceWith(view.$el);
         view.options.isInDOM = true;
       }
-      layout = this;
       if (!view.options._viewBranch.partials) {
         this._parsePartials(view.$el);
       }
       if (view.options._viewBranch.partials) {
-        _.each(view.options._viewBranch.partials, function(partial, name) {
-          return layout.getView(name).render();
-        });
+        _ref1 = view.options._viewBranch.partials;
+        for (name in _ref1) {
+          partial = _ref1[name];
+          this.getView(name).render();
+        }
       }
       if (this._viewsUnrendered <= 0) {
-        return this._renderDeferred.resolve();
+        this._renderDeferred.resolve();
       }
+      return this;
     },
     _clearSubViews: function(view) {
-      var layout;
-      layout = this;
+      var name, partial, _ref1, _results;
       if (this._destroyDeferred) {
         this._destroyDeferred.notify();
       }
       if (view.options._viewBranch.partials) {
-        return _.each(view.options._viewBranch.partials, function(partial, name) {
-          if (layout.getView(name)) {
-            return layout.getView(name).remove();
+        _ref1 = view.options._viewBranch.partials;
+        _results = [];
+        for (name in _ref1) {
+          partial = _ref1[name];
+          if (this.getView(name)) {
+            _results.push(this.getView(name).remove());
+          } else {
+            _results.push(void 0);
           }
-        });
+        }
+        return _results;
       }
     },
     _onViewRemovedFromDOM: function(view) {},
