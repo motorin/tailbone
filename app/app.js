@@ -108,7 +108,7 @@ Is Inn namespace defined?
     _getTemplateURL: function() {
       var devider;
       devider = this.options.templateFolder ? '/' : '';
-      if (!(this.options.templateURL != null)) {
+      if (this.options.templateURL == null) {
         return this.options.templateFolder + devider + this._getTemplateName() + '.' + this.options.templateFormat;
       }
       return this.options.templateURL;
@@ -220,7 +220,7 @@ Is Inn namespace defined?
     Layout.prototype._getTemplateURL = function() {
       var devider;
       devider = this.options.templateOptions.templateFolder ? '/' : '';
-      if (!(this.options.templateURL != null)) {
+      if (this.options.templateURL == null) {
         return this.options.templateOptions.templateFolder + devider + this._getTemplateName() + '.' + this.options.templateOptions.templateFormat;
       }
       return this.options.templateURL;

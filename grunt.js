@@ -1,4 +1,5 @@
 /*global module:false*/
+/* To install PhantomJS on Mac OS X just run `brew install phantomjs` */
 module.exports = function(grunt) {
 
   // CoffeeScript plugin
@@ -110,6 +111,7 @@ module.exports = function(grunt) {
 
     },
 
+
     lint: {
       files: [
         'app/js/*.js',
@@ -117,6 +119,10 @@ module.exports = function(grunt) {
         // 'app/tests/*.js' // Из-за хитрости тестов было много хинтов, решили отключить
       ]
     },
+
+
+    jshint: file.readJSON( '.jshintrc' ),
+
 
     watch: {
       files: [
@@ -126,15 +132,25 @@ module.exports = function(grunt) {
       tasks: 'rebuild'
     },
 
+
+    qunit: {
+      files: [
+        "app_tests.html",
+        "utils_tests.html"
+      ]
+    },
+
+
     server: {
       port: 3000,
-      base: '.'
+      base: './'
     }
 
   });
 
   // Default task.
-  registerTask('default', 'coffee concat min');
+  registerTask('default', 'coffee concat min lint');
   registerTask('rebuild', 'coffee concat min')
+  registerTask('test', 'qunit')
 
 };

@@ -52,7 +52,7 @@ class Inn.Layout
   
   _getTemplateURL: ->
     devider = if @options.templateOptions.templateFolder then '/' else ''
-    return @options.templateOptions.templateFolder+devider+@_getTemplateName()+'.'+@options.templateOptions.templateFormat if not @options.templateURL?
+    return @options.templateOptions.templateFolder+devider+@_getTemplateName()+'.'+@options.templateOptions.templateFormat unless @options.templateURL?
     return @options.templateURL
     
   _getTemplateName: ->

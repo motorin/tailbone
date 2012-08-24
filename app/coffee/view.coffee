@@ -42,7 +42,7 @@ Inn.View = Backbone.View.extend({
 
   _getTemplateURL: ->
     devider = if @options.templateFolder then '/' else ''
-    return @options.templateFolder+devider+@_getTemplateName()+'.'+@options.templateFormat if not @options.templateURL?
+    return @options.templateFolder+devider+@_getTemplateName()+'.'+@options.templateFormat unless @options.templateURL?
     return @options.templateURL
   
   _getTemplateName: ->
@@ -65,7 +65,7 @@ Inn.View = Backbone.View.extend({
       #wrapping dust template in view method
       view._template = (data)->
         rendered_html = ''
-        dust.render this._getTemplateName(), data, (err, text)-> 
+        dust.render this._getTemplateName(), data, (err, text)->
           rendered_html = text
         return rendered_html
 

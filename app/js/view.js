@@ -51,7 +51,7 @@ Is Inn namespace defined?
     _getTemplateURL: function() {
       var devider;
       devider = this.options.templateFolder ? '/' : '';
-      if (!(this.options.templateURL != null)) {
+      if (this.options.templateURL == null) {
         return this.options.templateFolder + devider + this._getTemplateName() + '.' + this.options.templateFormat;
       }
       return this.options.templateURL;

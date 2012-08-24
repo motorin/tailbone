@@ -1,0 +1,19 @@
+{
+    "options": {
+        "eqnull": true,
+        "shadow": true,
+        "boss": true,
+        "supernew": true,
+        "maxerr": 100
+    },
+    "globals": {
+        "define": true,
+        "jQuery": true,
+        "global": true,
+        "module": true,
+        "exports": true,
+        "require": true,
+        "$": true,
+        "console": true
+    }
+}
