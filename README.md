@@ -4,6 +4,16 @@ app-dust-backbone
 Строим client-side application.
 Считаем его пока чем-то смешанным между менеджером шаблонов, и менеджером разметки.
 
+Building
+----------
+To build project you may just run `grunt` in working directory
+
+
+Also available following tasks:
+* `watch` - tracks files for changes and will be recompile it on-fly
+* `test` - launches qUnit tests (requires PhantomJS)
+* `lint` - launches jshint
+
 
 Inn.View
 --------
