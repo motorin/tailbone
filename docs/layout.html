@@ -85,9 +85,8 @@
     <span class="nv">partials = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">partials</span> <span class="nx">unless</span> <span class="nx">partials</span>
     
     <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">partial</span> <span class="k">of</span> <span class="nx">partials</span>
-      <span class="nx">@addView</span> <span class="k">new</span> <span class="nx">Inn</span><span class="p">.</span><span class="nx">View</span> <span class="nv">id: </span><span class="nx">name</span>
+      <span class="nx">@addView</span> <span class="nv">view = </span><span class="k">new</span> <span class="nx">Inn</span><span class="p">.</span><span class="nx">View</span> <span class="nv">id: </span><span class="nx">name</span>
 
-      <span class="nv">view = </span><span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
       <span class="nv">view.options._viewBranch = </span><span class="nx">partial</span>
       <span class="nv">view.options.templateName = </span><span class="nx">partial</span><span class="p">.</span><span class="nx">templateName</span> <span class="k">if</span> <span class="nx">partial</span><span class="p">.</span><span class="nx">templateName</span>
       <span class="nv">view.options.templateURL = </span><span class="nx">partial</span><span class="p">.</span><span class="nx">templateURL</span> <span class="k">if</span> <span class="nx">partial</span><span class="p">.</span><span class="nx">templateURL</span>

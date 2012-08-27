@@ -98,10 +98,9 @@
       }
       for (name in partials) {
         partial = partials[name];
-        this.addView(new Inn.View({
+        this.addView(view = new Inn.View({
           id: name
         }));
-        view = this.getView(name);
         view.options._viewBranch = partial;
         if (partial.templateName) {
           view.options.templateName = partial.templateName;
