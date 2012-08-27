@@ -225,5 +225,5 @@ class Inn.Layout
     templateFormat: 'js'
     viewOptions: {}
 
-# Добавляем методы из TemplateMixin
-_.extend(Inn.Layout.prototype, Inn.TemplateMixin)
+  # Добавляем методы из TemplateMixin
+  _.extend(@prototype, Inn.TemplateMixin)

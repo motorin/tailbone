@@ -247,10 +247,10 @@
       viewOptions: {}
     };
 
+    _.extend(Layout.prototype, Inn.TemplateMixin);
+
     return Layout;
 
   })();
-
-  _.extend(Inn.Layout.prototype, Inn.TemplateMixin);
 
 }).call(this);
