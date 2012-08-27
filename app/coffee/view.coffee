@@ -61,7 +61,7 @@ Inn.View = Backbone.View.extend({
   ##### remove()
   #
   #---
-  # Удаляет вью из DOM верева
+  # Удаляет View из DOM верева
   remove: ->
     # Отписывается от событий
     @undelegateEvents()

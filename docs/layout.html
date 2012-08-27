@@ -38,7 +38,7 @@
 
 <hr />
 
-<p>Добавляет вью в список</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">addView: </span><span class="nf">(view) -&gt;</span>
+<p>Добавляет View в список</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">addView: </span><span class="nf">(view) -&gt;</span>
     
     <span class="k">throw</span> <span class="k">new</span> <span class="nx">Inn</span><span class="p">.</span><span class="nb">Error</span><span class="p">(</span><span class="s">&#39;view shold be an instance of Inn.View&#39;</span><span class="p">)</span> <span class="nx">unless</span> <span class="nx">view</span> <span class="k">instanceof</span> <span class="nx">Inn</span><span class="p">.</span><span class="nx">View</span>
     
@@ -67,12 +67,12 @@
 
 <hr />
 
-<p>Возвращает вью с именем <strong>name</strong></p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">getView: </span><span class="nf">(name) -&gt;</span> <span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">find</span> <span class="nx">@_views</span><span class="p">,</span> <span class="nf">(view) -&gt;</span> <span class="nx">view</span><span class="p">.</span><span class="nx">id</span> <span class="o">is</span> <span class="nx">name</span><span class="p">)</span> <span class="o">?</span> <span class="kc">null</span>
+<p>Возвращает View с именем <strong>name</strong></p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">getView: </span><span class="nf">(name) -&gt;</span> <span class="p">(</span><span class="nx">_</span><span class="p">.</span><span class="nx">find</span> <span class="nx">@_views</span><span class="p">,</span> <span class="nf">(view) -&gt;</span> <span class="nx">view</span><span class="p">.</span><span class="nx">id</span> <span class="o">is</span> <span class="nx">name</span><span class="p">)</span> <span class="o">?</span> <span class="kc">null</span>
         </pre></div>             </td>           </tr>                               <tr id="section-13">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-13">&#182;</a>               </div>               <h4>removeView( <em>name</em> )</h4>
 
 <hr />
 
-<p>Удаляет вью с именем <strong>name</strong></p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">removeView: </span><span class="nf">(name) -&gt;</span>
+<p>Удаляет View с именем <strong>name</strong></p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">removeView: </span><span class="nf">(name) -&gt;</span>
     <span class="k">return</span> <span class="kc">null</span> <span class="k">if</span> <span class="p">(</span><span class="nv">survived = </span><span class="nx">_</span><span class="p">.</span><span class="nx">reject</span> <span class="nx">@_views</span><span class="p">,</span> <span class="nf">(view) -&gt;</span> <span class="nx">view</span><span class="p">.</span><span class="nx">id</span> <span class="o">is</span> <span class="nx">name</span><span class="p">).</span><span class="nx">length</span> <span class="o">is</span> <span class="nx">@_views</span><span class="p">.</span><span class="nx">length</span>
     
     <span class="vi">@_views = </span><span class="nx">survived</span>
@@ -81,7 +81,7 @@
 
 <hr />
 
-<p>Обрабатывает partials и превращает их во вью</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_processPartials: </span><span class="nf">(partials)-&gt;</span>
+<p>Обрабатывает partials и превращает их во View</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_processPartials: </span><span class="nf">(partials)-&gt;</span>
     <span class="nv">partials = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">partials</span> <span class="nx">unless</span> <span class="nx">partials</span>
     
     <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">partial</span> <span class="k">of</span> <span class="nx">partials</span>
@@ -142,7 +142,7 @@
 
 <hr />
 
-<p>Вызывает метод .remove() у дочерних вью</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_clearSubViews: </span><span class="nf">(view)-&gt;</span>
+<p>Вызывает метод .remove() у дочерних View</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_clearSubViews: </span><span class="nf">(view)-&gt;</span>
     <span class="nx">@_destroyDeferred</span><span class="p">.</span><span class="nx">notify</span><span class="p">()</span> <span class="k">if</span> <span class="nx">@_destroyDeferred</span>
     
     <span class="k">if</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">_viewBranch</span><span class="p">.</span><span class="nx">partials</span>
@@ -151,7 +151,7 @@
 
 <hr />
 
-<p>Обработчик события удаления вью</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_onViewRemovedFromDOM: </span><span class="nf">(view) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <h4>destroy()</h4>
+<p>Обработчик события удаления View</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_onViewRemovedFromDOM: </span><span class="nf">(view) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-20">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-20">&#182;</a>               </div>               <h4>destroy()</h4>
 
 <hr />
 

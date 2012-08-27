@@ -53,7 +53,7 @@ class Inn.Layout
   ##### addView( *view* )
   #
   #---
-  # Добавляет вью в список
+  # Добавляет View в список
   addView: (view) ->
     
     throw new Inn.Error('view shold be an instance of Inn.View') unless view instanceof Inn.View
@@ -89,13 +89,13 @@ class Inn.Layout
   ##### getView( *name* )
   #
   #---
-  # Возвращает вью с именем **name**
+  # Возвращает View с именем **name**
   getView: (name) -> (_.find @_views, (view) -> view.id is name) ? null
         
   ##### removeView( *name* )
   #
   #---
-  # Удаляет вью с именем **name**
+  # Удаляет View с именем **name**
   removeView: (name) ->
     return null if (survived = _.reject @_views, (view) -> view.id is name).length is @_views.length
     
@@ -107,7 +107,7 @@ class Inn.Layout
   ##### _processPartials( *partials* )
   #
   #---
-  # Обрабатывает partials и превращает их во вью
+  # Обрабатывает partials и превращает их во View
   _processPartials: (partials)->
     partials = @options.partials unless partials
     
@@ -174,7 +174,7 @@ class Inn.Layout
   ##### _clearSubViews( *view* )
   #
   #---
-  # Вызывает метод .remove() у дочерних вью
+  # Вызывает метод .remove() у дочерних View
   _clearSubViews: (view)->
     @_destroyDeferred.notify() if @_destroyDeferred
     
@@ -185,7 +185,7 @@ class Inn.Layout
   ##### _onViewRemovedFromDOM( *view* )
   #
   #---
-  # Обработчик события удаления вью
+  # Обработчик события удаления View
   _onViewRemovedFromDOM: (view) ->
 
   ##### destroy()
