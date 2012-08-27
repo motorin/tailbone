@@ -110,8 +110,9 @@ Inn.Layout = Inn.View.extend
     partials = @options.partials unless partials
     
     for name, partial of partials
-      @addView view = new Inn.View id: name
+      @addView new Inn.View id: name
 
+      view = @getView(name)
       view.options._viewBranch = partial
       view.options.templateName = partial.templateName if partial.templateName
       view.options.templateURL = partial.templateURL if partial.templateURL
