@@ -14,9 +14,6 @@ class Inn.Layout
   constructor: (options) ->
     
     throw new Inn.Error('dataManager should be in options') unless options && options.dataManager && options.dataManager instanceof Inn.DataManager
-
-    # Добавляем методы из TemplateMixin
-    _.extend(@, Inn.TemplateMixin)
     
     @options = $.extend true, {}, Inn.Layout.defaults, options
     @_dataManager = options.dataManager
@@ -227,3 +224,6 @@ class Inn.Layout
     templateFolder: ''
     templateFormat: 'js'
     viewOptions: {}
+
+# Добавляем методы из TemplateMixin
+_.extend(Inn.Layout.prototype, Inn.TemplateMixin)

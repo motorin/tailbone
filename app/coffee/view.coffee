@@ -12,9 +12,6 @@ Inn.View = Backbone.View.extend({
   #---
   # Конструктор
   initialize: (options)->
-    # Добавляем методы из TemplateMixin
-    _.extend(@, Inn.TemplateMixin)
-
     # наследует настройки по умолчанию
     @options = $.extend {}, 
       templateFolder: ''
@@ -74,3 +71,6 @@ Inn.View = Backbone.View.extend({
     return @
     
 })
+
+# Добавляем методы из TemplateMixin
+_.extend(Inn.View.prototype, Inn.TemplateMixin)

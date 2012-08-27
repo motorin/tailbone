@@ -21,8 +21,8 @@
       return this.options.templateName;
     },
     _getTemplate: function() {
-      var view;
-      if (this.templateDeferred && this.templateDeferred.state() === 'pending') {
+      var view, _ref1;
+      if (((_ref1 = this.templateDeferred) != null ? _ref1.state() : void 0) === 'pending') {
         return this.templateDeferred;
       }
       this.templateDeferred = new $.Deferred();

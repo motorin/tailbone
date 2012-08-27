@@ -56,8 +56,8 @@
       return this.options.templateName;
     },
     _getTemplate: function() {
-      var view;
-      if (this.templateDeferred && this.templateDeferred.state() === 'pending') {
+      var view, _ref1;
+      if (((_ref1 = this.templateDeferred) != null ? _ref1.state() : void 0) === 'pending') {
         return this.templateDeferred;
       }
       this.templateDeferred = new $.Deferred();
@@ -92,7 +92,6 @@
 
   Inn.View = Backbone.View.extend({
     initialize: function(options) {
-      _.extend(this, Inn.TemplateMixin);
       this.options = $.extend({}, {
         templateFolder: '',
         templateFormat: 'js'
@@ -137,6 +136,8 @@
     }
   });
 
+  _.extend(Inn.View.prototype, Inn.TemplateMixin);
+
 }).call(this);
 
 (function() {
@@ -153,7 +154,6 @@
       if (!(options && options.dataManager && options.dataManager instanceof Inn.DataManager)) {
         throw new Inn.Error('dataManager should be in options');
       }
-      _.extend(this, Inn.TemplateMixin);
       this.options = $.extend(true, {}, Inn.Layout.defaults, options);
       this._dataManager = options.dataManager;
       this._views = [];
@@ -392,6 +392,8 @@
     return Layout;
 
   })();
+
+  _.extend(Inn.Layout.prototype, Inn.TemplateMixin);
 
 }).call(this);
 

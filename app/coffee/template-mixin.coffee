@@ -30,8 +30,7 @@ Inn.TemplateMixin = {
   # Загружает шаблон, возвращает deferred object
   _getTemplate: ->
     # Если в данный момент шаблон уже грузится, вернёт deferred object с текущим состоянием
-    if @templateDeferred and @templateDeferred.state() == 'pending'
-      return @templateDeferred
+    return @templateDeferred if @templateDeferred?.state() == 'pending'
     
     @templateDeferred = new $.Deferred()
 

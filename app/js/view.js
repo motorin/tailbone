@@ -7,7 +7,6 @@
 
   Inn.View = Backbone.View.extend({
     initialize: function(options) {
-      _.extend(this, Inn.TemplateMixin);
       this.options = $.extend({}, {
         templateFolder: '',
         templateFormat: 'js'
@@ -51,5 +50,7 @@
       return this;
     }
   });
+
+  _.extend(Inn.View.prototype, Inn.TemplateMixin);
 
 }).call(this);

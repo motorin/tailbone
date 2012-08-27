@@ -12,7 +12,6 @@
       if (!(options && options.dataManager && options.dataManager instanceof Inn.DataManager)) {
         throw new Inn.Error('dataManager should be in options');
       }
-      _.extend(this, Inn.TemplateMixin);
       this.options = $.extend(true, {}, Inn.Layout.defaults, options);
       this._dataManager = options.dataManager;
       this._views = [];
@@ -251,5 +250,7 @@
     return Layout;
 
   })();
+
+  _.extend(Inn.Layout.prototype, Inn.TemplateMixin);
 
 }).call(this);
