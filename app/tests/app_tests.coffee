@@ -309,31 +309,27 @@ module "Inn.Layout",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager
-      templateOptions:
-        templateFolder: 'app/templates'
-      
+      templateFolder: 'app/templates'
       
     @layout = new Inn.Layout @layout_config
-    
+
     @layout_with_id = new Inn.Layout
       dataManager: @dataManager
       id: 'secondLayout'
     
     @layout_with_templateFolder = new Inn.Layout
       dataManager: @dataManager
-      templateOptions:
+      viewOptions:
         templateFolder: 'app/templates'
      
     @layout_with_templateFormat = new Inn.Layout
       dataManager: @dataManager
-      templateOptions:
-        templateFormat: 'jade'
+      templateFormat: 'jade'
 
     @layout_with_templateFormat_and_templateFolder = new Inn.Layout
       dataManager: @dataManager
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'jade'
+      templateFolder: 'app/templates'
+      templateFormat: 'jade'
       
     @layout_with_overriden_templateName = new Inn.Layout
       dataManager: @dataManager
@@ -341,15 +337,13 @@ module "Inn.Layout",
       
     @layout_with_overriden_templateName_and_templateFolder = new Inn.Layout
       dataManager: @dataManager
-      templateOptions:
-        templateFolder: 'app/templates'
+      templateFolder: 'app/templates'
       templateName: 'other_layout'  
       
     @layout_with_overriden_templateName_and_templateFolder_and_templateFormat = new Inn.Layout
       dataManager: @dataManager
-      templateOptions:
-        templateFormat: 'jade'
-        templateFolder: 'app/templates'
+      templateFormat: 'jade'
+      templateFolder: 'app/templates'
       templateName: 'other_layout'
 
     @userModel = new Inn.Model
@@ -654,9 +648,8 @@ module "Inn.Layout Render remove and so on",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'js'
+      templateFolder: 'app/templates'
+      templateFormat: 'js'
       
     @layout = new Inn.Layout @layout_config
     
@@ -674,9 +667,8 @@ module "Inn.Layout Render remove and so on",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'jade'
+      templateFolder: 'app/templates'
+      templateFormat: 'jade'
       
     @layout_jade = new Inn.Layout @layout_config_jade
     
@@ -703,7 +695,7 @@ test 'layout should create views with default options', 4, ->
 
 asyncTest 'layout render should attach views to DOM', 3, ->
   deferred = @layout.render()
-  
+
   deferred.done ->
     strictEqual $('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
     strictEqual $('#content').html(), '===Content===<div id="tags">===Tags===</div><div id="sortings">===Sortings===</div><div id="promoMovie">===PromoMovie===</div><div id="frontPageMovies">===Frontpage movies===<div id="pagination">===Pagination===</div></div>', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
@@ -748,9 +740,8 @@ module "Inn.Layout Destroy",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'js'
+      templateFolder: 'app/templates'
+      templateFormat: 'js'
       
     @layout = new Inn.Layout @layout_config
     
@@ -804,9 +795,8 @@ module "Inn.Layout View attributes",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'js'
+      templateFolder: 'app/templates'
+      templateFormat: 'js'
       
     @layout = new Inn.Layout @layout_config
     
@@ -853,7 +843,7 @@ module "Inn.Layout automatic partials processing",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateOptions:
+      viewOptions:
         templateFolder: 'app/templates'
         templateFormat: 'js'
       
@@ -862,9 +852,8 @@ module "Inn.Layout automatic partials processing",
     @layout_config2 =
       dataManager: @dataManager,
       placeholderClassName: 'otherPlaceholder'
-      templateOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'js'
+      templateFolder: 'app/templates'
+      templateFormat: 'js'
     
     
     @layout2 = new Inn.Layout @layout_config2

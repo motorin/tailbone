@@ -1,12 +1,16 @@
-###
-Is Inn namespace defined?
-###
 window.Inn ?= {}
 
-###
-Application Model
-###
+#### *class* Inn.model
+#
+#---
+# Класс модели
+# 
 Inn.Model = Backbone.Model.extend({
-  url: ->
-    return 'app/models/'+@id+'.json'
-});
+  ##### url()
+  #
+  #---
+  # Возвращает URL, по которому доступна модель
+  url: -> 
+  	return "app/models/#{@id}.json"
+  
+})

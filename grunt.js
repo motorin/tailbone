@@ -86,6 +86,7 @@ module.exports = function(grunt) {
           '<banner:meta.banner>',
           'app/js/model.js',
           'app/js/collection.js',
+          'app/js/template-mixin.js',
           'app/js/view.js',
           'app/js/layout.js',
           'app/js/data-manager.js'
@@ -165,7 +166,7 @@ module.exports = function(grunt) {
 
   // Default task.
   registerTask('default', 'coffee lint concat min docco');
-  registerTask('rebuild', 'coffee concat min docco')
+  registerTask('rebuild', 'coffee lint concat docco')
   registerTask('test', 'qunit')
 
 };

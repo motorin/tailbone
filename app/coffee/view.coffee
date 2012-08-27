@@ -1,24 +1,32 @@
-###
-Is Inn namespace defined?
-###
 window.Inn ?= {}
 
-###
-Application standart View
-###
+#### *class* Inn.View
+#
+#---
+# Класс представления
+# 
 Inn.View = Backbone.View.extend({
+
+  ##### initialize( *options* )
+  #
+  #---
+  # Конструктор
   initialize: (options)->
-    #extending defaults
+    # наследует настройки по умолчанию
     @options = $.extend {}, 
       templateFolder: ''
       templateFormat: 'js'
     , options
     
-    #return this for chaining
-    this
-    
+    # поддерживает "чейнинг"
+    return @
+
+  ##### render()
+  #
+  #---
+  # Рендерит шаблон, возвращает deferred object
   render: ->
-    #if view in rendering state return current render deferred object
+    # Если в данный момент шаблон уже рендерится, вернёт deferred object с текущим состоянием
     if @_renderDeferred and @_renderDeferred.state() == 'pending'
       return @_renderDeferred
     
@@ -39,46 +47,30 @@ Inn.View = Backbone.View.extend({
       view._renderDeferred.resolve()
       
     return @_renderDeferred
-
-  _getTemplateURL: ->
-    devider = if @options.templateFolder then '/' else ''
-    return @options.templateFolder+devider+@_getTemplateName()+'.'+@options.templateFormat unless @options.templateURL?
-    return @options.templateURL
   
-  _getTemplateName: ->
-    return 'b'+@id[0].toUpperCase()+@id.slice(1) unless @options.templateName
-    return @options.templateName
-    
-  _getTemplate: ->
-    #if template is currently getting template return current template deferred object
-    if @templateDeferred and @templateDeferred.state() == 'pending'
-      return @templateDeferred
-    
-    @templateDeferred = new $.Deferred()
-
-    if typeof @_template == 'function'
-      @templateDeferred.resolve()
-      return @templateDeferred
-
-    view = this
-    $.getScript @_getTemplateURL(), ()->
-      #wrapping dust template in view method
-      view._template = (data)->
-        rendered_html = ''
-        dust.render this._getTemplateName(), data, (err, text)->
-          rendered_html = text
-        return rendered_html
-
-      view.templateDeferred.resolve()
-        
-    return @templateDeferred
-  
+  ##### getDataForView()
+  #
+  #---
+  # Достаёт данные из модели
   getDataForView: ->
     return this.model.toJSON() if this.model
   
+  ##### remove()
+  #
+  #---
+  # Удаляет View из DOM верева
   remove: ->
+    # Отписывается от событий
     @undelegateEvents()
     @$el.empty().remove()
+    # Генерирует событие **"remove"**
     @trigger('remove')
-    @options.isInDOM = false
-});
+    # Устанавливает заначение опции isInDom в false
+    @options.isInDOM = off
+
+    return @
+    
+})
+
+# Добавляем методы из TemplateMixin
+_.extend(Inn.View.prototype, Inn.TemplateMixin)
