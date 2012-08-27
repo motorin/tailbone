@@ -110,17 +110,22 @@ class Inn.Layout
   # Обрабатывает partials и превращает их во View
   _processPartials: (partials)->
     partials = @options.partials unless partials
-    
+
     for name, partial of partials
-      @addView new Inn.View id: name
+      viewOptions = _.extend {
+        id: name
+        templateFolder: @options.templateFolder ? undefined
+        templateFormat: @options.templateFormat ? undefined
+      }, @options.viewOptions
+
+      @addView new Inn.View viewOptions
 
       view = @getView(name)
+
       view.options._viewBranch = partial
       view.options.templateName = partial.templateName if partial.templateName
       view.options.templateURL = partial.templateURL if partial.templateURL
-      view.options.templateFolder = @options.templateFolder if @options and @options.templateFolder
-      view.options.templateFormat = @options.templateFormat if @options and @options.templateFormat
-      
+
       view.attributes = partial.attributes
 
       @_processPartials(partial.partials) if partial.partials
@@ -221,3 +226,4 @@ class Inn.Layout
     placeholderClassName: 'layoutPlaceholder'
     templateFolder: ''
     templateFormat: 'js'
+    viewOptions: {}

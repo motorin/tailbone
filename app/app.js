@@ -42,10 +42,10 @@
 
   Inn.TemplateMixin = {
     _getTemplateURL: function() {
-      var devider;
-      devider = this.options.templateFolder ? '/' : '';
+      var divider;
+      divider = this.options.templateFolder ? '/' : '';
       if (this.options.templateURL == null) {
-        return this.options.templateFolder + devider + this._getTemplateName() + '.' + this.options.templateFormat;
+        return this.options.templateFolder + divider + this._getTemplateName() + '.' + this.options.templateFormat;
       }
       return this.options.templateURL;
     },
@@ -240,15 +240,18 @@
     };
 
     Layout.prototype._processPartials = function(partials) {
-      var name, partial, view;
+      var name, partial, view, viewOptions, _ref1, _ref2;
       if (!partials) {
         partials = this.options.partials;
       }
       for (name in partials) {
         partial = partials[name];
-        this.addView(new Inn.View({
-          id: name
-        }));
+        viewOptions = _.extend({
+          id: name,
+          templateFolder: (_ref1 = this.options.templateFolder) != null ? _ref1 : void 0,
+          templateFormat: (_ref2 = this.options.templateFormat) != null ? _ref2 : void 0
+        }, this.options.viewOptions);
+        this.addView(new Inn.View(viewOptions));
         view = this.getView(name);
         view.options._viewBranch = partial;
         if (partial.templateName) {
@@ -256,12 +259,6 @@
         }
         if (partial.templateURL) {
           view.options.templateURL = partial.templateURL;
-        }
-        if (this.options && this.options.templateFolder) {
-          view.options.templateFolder = this.options.templateFolder;
-        }
-        if (this.options && this.options.templateFormat) {
-          view.options.templateFormat = this.options.templateFormat;
         }
         view.attributes = partial.attributes;
         if (partial.partials) {
@@ -388,7 +385,8 @@
     Layout.defaults = {
       placeholderClassName: 'layoutPlaceholder',
       templateFolder: '',
-      templateFormat: 'js'
+      templateFormat: 'js',
+      viewOptions: {}
     };
 
     return Layout;

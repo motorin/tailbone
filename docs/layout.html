@@ -83,17 +83,22 @@
 
 <p>Обрабатывает partials и превращает их во View</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_processPartials: </span><span class="nf">(partials)-&gt;</span>
     <span class="nv">partials = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">partials</span> <span class="nx">unless</span> <span class="nx">partials</span>
-    
+
     <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">partial</span> <span class="k">of</span> <span class="nx">partials</span>
-      <span class="nx">@addView</span> <span class="k">new</span> <span class="nx">Inn</span><span class="p">.</span><span class="nx">View</span> <span class="nv">id: </span><span class="nx">name</span>
+      <span class="nv">viewOptions = </span><span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="p">{</span>
+        <span class="nv">id: </span><span class="nx">name</span>
+        <span class="nv">templateFolder: </span><span class="nx">@options</span><span class="p">.</span><span class="nx">templateFolder</span> <span class="o">?</span> <span class="kc">undefined</span>
+        <span class="nv">templateFormat: </span><span class="nx">@options</span><span class="p">.</span><span class="nx">templateFormat</span> <span class="o">?</span> <span class="kc">undefined</span>
+      <span class="p">},</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">viewOptions</span>
+
+      <span class="nx">@addView</span> <span class="k">new</span> <span class="nx">Inn</span><span class="p">.</span><span class="nx">View</span> <span class="nx">viewOptions</span>
 
       <span class="nv">view = </span><span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
+
       <span class="nv">view.options._viewBranch = </span><span class="nx">partial</span>
       <span class="nv">view.options.templateName = </span><span class="nx">partial</span><span class="p">.</span><span class="nx">templateName</span> <span class="k">if</span> <span class="nx">partial</span><span class="p">.</span><span class="nx">templateName</span>
       <span class="nv">view.options.templateURL = </span><span class="nx">partial</span><span class="p">.</span><span class="nx">templateURL</span> <span class="k">if</span> <span class="nx">partial</span><span class="p">.</span><span class="nx">templateURL</span>
-      <span class="nv">view.options.templateFolder = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">templateFolder</span> <span class="k">if</span> <span class="nx">@options</span> <span class="o">and</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateFolder</span>
-      <span class="nv">view.options.templateFormat = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">templateFormat</span> <span class="k">if</span> <span class="nx">@options</span> <span class="o">and</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateFormat</span>
-      
+
       <span class="nv">view.attributes = </span><span class="nx">partial</span><span class="p">.</span><span class="nx">attributes</span>
 
       <span class="nx">@_processPartials</span><span class="p">(</span><span class="nx">partial</span><span class="p">.</span><span class="nx">partials</span><span class="p">)</span> <span class="k">if</span> <span class="nx">partial</span><span class="p">.</span><span class="nx">partials</span>
@@ -182,5 +187,6 @@
     <span class="nv">placeholderClassName: </span><span class="s">&#39;layoutPlaceholder&#39;</span>
     <span class="nv">templateFolder: </span><span class="s">&#39;&#39;</span>
     <span class="nv">templateFormat: </span><span class="s">&#39;js&#39;</span>
+    <span class="nv">viewOptions: </span><span class="p">{}</span>
 
 </pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

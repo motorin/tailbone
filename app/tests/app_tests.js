@@ -317,7 +317,9 @@
       });
       this.layout_with_templateFolder = new Inn.Layout({
         dataManager: this.dataManager,
-        templateFolder: 'app/templates'
+        viewOptions: {
+          templateFolder: 'app/templates'
+        }
       });
       this.layout_with_templateFormat = new Inn.Layout({
         dataManager: this.dataManager,
@@ -844,8 +846,10 @@
           'someView': {}
         },
         dataManager: this.dataManager,
-        templateFolder: 'app/templates',
-        templateFormat: 'js'
+        viewOptions: {
+          templateFolder: 'app/templates',
+          templateFormat: 'js'
+        }
       };
       this.layout = new Inn.Layout(this.layout_config);
       this.layout_config2 = {

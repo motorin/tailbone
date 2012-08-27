@@ -12,8 +12,8 @@ Inn.TemplateMixin = {
   #---
   # Определяет URL шаблона
   _getTemplateURL: ->
-    devider = if @options.templateFolder then '/' else ''
-    return @options.templateFolder+devider+@_getTemplateName()+'.'+@options.templateFormat unless @options.templateURL?
+    divider = if @options.templateFolder then '/' else ''
+    return @options.templateFolder + divider + @_getTemplateName() + '.' + @options.templateFormat unless @options.templateURL?
     return @options.templateURL
   
   ##### _getTemplateName()

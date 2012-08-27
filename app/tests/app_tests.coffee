@@ -311,16 +311,16 @@ module "Inn.Layout",
       dataManager: @dataManager
       templateFolder: 'app/templates'
       
-      
     @layout = new Inn.Layout @layout_config
-    
+
     @layout_with_id = new Inn.Layout
       dataManager: @dataManager
       id: 'secondLayout'
     
     @layout_with_templateFolder = new Inn.Layout
       dataManager: @dataManager
-      templateFolder: 'app/templates'
+      viewOptions:
+        templateFolder: 'app/templates'
      
     @layout_with_templateFormat = new Inn.Layout
       dataManager: @dataManager
@@ -419,6 +419,7 @@ module "Inn.Layout",
     delete @contentView
     delete @frontapageView
   
+
 test "Наличие", 1, ->
   ok @layout instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)'
 
@@ -649,7 +650,7 @@ module "Inn.Layout Render remove and so on",
       dataManager: @dataManager,
       templateFolder: 'app/templates'
       templateFormat: 'js'
-    
+      
     @layout = new Inn.Layout @layout_config
     
     @layout_config_jade =
@@ -694,7 +695,7 @@ test 'layout should create views with default options', 4, ->
 
 asyncTest 'layout render should attach views to DOM', 3, ->
   deferred = @layout.render()
-  
+
   deferred.done ->
     strictEqual $('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
     strictEqual $('#content').html(), '===Content===<div id="tags">===Tags===</div><div id="sortings">===Sortings===</div><div id="promoMovie">===PromoMovie===</div><div id="frontPageMovies">===Frontpage movies===<div id="pagination">===Pagination===</div></div>', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
@@ -842,8 +843,9 @@ module "Inn.Layout automatic partials processing",
                 'pagination': {}
         'someView': {}
       dataManager: @dataManager,
-      templateFolder: 'app/templates'
-      templateFormat: 'js'
+      viewOptions:
+        templateFolder: 'app/templates'
+        templateFormat: 'js'
       
     @layout = new Inn.Layout @layout_config
     

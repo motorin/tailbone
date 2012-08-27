@@ -7,10 +7,10 @@
 
   Inn.TemplateMixin = {
     _getTemplateURL: function() {
-      var devider;
-      devider = this.options.templateFolder ? '/' : '';
+      var divider;
+      divider = this.options.templateFolder ? '/' : '';
       if (this.options.templateURL == null) {
-        return this.options.templateFolder + devider + this._getTemplateName() + '.' + this.options.templateFormat;
+        return this.options.templateFolder + divider + this._getTemplateName() + '.' + this.options.templateFormat;
       }
       return this.options.templateURL;
     },
