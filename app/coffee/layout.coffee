@@ -5,16 +5,18 @@ window.Inn ?= {}
 #---
 # Менеджер представлений
 # 
-Inn.Layout = Inn.View.extend
+class Inn.Layout
 
-
-  ##### initialize( *options* )
+  ##### constructor( *options* )
   #
   #---
   # Создаёт экземпляр менеджера представлений
-  initialize: (options) ->
+  constructor: (options) ->
     
     throw new Inn.Error('dataManager should be in options') unless options && options.dataManager && options.dataManager instanceof Inn.DataManager
+
+    # Добавляем методы из TemplateMixin
+    _.extend(@, Inn.TemplateMixin)
     
     @options = $.extend true, {}, Inn.Layout.defaults, options
     @_dataManager = options.dataManager
@@ -211,11 +213,11 @@ Inn.Layout = Inn.View.extend
     
     @_destroyDeferred
 
-##### @defaults
-#
-#---
-# Опции layout-а по умолчанию
-Inn.Layout.defaults = 
-  placeholderClassName: 'layoutPlaceholder'
-  templateFolder: ''
-  templateFormat: 'js'
+  ##### @defaults
+  #
+  #---
+  # Опции layout-а по умолчанию
+  @defaults = 
+    placeholderClassName: 'layoutPlaceholder'
+    templateFolder: ''
+    templateFormat: 'js'

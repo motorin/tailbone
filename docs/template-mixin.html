@@ -1,0 +1,46 @@
+<!DOCTYPE html>  <html> <head>   <title>template-mixin.coffee</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="collection.html">                 collection.coffee               </a>                                           <a class="source" href="data-manager.html">                 data-manager.coffee               </a>                                           <a class="source" href="layout.html">                 layout.coffee               </a>                                           <a class="source" href="model.html">                 model.coffee               </a>                                           <a class="source" href="template-mixin.html">                 template-mixin.coffee               </a>                                           <a class="source" href="utils.html">                 utils.coffee               </a>                                           <a class="source" href="view.html">                 view.coffee               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               template-mixin.coffee             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>                            </td>             <td class="code">               <div class="highlight"><pre><span class="nb">window</span><span class="p">.</span><span class="nx">Inn</span> <span class="o">?=</span> <span class="p">{}</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <h3><em>mixin</em> Inn.TemplateMixin</h3>
+
+<hr />
+
+<p>Миксин с логикой взаимодействия Layout/View с шаблоном</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nv">Inn.TemplateMixin = </span><span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <h4>_getTemplateURL()</h4>
+
+<hr />
+
+<p>Определяет URL шаблона</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_getTemplateURL: </span><span class="o">-&gt;</span>
+    <span class="nv">devider = </span><span class="k">if</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateFolder</span> <span class="k">then</span> <span class="s">&#39;/&#39;</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
+    <span class="k">return</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateFolder</span><span class="o">+</span><span class="nx">devider</span><span class="o">+</span><span class="nx">@_getTemplateName</span><span class="p">()</span><span class="o">+</span><span class="s">&#39;.&#39;</span><span class="o">+</span><span class="nx">@options</span><span class="p">.</span><span class="nx">templateFormat</span> <span class="nx">unless</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateURL</span><span class="o">?</span>
+    <span class="k">return</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateURL</span>
+  </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <h4>_getTemplateName()</h4>
+
+<hr />
+
+<p>Определяет название шаблона</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_getTemplateName: </span><span class="o">-&gt;</span>
+    <span class="k">return</span> <span class="s">&#39;b&#39;</span><span class="o">+</span><span class="nx">@id</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">toUpperCase</span><span class="p">()</span><span class="o">+</span><span class="nx">@id</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="nx">unless</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateName</span>
+    <span class="k">return</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateName</span>
+    </pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <h4>_getTemplate()</h4>
+
+<hr />
+
+<p>Загружает шаблон, возвращает deferred object</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_getTemplate: </span><span class="o">-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>Если в данный момент шаблон уже грузится, вернёт deferred object с текущим состоянием</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">if</span> <span class="nx">@templateDeferred</span> <span class="o">and</span> <span class="nx">@templateDeferred</span><span class="p">.</span><span class="nx">state</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;pending&#39;</span>
+      <span class="k">return</span> <span class="nx">@templateDeferred</span>
+    
+    <span class="vi">@templateDeferred = </span><span class="k">new</span> <span class="nx">$</span><span class="p">.</span><span class="nx">Deferred</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="k">typeof</span> <span class="nx">@_template</span> <span class="o">==</span> <span class="s">&#39;function&#39;</span>
+      <span class="nx">@templateDeferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">()</span>
+      <span class="k">return</span> <span class="nx">@templateDeferred</span>
+
+    <span class="nv">view = </span><span class="k">this</span>
+    <span class="nx">$</span><span class="p">.</span><span class="nx">getScript</span> <span class="nx">@_getTemplateURL</span><span class="p">(),</span> <span class="nf">()-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <p>Оборачивает загруженный шаблон во внутреннюю функцию</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nv">view._template = </span><span class="nf">(data)-&gt;</span>
+        <span class="nv">rendered_html = </span><span class="s">&#39;&#39;</span>
+        <span class="nx">dust</span><span class="p">.</span><span class="nx">render</span> <span class="k">this</span><span class="p">.</span><span class="nx">_getTemplateName</span><span class="p">(),</span> <span class="nx">data</span><span class="p">,</span> <span class="nf">(err, text)-&gt;</span>
+          <span class="nv">rendered_html = </span><span class="nx">text</span>
+        <span class="k">return</span> <span class="nx">rendered_html</span>
+
+      <span class="nx">view</span><span class="p">.</span><span class="nx">templateDeferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">()</span>
+        
+    <span class="k">return</span> <span class="nx">@templateDeferred</span>
+	
+<span class="p">}</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 

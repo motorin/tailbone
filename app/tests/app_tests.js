@@ -413,10 +413,6 @@
     }
   });
 
-  test('extends Inn.View', 1, function() {
-    return ok(this.layout instanceof Inn.View, 'Layout should extend View');
-  });
-
   test("Наличие", 1, function() {
     return ok(this.layout instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)');
   });

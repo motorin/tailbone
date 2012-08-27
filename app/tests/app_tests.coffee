@@ -419,9 +419,6 @@ module "Inn.Layout",
     delete @contentView
     delete @frontapageView
   
-test 'extends Inn.View', 1, ->
-  ok @layout instanceof Inn.View, 'Layout should extend View'
-
 test "Наличие", 1, ->
   ok @layout instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)'
 

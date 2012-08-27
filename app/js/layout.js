@@ -6,19 +6,22 @@
     window.Inn = {};
   }
 
-  Inn.Layout = Inn.View.extend({
-    initialize: function(options) {
+  Inn.Layout = (function() {
+
+    function Layout(options) {
       if (!(options && options.dataManager && options.dataManager instanceof Inn.DataManager)) {
         throw new Inn.Error('dataManager should be in options');
       }
+      _.extend(this, Inn.TemplateMixin);
       this.options = $.extend(true, {}, Inn.Layout.defaults, options);
       this._dataManager = options.dataManager;
       this._views = [];
       this._viewsUnrendered = 0;
       this.id = this.options.id ? this.options.id : 'layout';
-      return _.extend(this, Backbone.Events);
-    },
-    render: function() {
+      _.extend(this, Backbone.Events);
+    }
+
+    Layout.prototype.render = function() {
       var _this = this;
       if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
         return this._renderDeferred;
@@ -42,8 +45,9 @@
         return _results;
       });
       return this._renderDeferred;
-    },
-    addView: function(view) {
+    };
+
+    Layout.prototype.addView = function(view) {
       var data, viewInLayout;
       if (!(view instanceof Inn.View)) {
         throw new Inn.Error('view shold be an instance of Inn.View');
@@ -74,14 +78,16 @@
       view.on('remove', _.bind(this._onViewRemovedFromDOM, this, view));
       this.trigger('add:view', view);
       return this;
-    },
-    getView: function(name) {
+    };
+
+    Layout.prototype.getView = function(name) {
       var _ref1;
       return (_ref1 = _.find(this._views, function(view) {
         return view.id === name;
       })) != null ? _ref1 : null;
-    },
-    removeView: function(name) {
+    };
+
+    Layout.prototype.removeView = function(name) {
       var survived;
       if ((survived = _.reject(this._views, function(view) {
         return view.id === name;
@@ -90,8 +96,9 @@
       }
       this._views = survived;
       return this.trigger('remove:view');
-    },
-    _processPartials: function(partials) {
+    };
+
+    Layout.prototype._processPartials = function(partials) {
       var name, partial, view;
       if (!partials) {
         partials = this.options.partials;
@@ -121,8 +128,9 @@
         }
       }
       return this;
-    },
-    _parsePartials: function(partialContent) {
+    };
+
+    Layout.prototype._parsePartials = function(partialContent) {
       var element, idx, layout, name, partial, partialId, partialsObject, _i, _len, _ref1, _ref2, _results;
       layout = this;
       if (!partialContent) {
@@ -154,8 +162,9 @@
         }
         return _results;
       }
-    },
-    _recheckSubViews: function(view) {
+    };
+
+    Layout.prototype._recheckSubViews = function(view) {
       var name, partial, _ref1;
       this._viewsUnrendered--;
       if (view.el.parentNode === null && $("#" + view.id).length) {
@@ -176,8 +185,9 @@
         this._renderDeferred.resolve();
       }
       return this;
-    },
-    _clearSubViews: function(view) {
+    };
+
+    Layout.prototype._clearSubViews = function(view) {
       var name, partial, _ref1, _results;
       if (this._destroyDeferred) {
         this._destroyDeferred.notify();
@@ -195,9 +205,11 @@
         }
         return _results;
       }
-    },
-    _onViewRemovedFromDOM: function(view) {},
-    destroy: function() {
+    };
+
+    Layout.prototype._onViewRemovedFromDOM = function(view) {};
+
+    Layout.prototype.destroy = function() {
       var layout, name, partial, _ref1,
         _this = this;
       $("#" + this.id).empty();
@@ -230,13 +242,16 @@
         }
       }
       return this._destroyDeferred;
-    }
-  });
+    };
 
-  Inn.Layout.defaults = {
-    placeholderClassName: 'layoutPlaceholder',
-    templateFolder: '',
-    templateFormat: 'js'
-  };
+    Layout.defaults = {
+      placeholderClassName: 'layoutPlaceholder',
+      templateFolder: '',
+      templateFormat: 'js'
+    };
+
+    return Layout;
+
+  })();
 
 }).call(this);
