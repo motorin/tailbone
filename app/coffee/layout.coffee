@@ -109,13 +109,13 @@ class Inn.Layout
     partials = @options.partials unless partials
 
     for name, partial of partials
-      viewOptions = _.extend {
+      viewOverriddenOptions = _.extend {
         id: name
         templateFolder: @options.templateFolder ? undefined
         templateFormat: @options.templateFormat ? undefined
       }, @options.viewOptions
 
-      @addView new Inn.View viewOptions
+      @addView new Inn.View viewOverriddenOptions
 
       view = @getView(name)
 

@@ -85,13 +85,13 @@
     <span class="nv">partials = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">partials</span> <span class="nx">unless</span> <span class="nx">partials</span>
 
     <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">partial</span> <span class="k">of</span> <span class="nx">partials</span>
-      <span class="nv">viewOptions = </span><span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="p">{</span>
+      <span class="nv">viewOverriddenOptions = </span><span class="nx">_</span><span class="p">.</span><span class="nx">extend</span> <span class="p">{</span>
         <span class="nv">id: </span><span class="nx">name</span>
         <span class="nv">templateFolder: </span><span class="nx">@options</span><span class="p">.</span><span class="nx">templateFolder</span> <span class="o">?</span> <span class="kc">undefined</span>
         <span class="nv">templateFormat: </span><span class="nx">@options</span><span class="p">.</span><span class="nx">templateFormat</span> <span class="o">?</span> <span class="kc">undefined</span>
       <span class="p">},</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">viewOptions</span>
 
-      <span class="nx">@addView</span> <span class="k">new</span> <span class="nx">Inn</span><span class="p">.</span><span class="nx">View</span> <span class="nx">viewOptions</span>
+      <span class="nx">@addView</span> <span class="k">new</span> <span class="nx">Inn</span><span class="p">.</span><span class="nx">View</span> <span class="nx">viewOverriddenOptions</span>
 
       <span class="nv">view = </span><span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
 
