@@ -47,7 +47,8 @@
       this.undelegateEvents();
       this.$el.empty().remove();
       this.trigger('remove');
-      return this.options.isInDOM = false;
+      this.options.isInDOM = false;
+      return this;
     }
   });
 

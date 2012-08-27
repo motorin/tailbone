@@ -10,6 +10,7 @@ Inn.Model = Backbone.Model.extend({
   #
   #---
   # Возвращает URL, по которому доступна модель
-  url: -> "app/models/#{@id}.json"
+  url: -> 
+  	return "app/models/#{@id}.json"
   
 })

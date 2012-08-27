@@ -48,7 +48,7 @@ class Inn.Layout
       for name, partial of @options.partials
         @getView(name).render() if @getView(name)
           
-    @_renderDeferred
+    return @_renderDeferred
 
   ##### addView( *view* )
   #
@@ -84,7 +84,7 @@ class Inn.Layout
     # Генерирует событие **"add:view"**
     @trigger 'add:view', view
     
-    @
+    return @
     
   ##### getView( *name* )
   #
@@ -125,7 +125,7 @@ class Inn.Layout
 
       @_processPartials(partial.partials) if partial.partials
       
-    @
+    return @
     
   ##### Генерирует( *partialContent* )
   #
@@ -211,7 +211,7 @@ class Inn.Layout
     for name, partial of @options.partials
       @getView(name).remove() if @getView(name)
     
-    @_destroyDeferred
+    return @_destroyDeferred
 
   ##### @defaults
   #

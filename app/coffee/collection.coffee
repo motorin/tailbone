@@ -11,7 +11,8 @@ Inn.Collection = Backbone.Collection.extend({
   #
   #---
   # Возвращает URL, по которому доступна коллекция
-  url: -> '#'
+  url: -> 
+    return '#'
 
   ##### model
   # 

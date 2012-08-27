@@ -22,7 +22,7 @@ Inn.View = Backbone.View.extend({
     , options
     
     # поддерживает "чейнинг"
-    this
+    return @
 
   ##### render()
   #
@@ -69,5 +69,8 @@ Inn.View = Backbone.View.extend({
     # Генерирует событие **"remove"**
     @trigger('remove')
     # Устанавливает заначение опции isInDom в false
-    @options.isInDOM = false
-});
+    @options.isInDOM = off
+
+    return @
+    
+})
