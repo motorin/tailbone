@@ -50,5 +50,20 @@ Inn.TemplateMixin = {
       view.templateDeferred.resolve()
         
     return @templateDeferred
+
+  ##### render()
+  #
+  #---
+  # Запускает процесс рендеринга, возвращает deferred object
+  render: ->
+    # Если в данный момент шаблон уже рендерится, вернёт deferred object с текущим состоянием
+    if @_renderDeferred and @_renderDeferred.state() == 'pending'
+      return @_renderDeferred
+    
+    @_renderDeferred = new $.Deferred()
+    
+    @renderSelf()
+      
+    return @_renderDeferred
 	
 }

@@ -13,34 +13,29 @@
       }, options);
       return this;
     },
-    render: function() {
-      var view;
-      if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
-        return this._renderDeferred;
-      }
-      if (this.options.layout) {
-        this.options.layout._viewsUnrendered++;
-      }
-      this._renderDeferred = new $.Deferred();
-      view = this;
-      this._getTemplate().done(function() {
-        if (view.attributes) {
-          if (typeof view.attributes === 'function') {
-            view.$el.attr(view.attributes());
-          } else {
-            view.$el.attr(view.attributes);
-          }
-        }
-        view.$el.html(view._template(view.getDataForView()));
-        view.trigger('render', view);
-        return view._renderDeferred.resolve();
-      });
-      return this._renderDeferred;
-    },
     getDataForView: function() {
       if (this.model) {
         return this.model.toJSON();
       }
+    },
+    renderSelf: function() {
+      var _this = this;
+      if (this.options.layout) {
+        this.options.layout._viewsUnrendered.push(this);
+      }
+      this._getTemplate().done(function() {
+        if (_this.attributes) {
+          if (typeof _this.attributes === 'function') {
+            _this.$el.attr(_this.attributes());
+          } else {
+            _this.$el.attr(_this.attributes);
+          }
+        }
+        _this.$el.html(_this._template(_this.getDataForView()));
+        _this.trigger('render', _this);
+        return _this._renderDeferred.resolve();
+      });
+      return this;
     },
     remove: function() {
       this.undelegateEvents();

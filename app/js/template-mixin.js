@@ -43,6 +43,14 @@
         return view.templateDeferred.resolve();
       });
       return this.templateDeferred;
+    },
+    render: function() {
+      if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
+        return this._renderDeferred;
+      }
+      this._renderDeferred = new $.Deferred();
+      this.renderSelf();
+      return this._renderDeferred;
     }
   };
 

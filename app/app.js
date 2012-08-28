@@ -78,6 +78,14 @@
         return view.templateDeferred.resolve();
       });
       return this.templateDeferred;
+    },
+    render: function() {
+      if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
+        return this._renderDeferred;
+      }
+      this._renderDeferred = new $.Deferred();
+      this.renderSelf();
+      return this._renderDeferred;
     }
   };
 
@@ -98,34 +106,29 @@
       }, options);
       return this;
     },
-    render: function() {
-      var view;
-      if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
-        return this._renderDeferred;
-      }
-      if (this.options.layout) {
-        this.options.layout._viewsUnrendered++;
-      }
-      this._renderDeferred = new $.Deferred();
-      view = this;
-      this._getTemplate().done(function() {
-        if (view.attributes) {
-          if (typeof view.attributes === 'function') {
-            view.$el.attr(view.attributes());
-          } else {
-            view.$el.attr(view.attributes);
-          }
-        }
-        view.$el.html(view._template(view.getDataForView()));
-        view.trigger('render', view);
-        return view._renderDeferred.resolve();
-      });
-      return this._renderDeferred;
-    },
     getDataForView: function() {
       if (this.model) {
         return this.model.toJSON();
       }
+    },
+    renderSelf: function() {
+      var _this = this;
+      if (this.options.layout) {
+        this.options.layout._viewsUnrendered.push(this);
+      }
+      this._getTemplate().done(function() {
+        if (_this.attributes) {
+          if (typeof _this.attributes === 'function') {
+            _this.$el.attr(_this.attributes());
+          } else {
+            _this.$el.attr(_this.attributes);
+          }
+        }
+        _this.$el.html(_this._template(_this.getDataForView()));
+        _this.trigger('render', _this);
+        return _this._renderDeferred.resolve();
+      });
+      return this;
     },
     remove: function() {
       this.undelegateEvents();
@@ -157,17 +160,13 @@
       this.options = $.extend(true, {}, Inn.Layout.defaults, options);
       this._dataManager = options.dataManager;
       this._views = [];
-      this._viewsUnrendered = 0;
+      this._viewsUnrendered = [];
       this.id = this.options.id ? this.options.id : 'layout';
       _.extend(this, Backbone.Events);
     }
 
-    Layout.prototype.render = function() {
+    Layout.prototype.renderSelf = function() {
       var _this = this;
-      if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
-        return this._renderDeferred;
-      }
-      this._renderDeferred = new $.Deferred();
       this._getTemplate().done(function() {
         var name, partial, _ref1, _results;
         $("#" + _this.id).html(_this._template());
@@ -185,7 +184,7 @@
         }
         return _results;
       });
-      return this._renderDeferred;
+      return this;
     };
 
     Layout.prototype.addView = function(view) {
@@ -304,7 +303,7 @@
 
     Layout.prototype._recheckSubViews = function(view) {
       var name, partial, _ref1;
-      this._viewsUnrendered--;
+      this._viewsUnrendered.splice(_.indexOf(this._viewsUnrendered, view), 1);
       if (view.el.parentNode === null && $("#" + view.id).length) {
         $("#" + view.id).replaceWith(view.$el);
         view.options.isInDOM = true;
@@ -319,7 +318,7 @@
           this.getView(name).render();
         }
       }
-      if (this._viewsUnrendered <= 0) {
+      if (this._viewsUnrendered.length <= 0) {
         this._renderDeferred.resolve();
       }
       return this;
