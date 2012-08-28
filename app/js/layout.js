@@ -15,7 +15,7 @@
       this.options = $.extend(true, {}, Inn.Layout.defaults, options);
       this._dataManager = options.dataManager;
       this._views = [];
-      this._viewsUnrendered = 0;
+      this._viewsUnrendered = [];
       this.id = this.options.id ? this.options.id : 'layout';
       _.extend(this, Backbone.Events);
     }
@@ -136,7 +136,7 @@
 
     Layout.prototype._recheckSubViews = function(view) {
       var name, partial, _ref1;
-      this._viewsUnrendered--;
+      this._viewsUnrendered.splice(_.indexOf(this._viewsUnrendered, view), 1);
       if (view.el.parentNode === null && $("#" + view.id).length) {
         $("#" + view.id).replaceWith(view.$el);
         view.options.isInDOM = true;
@@ -151,7 +151,7 @@
           this.getView(name).render();
         }
       }
-      if (this._viewsUnrendered <= 0) {
+      if (this._viewsUnrendered.length <= 0) {
         this._renderDeferred.resolve();
       }
       return this;

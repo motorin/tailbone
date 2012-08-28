@@ -13,7 +13,7 @@
     <span class="vi">@options = </span><span class="nx">$</span><span class="p">.</span><span class="nx">extend</span> <span class="kc">true</span><span class="p">,</span> <span class="p">{},</span> <span class="nx">Inn</span><span class="p">.</span><span class="nx">Layout</span><span class="p">.</span><span class="nx">defaults</span><span class="p">,</span> <span class="nx">options</span>
     <span class="vi">@_dataManager = </span><span class="nx">options</span><span class="p">.</span><span class="nx">dataManager</span>
     <span class="vi">@_views = </span><span class="p">[]</span>
-    <span class="vi">@_viewsUnrendered = </span><span class="mi">0</span>
+    <span class="vi">@_viewsUnrendered = </span><span class="p">[]</span>
     
     <span class="vi">@id = </span><span class="k">if</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">id</span> <span class="k">then</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">id</span> <span class="k">else</span> <span class="s">&#39;layout&#39;</span>
     </pre></div>             </td>           </tr>                               <tr id="section-4">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-4">&#182;</a>               </div>               <p>Умееть генерировать события (Backbone.Events)</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">_</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Events</span><span class="p">)</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <h4>addView( <em>view</em> )</h4>
@@ -110,7 +110,7 @@
       </pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <h4>_recheckSubViews( <em>view</em> )</h4>
 
 <hr />             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_recheckSubViews: </span><span class="nf">(view)-&gt;</span>
-    <span class="nx">@_viewsUnrendered</span><span class="o">--</span>
+    <span class="nx">@_viewsUnrendered</span><span class="p">.</span><span class="nx">splice</span> <span class="nx">_</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">@_viewsUnrendered</span><span class="p">,</span> <span class="nx">view</span><span class="p">),</span> <span class="mi">1</span>
     
     <span class="k">if</span> <span class="nx">view</span><span class="p">.</span><span class="nx">el</span><span class="p">.</span><span class="nx">parentNode</span> <span class="o">is</span> <span class="kc">null</span> <span class="o">and</span> <span class="nx">$</span><span class="p">(</span><span class="s">&quot;</span><span class="err">#</span><span class="si">#{</span><span class="nx">view</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">&quot;</span><span class="p">).</span><span class="nx">length</span>
       <span class="nx">$</span><span class="p">(</span><span class="s">&quot;</span><span class="err">#</span><span class="si">#{</span><span class="nx">view</span><span class="p">.</span><span class="nx">id</span><span class="si">}</span><span class="s">&quot;</span><span class="p">).</span><span class="nx">replaceWith</span> <span class="nx">view</span><span class="p">.</span><span class="nx">$el</span>
@@ -122,7 +122,7 @@
       <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">partial</span> <span class="k">of</span> <span class="nx">view</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">_viewBranch</span><span class="p">.</span><span class="nx">partials</span>
         <span class="nx">@getView</span><span class="p">(</span><span class="nx">name</span><span class="p">).</span><span class="nx">render</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="nx">@_viewsUnrendered</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="nx">@_viewsUnrendered</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;=</span> <span class="mi">0</span>
       <span class="nx">@_renderDeferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">()</span>
 
     <span class="nx">@</span></pre></div>             </td>           </tr>                               <tr id="section-15">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-15">&#182;</a>               </div>               <h4>_clearSubViews( <em>view</em> )</h4>

@@ -50,7 +50,7 @@
         return this._renderDeferred;
       }
       if (this.options.layout) {
-        this.options.layout._viewsUnrendered++;
+        this.options.layout._viewsUnrendered.push(this);
       }
       this._renderDeferred = new $.Deferred();
       this._getTemplate().done(function() {

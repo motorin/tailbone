@@ -60,7 +60,7 @@ Inn.TemplateMixin = {
     if @_renderDeferred and @_renderDeferred.state() == 'pending'
       return @_renderDeferred
     
-    @options.layout._viewsUnrendered++ if @options.layout                 #TODO untested and WRONG -- can't easily extend!!
+    @options.layout._viewsUnrendered.push(@) if @options.layout                 #TODO untested and WRONG -- can't easily extend!!
     
     @_renderDeferred = new $.Deferred()
     

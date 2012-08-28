@@ -18,7 +18,7 @@ class Inn.Layout
     @options = $.extend true, {}, Inn.Layout.defaults, options
     @_dataManager = options.dataManager
     @_views = []
-    @_viewsUnrendered = 0
+    @_viewsUnrendered = []
     
     @id = if @options.id then @options.id else 'layout'
     
@@ -134,7 +134,7 @@ class Inn.Layout
   #---
   # 
   _recheckSubViews: (view)->
-    @_viewsUnrendered--
+    @_viewsUnrendered.splice _.indexOf(@_viewsUnrendered, view), 1
     
     if view.el.parentNode is null and $("##{view.id}").length
       $("##{view.id}").replaceWith view.$el
@@ -146,7 +146,7 @@ class Inn.Layout
       for name, partial of view.options._viewBranch.partials
         @getView(name).render()
 
-    if @_viewsUnrendered <= 0
+    if @_viewsUnrendered.length <= 0
       @_renderDeferred.resolve()
 
     @
