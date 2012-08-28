@@ -11,6 +11,9 @@ module.exports = function(grunt) {
   // Clean plugin
   grunt.loadNpmTasks('grunt-clean');
 
+  // jUnit XML output plugin
+  grunt.loadNpmTasks("grunt-junit");  
+
   var task = grunt.task;
   var registerTask = grunt.registerTask;
   var file = grunt.file;
@@ -21,6 +24,9 @@ module.exports = function(grunt) {
   var option = grunt.option;
   var config = grunt.config;
   var template = grunt.template;
+
+  // Default jUnit XML output
+  process.env['JUNIT_OUTPUT'] = process.env['JUNIT_OUTPUT'] || '.junit-output/';
 
   // Project configuration.
   grunt.initConfig({
@@ -165,7 +171,7 @@ module.exports = function(grunt) {
   });
 
   // Default task.
-  registerTask('default', 'coffee lint concat min docco');
+  registerTask('default', 'coffee lint concat min junit docco');
   registerTask('rebuild', 'coffee lint concat docco')
   registerTask('test', 'qunit')
 
