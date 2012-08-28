@@ -18,34 +18,12 @@ class Inn.Layout
     @options = $.extend true, {}, Inn.Layout.defaults, options
     @_dataManager = options.dataManager
     @_views = []
-    @_viewsUnrendered = 0
+    @_viewsUnrendered = []
     
     @id = if @options.id then @options.id else 'layout'
     
     # Умееть генерировать события (Backbone.Events)
     _.extend(this, Backbone.Events)
-
-  ##### render()
-  #
-  #---
-  # Рендерит шаблон, возврашает deferred object
-  render: ->
-    # Если представления уже рендерятся, вернёт deferred object с текущим состоянием
-    if @_renderDeferred and @_renderDeferred.state() == 'pending'
-      return @_renderDeferred
-    
-    @_renderDeferred = new $.Deferred()
-    
-    @_getTemplate().done =>
-      $("##{@id}").html @_template()
-      
-      @_processPartials()
-      @_parsePartials()
-      
-      for name, partial of @options.partials
-        @getView(name).render() if @getView(name)
-          
-    return @_renderDeferred
 
   ##### addView( *view* )
   #
@@ -156,7 +134,7 @@ class Inn.Layout
   #---
   # 
   _recheckSubViews: (view)->
-    @_viewsUnrendered--
+    @_viewsUnrendered.splice _.indexOf(@_viewsUnrendered, view), 1
     
     if view.el.parentNode is null and $("##{view.id}").length
       $("##{view.id}").replaceWith view.$el
@@ -168,7 +146,7 @@ class Inn.Layout
       for name, partial of view.options._viewBranch.partials
         @getView(name).render()
 
-    if @_viewsUnrendered <= 0
+    if @_viewsUnrendered.length <= 0
       @_renderDeferred.resolve()
 
     @
