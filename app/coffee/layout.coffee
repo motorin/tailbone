@@ -25,28 +25,6 @@ class Inn.Layout
     # Умееть генерировать события (Backbone.Events)
     _.extend(this, Backbone.Events)
 
-  ##### render()
-  #
-  #---
-  # Рендерит шаблон, возврашает deferred object
-  render: ->
-    # Если представления уже рендерятся, вернёт deferred object с текущим состоянием
-    if @_renderDeferred and @_renderDeferred.state() == 'pending'
-      return @_renderDeferred
-    
-    @_renderDeferred = new $.Deferred()
-    
-    @_getTemplate().done =>
-      $("##{@id}").html @_template()
-      
-      @_processPartials()
-      @_parsePartials()
-      
-      for name, partial of @options.partials
-        @getView(name).render() if @getView(name)
-          
-    return @_renderDeferred
-
   ##### addView( *view* )
   #
   #---

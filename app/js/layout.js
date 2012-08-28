@@ -20,32 +20,6 @@
       _.extend(this, Backbone.Events);
     }
 
-    Layout.prototype.render = function() {
-      var _this = this;
-      if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
-        return this._renderDeferred;
-      }
-      this._renderDeferred = new $.Deferred();
-      this._getTemplate().done(function() {
-        var name, partial, _ref1, _results;
-        $("#" + _this.id).html(_this._template());
-        _this._processPartials();
-        _this._parsePartials();
-        _ref1 = _this.options.partials;
-        _results = [];
-        for (name in _ref1) {
-          partial = _ref1[name];
-          if (_this.getView(name)) {
-            _results.push(_this.getView(name).render());
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      });
-      return this._renderDeferred;
-    };
-
     Layout.prototype.addView = function(view) {
       var data, viewInLayout;
       if (!(view instanceof Inn.View)) {
