@@ -15,17 +15,13 @@
       this.options = $.extend(true, {}, Inn.Layout.defaults, options);
       this._dataManager = options.dataManager;
       this._views = [];
-      this._viewsUnrendered = 0;
+      this._viewsUnrendered = [];
       this.id = this.options.id ? this.options.id : 'layout';
       _.extend(this, Backbone.Events);
     }
 
-    Layout.prototype.render = function() {
+    Layout.prototype.renderSelf = function() {
       var _this = this;
-      if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
-        return this._renderDeferred;
-      }
-      this._renderDeferred = new $.Deferred();
       this._getTemplate().done(function() {
         var name, partial, _ref1, _results;
         $("#" + _this.id).html(_this._template());
@@ -43,7 +39,7 @@
         }
         return _results;
       });
-      return this._renderDeferred;
+      return this;
     };
 
     Layout.prototype.addView = function(view) {
@@ -162,7 +158,7 @@
 
     Layout.prototype._recheckSubViews = function(view) {
       var name, partial, _ref1;
-      this._viewsUnrendered--;
+      this._viewsUnrendered.splice(_.indexOf(this._viewsUnrendered, view), 1);
       if (view.el.parentNode === null && $("#" + view.id).length) {
         $("#" + view.id).replaceWith(view.$el);
         view.options.isInDOM = true;
@@ -177,7 +173,7 @@
           this.getView(name).render();
         }
       }
-      if (this._viewsUnrendered <= 0) {
+      if (this._viewsUnrendered.length <= 0) {
         this._renderDeferred.resolve();
       }
       return this;
