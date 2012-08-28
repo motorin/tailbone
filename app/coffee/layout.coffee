@@ -25,6 +25,24 @@ class Inn.Layout
     # Умееть генерировать события (Backbone.Events)
     _.extend(this, Backbone.Events)
 
+
+  ##### render()
+  #
+  #---
+  # Запускает рендерит шаблоны, возвращает deferred object
+  renderSelf: ->
+    @_getTemplate().done =>
+      $("##{@id}").html @_template()
+    
+      @_processPartials()
+      @_parsePartials()
+      
+      for name, partial of @options.partials
+        @getView(name).render() if @getView(name)
+
+    return @
+
+
   ##### addView( *view* )
   #
   #---

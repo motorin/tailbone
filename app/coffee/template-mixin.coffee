@@ -54,35 +54,15 @@ Inn.TemplateMixin = {
   ##### render()
   #
   #---
-  # Рендерит шаблон, возвращает deferred object
+  # Запускает процесс рендеринга, возвращает deferred object
   render: ->
     # Если в данный момент шаблон уже рендерится, вернёт deferred object с текущим состоянием
     if @_renderDeferred and @_renderDeferred.state() == 'pending'
       return @_renderDeferred
     
-    @options.layout._viewsUnrendered.push(@) if @options.layout                 #TODO untested and WRONG -- can't easily extend!!
-    
     @_renderDeferred = new $.Deferred()
     
-    @_getTemplate().done =>
-      if @$el? # логика view
-        if @attributes
-          if typeof @attributes == 'function'
-            @$el.attr @attributes()
-          else
-            @$el.attr @attributes
-
-        @$el.html @_template @getDataForView()
-        @trigger 'render', @
-        @_renderDeferred.resolve()
-      else # логика layout-а
-        $("##{@id}").html @_template()
-      
-        @_processPartials()
-        @_parsePartials()
-        
-        for name, partial of @options.partials
-          @getView(name).render() if @getView(name)
+    @renderSelf()
       
     return @_renderDeferred
 	
