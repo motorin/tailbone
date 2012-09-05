@@ -169,718 +169,731 @@ test 'destroy', 3, ->
 
 module "Inn.View",
   setup: ->
-    @canonical_view = new Inn.View
-      id: 'movie'
+    @canonicalView = new Inn.View {id: 'movie'}
+    @nestedViewSecondLevel = new Inn.View {id: 'movie'}, [new Inn.View {id: 'foo'}]
+    @nestedViewThirdLevel = new Inn.View {id: 'movie'}, [new Inn.View {id: 'foo'}, [new Inn.View {id: 'bar'}]]
     
-    @folder_view = new Inn.View
-      id: 'movie',
-      templateFolder: 'templates'
+    # @folder_view = new Inn.View
+    #   id: 'movie',
+    #   templateFolder: 'templates'
 
-    @format_view = new Inn.View
-      id: 'movie',
-      templateFormat: 'jade'
+    # @format_view = new Inn.View
+    #   id: 'movie',
+    #   templateFormat: 'jade'
 
-    @overriden_view = new Inn.View
-      id: 'content',
-      templateURL: 'bFrontpage'
+    # @overriden_view = new Inn.View
+    #   id: 'content',
+    #   templateURL: 'bFrontpage'
       
-    @overriden_folder_view = new Inn.View
-      id: 'content',
-      templateURL: 'bFrontpage',
-      templateFolder: 'templates'
+    # @overriden_folder_view = new Inn.View
+    #   id: 'content',
+    #   templateURL: 'bFrontpage',
+    #   templateFolder: 'templates'
     
-    @overriden_format_and_folder_view = new Inn.View
-      id: 'content',
-      templateName: 'bFrontpage'
-      templateFolder: 'templates'
-      templateFormat: 'jade'
+    # @overriden_format_and_folder_view = new Inn.View
+    #   id: 'content',
+    #   templateName: 'bFrontpage'
+    #   templateFolder: 'templates'
+    #   templateFormat: 'jade'
       
-    @real_view = new Inn.View
-      id: 'someView',
-      templateFolder: 'app/templates'
+    # @real_view = new Inn.View
+    #   id: 'someView',
+    #   templateFolder: 'app/templates'
     
-    @template_view = new Inn.View
-      id: 'someView',
-      templateName: 'bFrontpage'
-      templateFolder: 'app/templates'
+    # @template_view = new Inn.View
+    #   id: 'someView',
+    #   templateName: 'bFrontpage'
+    #   templateFolder: 'app/templates'
     
   teardown: ->
-    delete @canonical_view
-    delete @overriden_view
+    delete @canonicalView
+    delete @nestedViewSecondLevel
+    delete @nestedViewThirdLevel
+    # delete @overriden_view
 
 
 test 'extends Backbone.View', 1, ->
-  ok @canonical_view instanceof Backbone.View, 'Модель должна наследоваться от Backbone.View'
+  ok @canonicalView instanceof Backbone.View, 'Inn.View должна наследоваться от Backbone.View'
 
+  asyncTest 'triggers ready event on render()', 1, ->
+    @canonicalView.render()
 
-test 'renders deferred style', 1, ->
-  equal typeof @canonical_view.render().done, 'function', 'Функция, рендерящая шаблон должна вернуть deferred-объект, у которого будет метод done'
-  
-  
-asyncTest 'triggers render event on render()', 1, ->
-  some_variable = false;
-  @real_view.on 'render', ->
-    some_variable = true
-  
-  @real_view.render().done ->
-    ok some_variable, 'View должна триггерить событие render при своем рендеринге'
-    start()
-
-test '_getTemplateURL()', 2, ->
-  #по умолчанию путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%.js" Если жестко задан параметр "templateURL" то должен браться он
-  equal @canonical_view._getTemplateURL(), 'bMovie.js', 'Должно вернуть bMovie.js, а вернуло ' + @canonical_view._getTemplateURL()
-  equal @overriden_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_view._getTemplateURL()
-
-
-test '_getTemplateURL() with folder name', 2, ->
-  #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.js"
-  equal @folder_view._getTemplateURL(), 'templates/bMovie.js', 'Должно вернуть templates/bMovie.js, а вернуло ' + @folder_view._getTemplateURL()
-  equal @overriden_folder_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_folder_view._getTemplateURL()
-
-
-test '_getTemplateURL() with folder name and template format', 2, ->
-  #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
-  equal @format_view._getTemplateURL(), 'bMovie.jade', 'Должно вернуть templates/bMovie.jade, а вернуло ' + @folder_view._getTemplateURL()
-  equal @overriden_format_and_folder_view._getTemplateURL(), 'templates/bFrontpage.jade', 'Должно вернуть templates/bFrontpage.jade, а вернуло ' + @overriden_folder_view._getTemplateURL()
-
-test '_getTemplateName()', 2, ->
-  #путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%"
-  equal @overriden_format_and_folder_view._getTemplateName(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_format_and_folder_view._getTemplateName()
-  equal @canonical_view._getTemplateName(), 'bMovie', 'Должно вернуть bMovie, а вернуло ' + @canonical_view._getTemplateName()
-
-test '_getTemplateURL() with _getTemplateName()', 1, ->
-  #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
-  equal @template_view._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + @template_view._getTemplateURL()
-
-
-asyncTest 'render should define _template', 1, ->
-  render = @real_view.render()
-  
-  test = this
-  
-  render.done ->
-    ok test.real_view._template, 'При рендеренге должна создаваться функция-шаблон'
-    start()
-
-
-asyncTest 'render should render _template', 1, ->
-  render = @real_view.render()
-  
-  test = this
-  
-  render.done ->
-    equal test.real_view.$el.text(), 'Some content', 'Должнен отрендериться временный элемент'
-    start()
-  
-
-test 'triggers remove event on remove()', 1, ->
-  some_variable = false;
-  @real_view.on 'remove', ->
-    some_variable = true
-  
-  @real_view.remove()
-  ok some_variable, 'View должна триггерить событие remove при уничтожении DOM-елемента'
-
-
-test 'getDataForView', 1, ->
-  @real_view.remove()
-  strictEqual typeof @real_view.getDataForView, 'function', 'View should have getDataForView method'
-
-
-
-module "Inn.Layout",
-  setup: ->
-    @dataManager = new Inn.DataManager
-      
-    @layout_config =
-      partials:
-        'header': {}
-        'footer':
-          templateURL: 'bFooter'
-        'content':
-          templateURL: 'bFrontpage'
-          partials:
-            'tags': {}
-            'sortings': {}
-            'promoMovie': {}
-            'frontPageMovies':
-              templateURL: 'bFrontPageMoviesList',
-              partials: 
-                'pagination': {}
-        'someView': {}
-      dataManager: @dataManager
-      templateFolder: 'app/templates'
-      
-    @layout = new Inn.Layout @layout_config
-
-    @layout_with_id = new Inn.Layout
-      dataManager: @dataManager
-      id: 'secondLayout'
-    
-    @layout_with_templateFolder = new Inn.Layout
-      dataManager: @dataManager
-      viewOptions:
-        templateFolder: 'app/templates'
-     
-    @layout_with_templateFormat = new Inn.Layout
-      dataManager: @dataManager
-      templateFormat: 'jade'
-
-    @layout_with_templateFormat_and_templateFolder = new Inn.Layout
-      dataManager: @dataManager
-      templateFolder: 'app/templates'
-      templateFormat: 'jade'
-      
-    @layout_with_overriden_templateName = new Inn.Layout
-      dataManager: @dataManager
-      templateName: 'other_layout'    
-      
-    @layout_with_overriden_templateName_and_templateFolder = new Inn.Layout
-      dataManager: @dataManager
-      templateFolder: 'app/templates'
-      templateName: 'other_layout'  
-      
-    @layout_with_overriden_templateName_and_templateFolder_and_templateFormat = new Inn.Layout
-      dataManager: @dataManager
-      templateFormat: 'jade'
-      templateFolder: 'app/templates'
-      templateName: 'other_layout'
-
-    @userModel = new Inn.Model
-      id: 'user',
-      name: 'user'
-      
-    @collectionModel = new Inn.Collection()
-      
-    @otherCollectionModel = new Inn.Collection()
-      
-    @tagsModel = new Inn.Model
-      id: 'tags'
-      
-    @dataManager.addDataAsset @userModel
-    @dataManager.addDataAsset @tagsModel
-    @dataManager.addDataAsset @collectionModel, 'collection'
-    @dataManager.addDataAsset @otherCollectionModel, 'otherCollection'
-      
-    @tagsView = new Inn.View
-      id: 'tags'
-      
-    @userbarView = new Inn.View
-      id: 'userbar',
-      model: @userModel
-      
-    @userbarCloneView = new Inn.View
-      id: 'userbar'
-      
-    @otherUserView = new Inn.View
-      id: 'user',
-      model: @userModel
-    
-    @collectionView = new Inn.View
-      id: 'collection'
-    
-      
-    @collectionSetView = new Inn.View
-      id: 'collectionSet',
-      collection: @otherCollectionModel
-      
-    @orphanView = new Inn.View
-      id: 'orphan'
-      
-    @realView = new Inn.View
-      id: 'someView',
-      templateFolder: 'app/templates'
-    
-    @contentView = new Inn.View
-      id: 'content',
-      templateFolder: 'app/templates'
-      
-    @frontpageView = new Inn.View
-      id: 'frontPageMovies',
-      templateFolder: 'app/templates'
-    
-    
-
-  teardown: ->
-    delete @dataManager
-    delete @layout_config
-    delete @layout
-    delete @userModel
-    delete @collectionModel
-    delete @otherCollectionModel
-    delete @tagsModel
-    delete @tagsView
-    delete @userbarView
-    delete @otherUserView
-    delete @collectionView
-    delete @collectionSetView
-    delete @orphanView
-    delete @realView
-    delete @contentView
-    delete @frontapageView
-  
-
-test "Наличие", 1, ->
-  ok @layout instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)'
-
-test "id", 2, ->
-  strictEqual @layout.id, 'layout', 'Должен автоматически присвоиться id главного элемента мастер-шаблона'
-  strictEqual @layout_with_id.id, 'secondLayout', 'Должен автоматически присвоиться id главного элемента мастер-шаблона'
-
-test '_getTemplateName()', 2, ->
-  #путь к шаблону должен генерироваться на основе ID по схеме "b%LayoutId%"
-  equal @layout._getTemplateName(), 'bLayout', 'Должно вернуть bLayou, а вернуло ' + @layout._getTemplateName()
-  equal @layout_with_id._getTemplateName(), 'bSecondLayout', 'Должно вернуть bSecondLayout, а вернуло ' + @layout_with_id._getTemplateName()
-
-test '_getTemplateURL()', 7, ->
-  strictEqual @layout._getTemplateURL(), 'app/templates/bLayout.js', 'Должно вернуться bLayout.js'
-  strictEqual @layout_with_id._getTemplateURL(), 'bSecondLayout.js', 'Должно вернуться bSecondLayout.js'
-  strictEqual @layout_with_templateFormat._getTemplateURL(), 'bLayout.jade', 'кастомный путь к шаблону, если он есть в настройках'
-  strictEqual @layout_with_templateFormat_and_templateFolder._getTemplateURL(), 'app/templates/bLayout.jade', 'кастомный путь к шаблону, если он есть в настройках'
-  strictEqual @layout_with_overriden_templateName._getTemplateURL(), 'other_layout.js', 'кастомный путь к шаблону, если он есть в настройках'
-  strictEqual @layout_with_overriden_templateName_and_templateFolder._getTemplateURL(), 'app/templates/other_layout.js', 'кастомный путь к шаблону, если он есть в настройках'
-  strictEqual @layout_with_overriden_templateName_and_templateFolder_and_templateFormat._getTemplateURL(), 'app/templates/other_layout.jade', 'кастомный путь к шаблону, если он есть в настройках'
-  
-test "_dataManager link require", 2, ->
-  raises ->
-    new Inn.Layout()
-  , Inn.Error, 'Если не передан экземпляр менеджера данных то должна вызываться ошибка'
-  
-  raises -> 
-    new Inn.Layout
-      dataManager: {}
-  , Inn.Error, 'Если не передан экземпляр менеджера данных неверного типа то должна вызываться ошибка'
-
-
-test "_dataManager link", 1, ->
-  ok @layout._dataManager instanceof Inn.DataManager, 'При создании layout у нему должна крепиться ссылка на менеджер данных'
-
-
-test 'render', 2, ->
-  equal typeof @layout.render, 'function', 'Нет функции, рендерящей мастер-шаблон'
-  equal typeof @layout.render().done, 'function', 'Функция, рендерящая мастер-шаблон должна вернуть deferred-объект, у которого будет метод done'
-
-
-test 'render should not create several deferreds until resolve', 1, ->
-  first_deferred = @layout.render()
-  second_deferred = @layout.render()
-  strictEqual first_deferred, second_deferred, 'Если неразрешен первый рендер, то должен возвращаться текущий'
-
-test 'addView', 6, ->
-  @layout.addView @tagsView
-  strictEqual @layout._views[0], @tagsView, 'Внутри layout view должны храниться внутри массива _views'
-
-  @layout.addView @userbarView
-  strictEqual @layout._views[0], @tagsView, 'Внутри layout view должны храниться внутри массива'
-  strictEqual @layout._views[1], @userbarView, 'Добавление view не должно перетирать старые view'
-    
-  @layout.addView @userbarView
-  strictEqual @layout._views[2], undefined, 'Если view уже добавлена, она не должна быть добавлена повторно'
-    
-  @layout.addView @tagsView
-  strictEqual @layout._views[2], undefined, 'Если view уже добавлена, она не должна быть добавлена повторно'
-  
-  @layout.addView @userbarCloneView
-  strictEqual @layout._views[2], undefined, 'Если view уже добавлена, она не должна быть добавлена повторно если имеет тот же ID'
-  
-
-
-test 'addView: return self', 1, ->
-  strictEqual @layout.addView(@tagsView), @layout, 'Функция Inn.Layout.addView должна возвращать саму себя'
-
-
-test 'addView: type', 4, ->
-  raises ->
-    @layout.addView {}
-  , Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка'
-  raises ->
-    @layout.addView()
-  , Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка'
-  raises ->
-    @layout.addView ""
-  , Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка'
-  raises ->
-    @layout.addView new Backbone.View()
-  , Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка'
-
-
-test 'add:view event', 1, ->
-  some_variable = false
-  @layout.on 'add:view', (view)->
-    some_variable = view;
-  
-  @layout.addView @tagsView
-    
-  strictEqual some_variable, @tagsView, 'Функция Inn.Layout.addView должна вызывать событие "add:view" и передавать в колбек добавленный объект'
-  
-
-test 'getView', 2, ->
-  @layout.addView @tagsView
-  
-  equal @layout.getView('tags'), @tagsView, 'Функция Inn.Layout.getView должна возвращать View по id'
-  strictEqual @layout.getView('other_id'), null, 'Функция Inn.Layout.getView должна возвращать null если View не найдена'
-  
-test 'removeView', 3, ->
-  @layout.addView @tagsView
-  
-  equal @layout.removeView('tags'), @layout, 'Функция Inn.Layout.removeView должна возвращать саму себя'
-  strictEqual @layout.getView('tags'), null, 'Функция Inn.Layout.removeView не удалила View'
-  strictEqual @layout.removeView('tags'), null, 'Функция Inn.Layout.removeView должна возвращать null если View не найдена'
-
-  
-test 'remove:view event', 1, ->
-  some_variable = false
-  @layout.on 'remove:view', (model)->
-    some_variable = true
-  
-  @layout.addView @tagsView
-  @layout.removeView 'tags'
-    
-  strictEqual some_variable, true, 'Функция Inn.Layout.removeView должна вызывать событие "remove:view"'
-
-
-test 'addView and data linking', 5, ->
-  @layout.addView @tagsView
-  strictEqual @layout.getView('tags').model, @tagsModel, 'При добавлении View в мастер-шаблон, к нему должны быть привязаны данные по его ID'
-    
-  @layout.addView @userbarView
-  strictEqual @layout.getView('userbar').model, @userModel, 'Если модель задана явно, то она остается'
-    
-  @layout.addView @orphanView
-  strictEqual @layout.getView('orphan').model, undefined, 'Если модели нет в менеджере, она остается неопределенной'
-    
-  @layout.addView @collectionView
-  strictEqual @layout.getView('collection').collection, @collectionModel, 'Если данные являются коллекцией, то они идут в атрибут collection'
-    
-  @layout.addView @collectionSetView
-  strictEqual @layout.getView('collectionSet').collection, @otherCollectionModel, 'Если коллекция задана явно, то она остается'
-
-
-#возможно это не нужно и неправильно TODO
-test 'addView: bind layout', 1, ->
-  @layout.addView @tagsView
-  strictEqual @layout.getView('tags').options.layout, @layout, 'Добавляя себе view Layout прописывает себя в его options'
-
-
-asyncTest 'listen to views render event and call recheckSubViews method', 1, ->
-  some_variable = false
-  
-  test = this
-  
-  @layout._recheckSubViews = (view)->
-    some_variable = view
-
-  @layout.addView @realView
-  
-  @realView.render().done ->
-    strictEqual some_variable, test.realView, 'Layout должен отслеживать события рендера и вызывать свой метод _recheckSubViews с передачей view в параметре'
-    start()
-    
-
-test 'recheckSubViews method', 1, ->
-  strictEqual typeof @layout._recheckSubViews, 'function', 'Layout должен сожержать метод проверки подвьюшек'
-  
-
-test '_processPartials: should return self', 1, ->
-  strictEqual @layout._processPartials(), @layout, '_processPartials должен возвращать себя'
-
-test '_processPartials: create top views', 3, ->
-  @layout._processPartials();
-  
-  ok @layout.getView('header') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
-  ok @layout.getView('footer') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
-  ok @layout.getView('content') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
-
-
-test '_processPartials: create partial views', 5, ->
-  @layout._processPartials();
-  
-  ok @layout.getView('tags') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
-  ok @layout.getView('sortings') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
-  ok @layout.getView('promoMovie') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
-  ok @layout.getView('frontPageMovies') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
-  ok @layout.getView('pagination') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
-  
-  
-test '_processPartials: set template names', 4, ->
-  @layout._processPartials();
-  
-  strictEqual @layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
-  strictEqual @layout.getView('content')._getTemplateURL(), 'bFrontpage', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
-  strictEqual @layout.getView('frontPageMovies')._getTemplateURL(), 'bFrontPageMoviesList', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
-  strictEqual @layout.getView('pagination')._getTemplateURL(), 'app/templates/bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
-
-
-test '_processPartials should attach _viewBranch', 3, ->
-  @layout.addView @realView
-  @layout.addView @contentView
-  @layout.addView @frontpageView
-  
-  @layout._processPartials()
-  
-  strictEqual @layout.getView('content').options._viewBranch, @layout.options.partials.content, 'При создании view layout должен сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
-  strictEqual @layout.getView('someView').options._viewBranch, @layout.options.partials.someView, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
-  strictEqual @layout.getView('frontPageMovies').options._viewBranch, @layout.options.partials.content.partials.frontPageMovies, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
-
-
-module "Inn.Layout Render remove and so on",
-  setup: ->
-    
-    $('#header').remove()
-    $('#content').remove()
-    $('#footer').remove()
-    
-    @dataManager = new Inn.DataManager
-      
-    @layout_config =
-      partials:
-        'header': {}
-        'footer': {}
-        'content':
-          templateName: 'bFrontpage'
-          templateURL: 'app/templates/bFrontpage.js'
-          partials:
-            'tags': {}
-            'sortings': {}
-            'promoMovie': {}
-            'frontPageMovies':
-              partials: 
-                'pagination': {}
-        'someView': {}
-      dataManager: @dataManager,
-      templateFolder: 'app/templates'
-      templateFormat: 'js'
-      
-    @layout = new Inn.Layout @layout_config
-    
-    @layout_config_jade =
-      partials:
-        'header': {}
-        'footer': {}
-        'content':
-          partials:
-            'tags': {}
-            'sortings': {}
-            'promoMovie': {}
-            'frontPageMovies':
-              partials: 
-                'pagination': {}
-        'someView': {}
-      dataManager: @dataManager,
-      templateFolder: 'app/templates'
-      templateFormat: 'jade'
-      
-    @layout_jade = new Inn.Layout @layout_config_jade
-    
-
-  teardown: ->
-    delete @dataManager
-    delete @layout_config
-    delete @layout
-    
-    $('#header').remove()
-    $('#content').remove()
-    $('#footer').remove()
-
-
-test 'layout should create views with default options', 4, ->
-  @layout._processPartials()
-  
-  strictEqual @layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
-  strictEqual @layout.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
-  
-  @layout_jade._processPartials()
-  strictEqual @layout_jade.getView('header')._getTemplateURL(), 'app/templates/bHeader.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
-  strictEqual @layout_jade.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
-
-asyncTest 'layout render should attach views to DOM', 3, ->
-  deferred = @layout.render()
-
-  deferred.done ->
-    strictEqual $('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
-    strictEqual $('#content').html(), '===Content===<div id="tags">===Tags===</div><div id="sortings">===Sortings===</div><div id="promoMovie">===PromoMovie===</div><div id="frontPageMovies">===Frontpage movies===<div id="pagination">===Pagination===</div></div>', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
-    strictEqual $('#footer').text(), '===Footer===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
-    start()
-
-
-asyncTest 'layout should cleanup nested views references for removed DOM elements', 5, ->
-  test = this
-  deferred = @layout.render()
-  
-  deferred.done ->
-    test.layout.getView('content').remove()
-    strictEqual test.layout.getView('tags').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
-    strictEqual test.layout.getView('sortings').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
-    strictEqual test.layout.getView('promoMovie').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
-    strictEqual test.layout.getView('frontPageMovies').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
-    strictEqual test.layout.getView('pagination').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
-    start()
-
-
-
-module "Inn.Layout Destroy",
-  setup: ->
-    $('#layout').empty()
-    
-    @dataManager = new Inn.DataManager
-      
-    @layout_config =
-      partials:
-        'header': {}
-        'footer': {}
-        'content':
-          templateName: 'bFrontpage'
-          templateURL: 'app/templates/bFrontpage.js'
-          partials:
-            'tags': {}
-            'sortings': {}
-            'promoMovie': {}
-            'frontPageMovies':
-              partials: 
-                'pagination': {}
-        'someView': {}
-      dataManager: @dataManager,
-      templateFolder: 'app/templates'
-      templateFormat: 'js'
-      
-    @layout = new Inn.Layout @layout_config
-    
-  teardown: ->
-    delete @dataManager
-    delete @layout_config
-    delete @layout
-    
-    $('#layout').empty()
-
-
-asyncTest 'layout should remove all views from self', 6, ->
-  test = this
-  deferred = @layout.render()
-
-  
-  deferred.done ->
-    test.layout.destroy().done ->
-      strictEqual test.layout.getView('tags'), null, 'layout should remove all views from self'
-      strictEqual test.layout.getView('sortings'), null, 'layout should remove all views from self'
-      strictEqual test.layout.getView('promoMovie'), null, 'layout should remove all views from self'
-      strictEqual test.layout.getView('frontPageMovies'), null, 'layout should remove all views from self'
-      strictEqual test.layout.getView('pagination'), null, 'layout should remove all views from self'
-      strictEqual test.layout.getView('someView'), null, 'layout should remove all views from self'
-    
+    @canonicalView.on 'ready', ->
+      ok on, 'View должна триггерить событие ready при своем рендеринге'
       start()
 
+  asyncTest 'triggers ready event on second level nested view.render()', 1, ->
+    @nestedViewSecondLevel.render()
 
-module "Inn.Layout View attributes",
-  setup: ->
-    $('#layout').empty()
+    @nestedViewSecondLevel.on 'ready', ->
+      ok on, 'View второго уровня вложенности должна триггерить событие ready при своем рендеринге'
+      start()
+
+  asyncTest 'triggers ready event on third level nested view.render()', 1, ->
+    @nestedViewThirdLevel.render()
+
+    @nestedViewThirdLevel.on 'ready', ->
+      ok on, 'View третьего уровня вложенности должна триггерить событие ready при своем рендеринге'
+      start()
     
-    @dataManager = new Inn.DataManager
-      
-    @layout_config =
-      partials:
-        'header':
-          attributes:
-            'class': 'bHeader'
-            'data-some': 'some_data'
-        'footer': {}
-        'content':
-          templateName: 'bFrontpage'
-          templateURL: 'app/templates/bFrontpage.js'
-          partials:
-            'tags': {}
-            'sortings': {}
-            'promoMovie': {}
-            'frontPageMovies':
-              partials: 
-                'pagination': {}
-        'someView': {}
-      dataManager: @dataManager,
-      templateFolder: 'app/templates'
-      templateFormat: 'js'
-      
-    @layout = new Inn.Layout @layout_config
-    
-  teardown: ->
-    delete @dataManager
-    delete @layout_config
-    delete @layout
-    
-    $('#layout').empty()
+# test 'renders deferred style', 1, ->
+#   equal typeof @canonical_view.render().done, 'function', 'Функция, рендерящая шаблон должна вернуть deferred-объект, у которого будет метод done'
+
+# test '_getTemplateURL()', 2, ->
+#   #по умолчанию путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%.js" Если жестко задан параметр "templateURL" то должен браться он
+#   equal @canonical_view._getTemplateURL(), 'bMovie.js', 'Должно вернуть bMovie.js, а вернуло ' + @canonical_view._getTemplateURL()
+#   equal @overriden_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_view._getTemplateURL()
 
 
-asyncTest 'layout should pass view attributes to View constructor', 2, ->
-  test = this
-  deferred = @layout.render()
+# test '_getTemplateURL() with folder name', 2, ->
+#   #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.js"
+#   equal @folder_view._getTemplateURL(), 'templates/bMovie.js', 'Должно вернуть templates/bMovie.js, а вернуло ' + @folder_view._getTemplateURL()
+#   equal @overriden_folder_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_folder_view._getTemplateURL()
+
+
+# test '_getTemplateURL() with folder name and template format', 2, ->
+#   #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
+#   equal @format_view._getTemplateURL(), 'bMovie.jade', 'Должно вернуть templates/bMovie.jade, а вернуло ' + @folder_view._getTemplateURL()
+#   equal @overriden_format_and_folder_view._getTemplateURL(), 'templates/bFrontpage.jade', 'Должно вернуть templates/bFrontpage.jade, а вернуло ' + @overriden_folder_view._getTemplateURL()
+
+# test '_getTemplateName()', 2, ->
+#   #путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%"
+#   equal @overriden_format_and_folder_view._getTemplateName(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_format_and_folder_view._getTemplateName()
+#   equal @canonical_view._getTemplateName(), 'bMovie', 'Должно вернуть bMovie, а вернуло ' + @canonical_view._getTemplateName()
+
+# test '_getTemplateURL() with _getTemplateName()', 1, ->
+#   #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
+#   equal @template_view._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + @template_view._getTemplateURL()
+
+
+# asyncTest 'render should define _template', 1, ->
+#   render = @real_view.render()
   
-  deferred.done ->
-    strictEqual test.layout.getView('header').$el.attr('class'), 'bHeader', 'layout should pass view attributes to View constructor'
-    strictEqual test.layout.getView('header').$el.data('some'), 'some_data', 'layout should pass view attributes to View constructor'
-      
-    start()
-
-
-module "Inn.Layout automatic partials processing",
-  setup: ->
-    $('#layout').empty()
-    @dataManager = new Inn.DataManager
-      
-    @layout_config =
-      partials:
-        'header':
-          attributes:
-            'class': 'bHeader'
-            'data-some': 'some_data'
-        'footer': {}
-        'content':
-          templateName: 'bFrontpage'
-          templateURL: 'app/templates/bFrontpage.js'
-          partials:
-            'tags': {}
-            'sortings': {}
-            'promoMovie': {}
-            'frontPageMovies':
-              partials: 
-                'pagination': {}
-        'someView': {}
-      dataManager: @dataManager,
-      viewOptions:
-        templateFolder: 'app/templates'
-        templateFormat: 'js'
-      
-    @layout = new Inn.Layout @layout_config
-    
-    @layout_config2 =
-      dataManager: @dataManager,
-      placeholderClassName: 'otherPlaceholder'
-      templateFolder: 'app/templates'
-      templateFormat: 'js'
-    
-    
-    @layout2 = new Inn.Layout @layout_config2
-    
-  teardown: ->
-    delete @dataManager
-    delete @layout_config
-    delete @layout
-    
-    $('#layout').empty()
-
-test 'Layout should have placeholderClassName option', 2, ->
-  strictEqual @layout.options.placeholderClassName, 'layoutPlaceholder', 'Layout should have default placeholderClassName option'
-  strictEqual @layout2.options.placeholderClassName, 'otherPlaceholder', 'Layout should have placeholderClassName option'
-
-
-asyncTest 'layout should automatically parse for placeholder and subviews', 5, ->
-  test = this
-  deferred = @layout2.render()
+#   test = this
   
-  deferred.done ->
-    notStrictEqual test.layout2.getView('footer'), null, 'layout should automatically create top-level views'
-    notStrictEqual test.layout2.getView('tags'), null, 'layout should automatically create subviews'
-    notStrictEqual test.layout2.getView('pagination'), null, 'layout should automatically create subviews'
+#   render.done ->
+#     ok test.real_view._template, 'При рендеренге должна создаваться функция-шаблон'
+#     start()
+
+
+# asyncTest 'render should render _template', 1, ->
+#   render = @real_view.render()
+  
+#   test = this
+  
+#   render.done ->
+#     equal test.real_view.$el.text(), 'Some content', 'Должнен отрендериться временный элемент'
+#     start()
+  
+
+# test 'triggers remove event on remove()', 1, ->
+#   some_variable = false;
+#   @real_view.on 'remove', ->
+#     some_variable = true
+  
+#   @real_view.remove()
+#   ok some_variable, 'View должна триггерить событие remove при уничтожении DOM-елемента'
+
+
+# test 'getDataForView', 1, ->
+#   @real_view.remove()
+#   strictEqual typeof @real_view.getDataForView, 'function', 'View should have getDataForView method'
+
+
+
+# module "Inn.Layout",
+#   setup: ->
+#     @dataManager = new Inn.DataManager
+      
+#     @layout_config =
+#       partials:
+#         'header': {}
+#         'footer':
+#           templateURL: 'bFooter'
+#         'content':
+#           templateURL: 'bFrontpage'
+#           partials:
+#             'tags': {}
+#             'sortings': {}
+#             'promoMovie': {}
+#             'frontPageMovies':
+#               templateURL: 'bFrontPageMoviesList',
+#               partials: 
+#                 'pagination': {}
+#         'someView': {}
+#       dataManager: @dataManager
+#       templateFolder: 'app/templates'
+      
+#     @layout = new Inn.Layout @layout_config
+
+#     @layout_with_id = new Inn.Layout
+#       dataManager: @dataManager
+#       id: 'secondLayout'
     
-    deepEqual test.layout2.getView('content').options._viewBranch, {"partials": {"frontPageMovies": {}, "promoMovie": {}, "sortings": {}, "tags":  {}}}, 'layout should automatically create subviews'
+#     @layout_with_templateFolder = new Inn.Layout
+#       dataManager: @dataManager
+#       viewOptions:
+#         templateFolder: 'app/templates'
+     
+#     @layout_with_templateFormat = new Inn.Layout
+#       dataManager: @dataManager
+#       templateFormat: 'jade'
+
+#     @layout_with_templateFormat_and_templateFolder = new Inn.Layout
+#       dataManager: @dataManager
+#       templateFolder: 'app/templates'
+#       templateFormat: 'jade'
+      
+#     @layout_with_overriden_templateName = new Inn.Layout
+#       dataManager: @dataManager
+#       templateName: 'other_layout'    
+      
+#     @layout_with_overriden_templateName_and_templateFolder = new Inn.Layout
+#       dataManager: @dataManager
+#       templateFolder: 'app/templates'
+#       templateName: 'other_layout'  
+      
+#     @layout_with_overriden_templateName_and_templateFolder_and_templateFormat = new Inn.Layout
+#       dataManager: @dataManager
+#       templateFormat: 'jade'
+#       templateFolder: 'app/templates'
+#       templateName: 'other_layout'
+
+#     @userModel = new Inn.Model
+#       id: 'user',
+#       name: 'user'
+      
+#     @collectionModel = new Inn.Collection()
+      
+#     @otherCollectionModel = new Inn.Collection()
+      
+#     @tagsModel = new Inn.Model
+#       id: 'tags'
+      
+#     @dataManager.addDataAsset @userModel
+#     @dataManager.addDataAsset @tagsModel
+#     @dataManager.addDataAsset @collectionModel, 'collection'
+#     @dataManager.addDataAsset @otherCollectionModel, 'otherCollection'
+      
+#     @tagsView = new Inn.View
+#       id: 'tags'
+      
+#     @userbarView = new Inn.View
+#       id: 'userbar',
+#       model: @userModel
+      
+#     @userbarCloneView = new Inn.View
+#       id: 'userbar'
+      
+#     @otherUserView = new Inn.View
+#       id: 'user',
+#       model: @userModel
     
-    deepEqual test.layout2.getView('frontPageMovies').options._viewBranch, {"partials": {"pagination": {}}}, 'layout should automatically create subviews'
+#     @collectionView = new Inn.View
+#       id: 'collection'
     
-    start()
+      
+#     @collectionSetView = new Inn.View
+#       id: 'collectionSet',
+#       collection: @otherCollectionModel
+      
+#     @orphanView = new Inn.View
+#       id: 'orphan'
+      
+#     @realView = new Inn.View
+#       id: 'someView',
+#       templateFolder: 'app/templates'
+    
+#     @contentView = new Inn.View
+#       id: 'content',
+#       templateFolder: 'app/templates'
+      
+#     @frontpageView = new Inn.View
+#       id: 'frontPageMovies',
+#       templateFolder: 'app/templates'
+    
+    
+
+#   teardown: ->
+#     delete @dataManager
+#     delete @layout_config
+#     delete @layout
+#     delete @userModel
+#     delete @collectionModel
+#     delete @otherCollectionModel
+#     delete @tagsModel
+#     delete @tagsView
+#     delete @userbarView
+#     delete @otherUserView
+#     delete @collectionView
+#     delete @collectionSetView
+#     delete @orphanView
+#     delete @realView
+#     delete @contentView
+#     delete @frontapageView
+  
+
+# test "Наличие", 1, ->
+#   ok @layout instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)'
+
+# test "id", 2, ->
+#   strictEqual @layout.id, 'layout', 'Должен автоматически присвоиться id главного элемента мастер-шаблона'
+#   strictEqual @layout_with_id.id, 'secondLayout', 'Должен автоматически присвоиться id главного элемента мастер-шаблона'
+
+# test '_getTemplateName()', 2, ->
+#   #путь к шаблону должен генерироваться на основе ID по схеме "b%LayoutId%"
+#   equal @layout._getTemplateName(), 'bLayout', 'Должно вернуть bLayou, а вернуло ' + @layout._getTemplateName()
+#   equal @layout_with_id._getTemplateName(), 'bSecondLayout', 'Должно вернуть bSecondLayout, а вернуло ' + @layout_with_id._getTemplateName()
+
+# test '_getTemplateURL()', 7, ->
+#   strictEqual @layout._getTemplateURL(), 'app/templates/bLayout.js', 'Должно вернуться bLayout.js'
+#   strictEqual @layout_with_id._getTemplateURL(), 'bSecondLayout.js', 'Должно вернуться bSecondLayout.js'
+#   strictEqual @layout_with_templateFormat._getTemplateURL(), 'bLayout.jade', 'кастомный путь к шаблону, если он есть в настройках'
+#   strictEqual @layout_with_templateFormat_and_templateFolder._getTemplateURL(), 'app/templates/bLayout.jade', 'кастомный путь к шаблону, если он есть в настройках'
+#   strictEqual @layout_with_overriden_templateName._getTemplateURL(), 'other_layout.js', 'кастомный путь к шаблону, если он есть в настройках'
+#   strictEqual @layout_with_overriden_templateName_and_templateFolder._getTemplateURL(), 'app/templates/other_layout.js', 'кастомный путь к шаблону, если он есть в настройках'
+#   strictEqual @layout_with_overriden_templateName_and_templateFolder_and_templateFormat._getTemplateURL(), 'app/templates/other_layout.jade', 'кастомный путь к шаблону, если он есть в настройках'
+  
+# test "_dataManager link require", 2, ->
+#   raises ->
+#     new Inn.Layout()
+#   , Inn.Error, 'Если не передан экземпляр менеджера данных то должна вызываться ошибка'
+  
+#   raises -> 
+#     new Inn.Layout
+#       dataManager: {}
+#   , Inn.Error, 'Если не передан экземпляр менеджера данных неверного типа то должна вызываться ошибка'
+
+
+# test "_dataManager link", 1, ->
+#   ok @layout._dataManager instanceof Inn.DataManager, 'При создании layout у нему должна крепиться ссылка на менеджер данных'
+
+
+# test 'render', 2, ->
+#   equal typeof @layout.render, 'function', 'Нет функции, рендерящей мастер-шаблон'
+#   equal typeof @layout.render().done, 'function', 'Функция, рендерящая мастер-шаблон должна вернуть deferred-объект, у которого будет метод done'
+
+
+# test 'render should not create several deferreds until resolve', 1, ->
+#   first_deferred = @layout.render()
+#   second_deferred = @layout.render()
+#   strictEqual first_deferred, second_deferred, 'Если неразрешен первый рендер, то должен возвращаться текущий'
+
+# test 'addView', 6, ->
+#   @layout.addView @tagsView
+#   strictEqual @layout._views[0], @tagsView, 'Внутри layout view должны храниться внутри массива _views'
+
+#   @layout.addView @userbarView
+#   strictEqual @layout._views[0], @tagsView, 'Внутри layout view должны храниться внутри массива'
+#   strictEqual @layout._views[1], @userbarView, 'Добавление view не должно перетирать старые view'
+    
+#   @layout.addView @userbarView
+#   strictEqual @layout._views[2], undefined, 'Если view уже добавлена, она не должна быть добавлена повторно'
+    
+#   @layout.addView @tagsView
+#   strictEqual @layout._views[2], undefined, 'Если view уже добавлена, она не должна быть добавлена повторно'
+  
+#   @layout.addView @userbarCloneView
+#   strictEqual @layout._views[2], undefined, 'Если view уже добавлена, она не должна быть добавлена повторно если имеет тот же ID'
+  
+
+
+# test 'addView: return self', 1, ->
+#   strictEqual @layout.addView(@tagsView), @layout, 'Функция Inn.Layout.addView должна возвращать саму себя'
+
+
+# test 'addView: type', 4, ->
+#   raises ->
+#     @layout.addView {}
+#   , Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка'
+#   raises ->
+#     @layout.addView()
+#   , Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка'
+#   raises ->
+#     @layout.addView ""
+#   , Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка'
+#   raises ->
+#     @layout.addView new Backbone.View()
+#   , Inn.Error, 'Если тип данных не Inn.View то должна вызываться ошибка'
+
+
+# test 'add:view event', 1, ->
+#   some_variable = false
+#   @layout.on 'add:view', (view)->
+#     some_variable = view;
+  
+#   @layout.addView @tagsView
+    
+#   strictEqual some_variable, @tagsView, 'Функция Inn.Layout.addView должна вызывать событие "add:view" и передавать в колбек добавленный объект'
+  
+
+# test 'getView', 2, ->
+#   @layout.addView @tagsView
+  
+#   equal @layout.getView('tags'), @tagsView, 'Функция Inn.Layout.getView должна возвращать View по id'
+#   strictEqual @layout.getView('other_id'), null, 'Функция Inn.Layout.getView должна возвращать null если View не найдена'
+  
+# test 'removeView', 3, ->
+#   @layout.addView @tagsView
+  
+#   equal @layout.removeView('tags'), @layout, 'Функция Inn.Layout.removeView должна возвращать саму себя'
+#   strictEqual @layout.getView('tags'), null, 'Функция Inn.Layout.removeView не удалила View'
+#   strictEqual @layout.removeView('tags'), null, 'Функция Inn.Layout.removeView должна возвращать null если View не найдена'
+
+  
+# test 'remove:view event', 1, ->
+#   some_variable = false
+#   @layout.on 'remove:view', (model)->
+#     some_variable = true
+  
+#   @layout.addView @tagsView
+#   @layout.removeView 'tags'
+    
+#   strictEqual some_variable, true, 'Функция Inn.Layout.removeView должна вызывать событие "remove:view"'
+
+
+# test 'addView and data linking', 5, ->
+#   @layout.addView @tagsView
+#   strictEqual @layout.getView('tags').model, @tagsModel, 'При добавлении View в мастер-шаблон, к нему должны быть привязаны данные по его ID'
+    
+#   @layout.addView @userbarView
+#   strictEqual @layout.getView('userbar').model, @userModel, 'Если модель задана явно, то она остается'
+    
+#   @layout.addView @orphanView
+#   strictEqual @layout.getView('orphan').model, undefined, 'Если модели нет в менеджере, она остается неопределенной'
+    
+#   @layout.addView @collectionView
+#   strictEqual @layout.getView('collection').collection, @collectionModel, 'Если данные являются коллекцией, то они идут в атрибут collection'
+    
+#   @layout.addView @collectionSetView
+#   strictEqual @layout.getView('collectionSet').collection, @otherCollectionModel, 'Если коллекция задана явно, то она остается'
+
+
+# #возможно это не нужно и неправильно TODO
+# test 'addView: bind layout', 1, ->
+#   @layout.addView @tagsView
+#   strictEqual @layout.getView('tags').options.layout, @layout, 'Добавляя себе view Layout прописывает себя в его options'
+
+
+# asyncTest 'listen to views render event and call recheckSubViews method', 1, ->
+#   some_variable = false
+  
+#   test = this
+  
+#   @layout._recheckSubViews = (view)->
+#     some_variable = view
+
+#   @layout.addView @realView
+  
+#   @realView.render().done ->
+#     strictEqual some_variable, test.realView, 'Layout должен отслеживать события рендера и вызывать свой метод _recheckSubViews с передачей view в параметре'
+#     start()
+    
+
+# test 'recheckSubViews method', 1, ->
+#   strictEqual typeof @layout._recheckSubViews, 'function', 'Layout должен сожержать метод проверки подвьюшек'
+  
+
+# test '_processPartials: should return self', 1, ->
+#   strictEqual @layout._processPartials(), @layout, '_processPartials должен возвращать себя'
+
+# test '_processPartials: create top views', 3, ->
+#   @layout._processPartials();
+  
+#   ok @layout.getView('header') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
+#   ok @layout.getView('footer') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
+#   ok @layout.getView('content') instanceof Inn.View, 'Layout должен автоматически создать view верхнего уровня на основе переданных настроек'
+
+
+# test '_processPartials: create partial views', 5, ->
+#   @layout._processPartials();
+  
+#   ok @layout.getView('tags') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
+#   ok @layout.getView('sortings') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
+#   ok @layout.getView('promoMovie') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
+#   ok @layout.getView('frontPageMovies') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
+#   ok @layout.getView('pagination') instanceof Inn.View, 'Layout должен автоматически создать партиалы на основе переданных настроек'
+  
+  
+# test '_processPartials: set template names', 4, ->
+#   @layout._processPartials();
+  
+#   strictEqual @layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
+#   strictEqual @layout.getView('content')._getTemplateURL(), 'bFrontpage', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
+#   strictEqual @layout.getView('frontPageMovies')._getTemplateURL(), 'bFrontPageMoviesList', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
+#   strictEqual @layout.getView('pagination')._getTemplateURL(), 'app/templates/bPagination.js', 'При создании view layout должен передавать кастомное название шаблона в конструктор, если он есть в настройках'
+
+
+# test '_processPartials should attach _viewBranch', 3, ->
+#   @layout.addView @realView
+#   @layout.addView @contentView
+#   @layout.addView @frontpageView
+  
+#   @layout._processPartials()
+  
+#   strictEqual @layout.getView('content').options._viewBranch, @layout.options.partials.content, 'При создании view layout должен сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
+#   strictEqual @layout.getView('someView').options._viewBranch, @layout.options.partials.someView, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
+#   strictEqual @layout.getView('frontPageMovies').options._viewBranch, @layout.options.partials.content.partials.frontPageMovies, 'При создании view layout сохранить в ней ветвь роутинга для последующей очистки памяти и перерендеринге детей этой view'
+
+
+# module "Inn.Layout Render remove and so on",
+#   setup: ->
+    
+#     $('#header').remove()
+#     $('#content').remove()
+#     $('#footer').remove()
+    
+#     @dataManager = new Inn.DataManager
+      
+#     @layout_config =
+#       partials:
+#         'header': {}
+#         'footer': {}
+#         'content':
+#           templateName: 'bFrontpage'
+#           templateURL: 'app/templates/bFrontpage.js'
+#           partials:
+#             'tags': {}
+#             'sortings': {}
+#             'promoMovie': {}
+#             'frontPageMovies':
+#               partials: 
+#                 'pagination': {}
+#         'someView': {}
+#       dataManager: @dataManager,
+#       templateFolder: 'app/templates'
+#       templateFormat: 'js'
+      
+#     @layout = new Inn.Layout @layout_config
+    
+#     @layout_config_jade =
+#       partials:
+#         'header': {}
+#         'footer': {}
+#         'content':
+#           partials:
+#             'tags': {}
+#             'sortings': {}
+#             'promoMovie': {}
+#             'frontPageMovies':
+#               partials: 
+#                 'pagination': {}
+#         'someView': {}
+#       dataManager: @dataManager,
+#       templateFolder: 'app/templates'
+#       templateFormat: 'jade'
+      
+#     @layout_jade = new Inn.Layout @layout_config_jade
+    
+
+#   teardown: ->
+#     delete @dataManager
+#     delete @layout_config
+#     delete @layout
+    
+#     $('#header').remove()
+#     $('#content').remove()
+#     $('#footer').remove()
+
+
+# test 'layout should create views with default options', 4, ->
+#   @layout._processPartials()
+  
+#   strictEqual @layout.getView('header')._getTemplateURL(), 'app/templates/bHeader.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
+#   strictEqual @layout.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.js', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
+  
+#   @layout_jade._processPartials()
+#   strictEqual @layout_jade.getView('header')._getTemplateURL(), 'app/templates/bHeader.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
+#   strictEqual @layout_jade.getView('frontPageMovies')._getTemplateURL(), 'app/templates/bFrontPageMovies.jade', 'При создании view layout должен передавать кастомный путь к шаблонам в конструктор'
+
+# asyncTest 'layout render should attach views to DOM', 3, ->
+#   deferred = @layout.render()
+
+#   deferred.done ->
+#     strictEqual $('#header').text(), '===Header===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
+#     strictEqual $('#content').html(), '===Content===<div id="tags">===Tags===</div><div id="sortings">===Sortings===</div><div id="promoMovie">===PromoMovie===</div><div id="frontPageMovies">===Frontpage movies===<div id="pagination">===Pagination===</div></div>', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
+#     strictEqual $('#footer').text(), '===Footer===', 'Layout должен отрендерить вьюшки верхнего уровня при вызове его метода render'
+#     start()
+
+
+# asyncTest 'layout should cleanup nested views references for removed DOM elements', 5, ->
+#   test = this
+#   deferred = @layout.render()
+  
+#   deferred.done ->
+#     test.layout.getView('content').remove()
+#     strictEqual test.layout.getView('tags').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
+#     strictEqual test.layout.getView('sortings').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
+#     strictEqual test.layout.getView('promoMovie').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
+#     strictEqual test.layout.getView('frontPageMovies').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
+#     strictEqual test.layout.getView('pagination').el.parentNode, null, 'layout should cleanup nested views references for removed DOM elements'
+#     start()
+
+
+
+# module "Inn.Layout Destroy",
+#   setup: ->
+#     $('#layout').empty()
+    
+#     @dataManager = new Inn.DataManager
+      
+#     @layout_config =
+#       partials:
+#         'header': {}
+#         'footer': {}
+#         'content':
+#           templateName: 'bFrontpage'
+#           templateURL: 'app/templates/bFrontpage.js'
+#           partials:
+#             'tags': {}
+#             'sortings': {}
+#             'promoMovie': {}
+#             'frontPageMovies':
+#               partials: 
+#                 'pagination': {}
+#         'someView': {}
+#       dataManager: @dataManager,
+#       templateFolder: 'app/templates'
+#       templateFormat: 'js'
+      
+#     @layout = new Inn.Layout @layout_config
+    
+#   teardown: ->
+#     delete @dataManager
+#     delete @layout_config
+#     delete @layout
+    
+#     $('#layout').empty()
+
+
+# asyncTest 'layout should remove all views from self', 6, ->
+#   test = this
+#   deferred = @layout.render()
+
+  
+#   deferred.done ->
+#     test.layout.destroy().done ->
+#       strictEqual test.layout.getView('tags'), null, 'layout should remove all views from self'
+#       strictEqual test.layout.getView('sortings'), null, 'layout should remove all views from self'
+#       strictEqual test.layout.getView('promoMovie'), null, 'layout should remove all views from self'
+#       strictEqual test.layout.getView('frontPageMovies'), null, 'layout should remove all views from self'
+#       strictEqual test.layout.getView('pagination'), null, 'layout should remove all views from self'
+#       strictEqual test.layout.getView('someView'), null, 'layout should remove all views from self'
+    
+#       start()
+
+
+# module "Inn.Layout View attributes",
+#   setup: ->
+#     $('#layout').empty()
+    
+#     @dataManager = new Inn.DataManager
+      
+#     @layout_config =
+#       partials:
+#         'header':
+#           attributes:
+#             'class': 'bHeader'
+#             'data-some': 'some_data'
+#         'footer': {}
+#         'content':
+#           templateName: 'bFrontpage'
+#           templateURL: 'app/templates/bFrontpage.js'
+#           partials:
+#             'tags': {}
+#             'sortings': {}
+#             'promoMovie': {}
+#             'frontPageMovies':
+#               partials: 
+#                 'pagination': {}
+#         'someView': {}
+#       dataManager: @dataManager,
+#       templateFolder: 'app/templates'
+#       templateFormat: 'js'
+      
+#     @layout = new Inn.Layout @layout_config
+    
+#   teardown: ->
+#     delete @dataManager
+#     delete @layout_config
+#     delete @layout
+    
+#     $('#layout').empty()
+
+
+# asyncTest 'layout should pass view attributes to View constructor', 2, ->
+#   test = this
+#   deferred = @layout.render()
+  
+#   deferred.done ->
+#     strictEqual test.layout.getView('header').$el.attr('class'), 'bHeader', 'layout should pass view attributes to View constructor'
+#     strictEqual test.layout.getView('header').$el.data('some'), 'some_data', 'layout should pass view attributes to View constructor'
+      
+#     start()
+
+
+# module "Inn.Layout automatic partials processing",
+#   setup: ->
+#     $('#layout').empty()
+#     @dataManager = new Inn.DataManager
+      
+#     @layout_config =
+#       partials:
+#         'header':
+#           attributes:
+#             'class': 'bHeader'
+#             'data-some': 'some_data'
+#         'footer': {}
+#         'content':
+#           templateName: 'bFrontpage'
+#           templateURL: 'app/templates/bFrontpage.js'
+#           partials:
+#             'tags': {}
+#             'sortings': {}
+#             'promoMovie': {}
+#             'frontPageMovies':
+#               partials: 
+#                 'pagination': {}
+#         'someView': {}
+#       dataManager: @dataManager,
+#       viewOptions:
+#         templateFolder: 'app/templates'
+#         templateFormat: 'js'
+      
+#     @layout = new Inn.Layout @layout_config
+    
+#     @layout_config2 =
+#       dataManager: @dataManager,
+#       placeholderClassName: 'otherPlaceholder'
+#       templateFolder: 'app/templates'
+#       templateFormat: 'js'
+    
+    
+#     @layout2 = new Inn.Layout @layout_config2
+    
+#   teardown: ->
+#     delete @dataManager
+#     delete @layout_config
+#     delete @layout
+    
+#     $('#layout').empty()
+
+# test 'Layout should have placeholderClassName option', 2, ->
+#   strictEqual @layout.options.placeholderClassName, 'layoutPlaceholder', 'Layout should have default placeholderClassName option'
+#   strictEqual @layout2.options.placeholderClassName, 'otherPlaceholder', 'Layout should have placeholderClassName option'
+
+
+# asyncTest 'layout should automatically parse for placeholder and subviews', 5, ->
+#   test = this
+#   deferred = @layout2.render()
+  
+#   deferred.done ->
+#     notStrictEqual test.layout2.getView('footer'), null, 'layout should automatically create top-level views'
+#     notStrictEqual test.layout2.getView('tags'), null, 'layout should automatically create subviews'
+#     notStrictEqual test.layout2.getView('pagination'), null, 'layout should automatically create subviews'
+    
+#     deepEqual test.layout2.getView('content').options._viewBranch, {"partials": {"frontPageMovies": {}, "promoMovie": {}, "sortings": {}, "tags":  {}}}, 'layout should automatically create subviews'
+    
+#     deepEqual test.layout2.getView('frontPageMovies').options._viewBranch, {"partials": {"pagination": {}}}, 'layout should automatically create subviews'
+    
+#     start()

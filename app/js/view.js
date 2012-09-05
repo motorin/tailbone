@@ -6,46 +6,63 @@
   }
 
   Inn.View = Backbone.View.extend({
-    initialize: function(options) {
-      this.options = $.extend({}, {
-        templateFolder: '',
-        templateFormat: 'js'
-      }, options);
+    initialize: function(options, partials) {
+      this.partials = partials != null ? partials : [];
+      return this._load();
+    },
+    destroy: function() {
+      this.parent = null;
       return this;
     },
-    getDataForView: function() {
-      if (this.model) {
-        return this.model.toJSON();
+    render: function() {
+      var child, idx, partial, _i, _j, _len, _len1, _ref1, _ref2,
+        _this = this;
+      _ref1 = this.partials;
+      for (idx = _i = 0, _len = _ref1.length; _i < _len; idx = ++_i) {
+        partial = _ref1[idx];
+        this.children.add(partial);
       }
+      _ref2 = this.pullChildren();
+      for (idx = _j = 0, _len1 = _ref2.length; _j < _len1; idx = ++_j) {
+        child = _ref2[idx];
+        this.children.add(child);
+      }
+      if (this.children.isEmpty()) {
+        setTimeout(function() {
+          _this.ready = true;
+          return _this.trigger('ready');
+        });
+      } else {
+        this.children.on('ready', function() {
+          return _this.trigger('ready');
+        });
+      }
+      return this;
     },
-    renderSelf: function() {
+    _load: function() {
       var _this = this;
-      if (this.options.layout) {
-        this.options.layout._viewsUnrendered.push(this);
-      }
-      this._getTemplate().done(function() {
-        if (_this.attributes) {
-          if (typeof _this.attributes === 'function') {
-            _this.$el.attr(_this.attributes());
-          } else {
-            _this.$el.attr(_this.attributes);
-          }
-        }
-        _this.$el.html(_this._template(_this.getDataForView()));
-        _this.trigger('render', _this);
-        return _this._renderDeferred.resolve();
+      setTimeout(function() {
+        return _this.trigger('loaded');
       });
       return this;
     },
-    remove: function() {
-      this.undelegateEvents();
-      this.$el.empty().remove();
-      this.trigger('remove');
-      this.options.isInDOM = false;
-      return this;
+    pullChildren: function() {
+      return [];
+    },
+    isRoot: function() {
+      return this._parent === null;
+    },
+    ready: false,
+    _parent: null,
+    children: new Inn.ViewsCollection,
+    isValid: function() {
+      return true;
+    },
+    options: {
+      placeholderClassName: 'layoutPlaceholder',
+      templateFolder: '',
+      templateFormat: 'js'
     }
   });
-
-  _.extend(Inn.View.prototype, Inn.TemplateMixin);
 
 }).call(this);

@@ -7,63 +7,124 @@ window.Inn ?= {}
 # 
 Inn.View = Backbone.View.extend({
 
-  ##### initialize( *options* )
+
+  ##### initialize( *options*, *partials* )
   #
   #---
   # Конструктор
-  initialize: (options)->
-    # наследует настройки по умолчанию
-    @options = $.extend {}, 
-      templateFolder: ''
-      templateFormat: 'js'
-    , options
-    
-    # поддерживает "чейнинг"
-    return @
-  
-  ##### getDataForView()
+  # 
+  # **options** - Хеш с настройками
+  # 
+  # **partials** - Хеш с конфигурацией partial-ов
+  initialize: (options, @partials = []) ->
+    @_load()
+
+
+  ##### destroy()
   #
   #---
-  # Достаёт данные из модели
-  getDataForView: ->
-    return this.model.toJSON() if this.model
-  
+  # Уничтожает View и всех его детей
+  #
+  # Генерирует событие **destroy**
+  destroy: ->
+    # Уничтожаем ссылку на родителя
+    @parent = null
+
+    return @
+
+
   ##### render()
   #
   #---
-  # Рендерит шаблон, возвращает deferred object
-  renderSelf: ->
-    @options.layout._viewsUnrendered.push(@) if @options.layout                 #TODO untested and WRONG -- can't easily extend!!
-    
-    @_getTemplate().done =>
-      if @attributes
-        if typeof @attributes == 'function'
-           @$el.attr @attributes()
-         else
-           @$el.attr @attributes
+  # Рендерит View и всех его детей
+  render: ->
+    #  ... тут будем рендерить себя ...
 
-      @$el.html @_template @getDataForView()
-      @trigger 'render', @
-      @_renderDeferred.resolve()
+    # Добавляем partials в очередь рендеринга
+    for partial, idx in @partials
+      @children.add partial
+
+    # Вытаскиваем детей
+    for child, idx in @pullChildren()
+      @children.add child
+
+    # Если нет partial-ов, генериуем событие **ready**
+    if @children.isEmpty()
+      setTimeout =>
+        # Устанавливаем флажок ready в true
+        @ready = on
+        @trigger 'ready'
+    else
+      # Ожидаем завершения рендеринга **partial**-ов
+      @children.on 'ready', => 
+        @trigger 'ready'
 
     return @
 
-  ##### remove()
+
+  ##### load()
   #
   #---
-  # Удаляет View из DOM верева
-  remove: ->
-    # Отписывается от событий
-    @undelegateEvents()
-    @$el.empty().remove()
-    # Генерирует событие **"remove"**
-    @trigger('remove')
-    # Устанавливает заначение опции isInDom в false
-    @options.isInDOM = off
+  # Загружает шаблоны View и всех его детей
+  _load: ->
+
+    setTimeout =>
+      # По завершении загрузки генерирует событие **loaded**
+      @trigger 'loaded'
 
     return @
-    
-})
 
-# Добавляем методы из TemplateMixin
-_.extend(Inn.View.prototype, Inn.TemplateMixin)
+
+  ##### pullChildren()
+  #
+  #---
+  # Вытаскивает pratials из отрендеренного шаблона
+  pullChildren: ->
+    return []
+
+
+  ##### isRoot()
+  #
+  #---
+  # Устанавливает, является ли этот View корневым
+  isRoot: ->
+    return @_parent is null
+
+
+  ##### ready
+  #
+  #---
+  # Отражает состояние View
+  ready: off
+
+
+  ##### _parent
+  #
+  #---
+  # Родительский View
+  _parent: null
+
+
+  ##### children
+  #
+  #---
+  # Коллекция с дочерними View
+  children: new Inn.ViewsCollection
+
+  ##### _validate()
+  #
+  #---
+  # Заглушка для Inn.ViewsCollection
+  isValid: -> on
+
+  ##### options
+  #
+  #---
+  # Хеш настроек по умолчанию
+  options:
+    placeholderClassName: 'layoutPlaceholder'
+    templateFolder: ''
+    templateFormat: 'js'
+
+
+});
