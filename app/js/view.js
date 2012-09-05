@@ -55,9 +55,6 @@
     ready: false,
     _parent: null,
     children: new Inn.ViewsCollection,
-    isValid: function() {
-      return true;
-    },
     options: {
       placeholderClassName: 'layoutPlaceholder',
       templateFolder: '',

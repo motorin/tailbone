@@ -111,11 +111,6 @@ Inn.View = Backbone.View.extend({
   # Коллекция с дочерними View
   children: new Inn.ViewsCollection
 
-  ##### _validate()
-  #
-  #---
-  # Заглушка для Inn.ViewsCollection
-  isValid: -> on
 
   ##### options
   #
