@@ -17,20 +17,22 @@
     };
 
     ViewsCollection.prototype.render = function() {
-      var view, _i, _len, _ref1, _results,
-        _this = this;
+      var view, _i, _len, _ref1, _results;
       _ref1 = this._list;
       _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         view = _ref1[_i];
-        view.on('ready', function() {
-          if (_this.isRendered()) {
-            return _this.trigger('ready');
-          }
-        });
+        view.on('ready', this.viewReadyHandler, this);
         _results.push(view.render());
       }
       return _results;
+    };
+
+    ViewsCollection.prototype.viewReadyHandler = function() {
+      if (this.isRendered()) {
+        this.trigger('ready');
+        return this.off('ready');
+      }
     };
 
     ViewsCollection.prototype.isRendered = function() {
@@ -46,6 +48,17 @@
       return _.find(this._list, function(view) {
         return view.id === id;
       });
+    };
+
+    ViewsCollection.prototype.reset = function() {
+      var view, _i, _len, _ref1, _results;
+      _ref1 = this._list;
+      _results = [];
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        view = _ref1[_i];
+        _results.push(view.ready = false);
+      }
+      return _results;
     };
 
     ViewsCollection.prototype.remove = function(view) {

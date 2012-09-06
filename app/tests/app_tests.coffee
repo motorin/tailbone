@@ -178,7 +178,7 @@ module "Inn.View",
 
     @canonicalView = new @DefaultView 
       id: 'frontpage'
-    
+
     @nestedViewSecondLevel = new @DefaultView 
       id: 'frontpage',
       [{id: 'tags'}]
@@ -276,6 +276,17 @@ asyncTest 'triggers ready event on third level nested view.render()', 1, ->
   @nestedViewThirdLevel.on 'ready', ->
     ok on, 'View третьего уровня вложенности должна триггерить событие ready при своем рендеринге'
     start()
+
+asyncTest 'Repeated view rendering', 1, ->
+  @nestedViewSecondLevel.render()
+  count = 0
+
+  @nestedViewSecondLevel.on 'ready', =>
+    if ++count is 2
+      equal @nestedViewSecondLevel.$el.html(), '===Content===<div id="tags">===Tags===</div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>', 'Повторный рендеринг View и его детей'
+      start()
+    else
+      @nestedViewSecondLevel.render()
 
 asyncTest 'Ability to find holes in template', 1, ->
   @nestedViewWithHoles.render()

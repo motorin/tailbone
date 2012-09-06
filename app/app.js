@@ -52,20 +52,22 @@
     };
 
     ViewsCollection.prototype.render = function() {
-      var view, _i, _len, _ref1, _results,
-        _this = this;
+      var view, _i, _len, _ref1, _results;
       _ref1 = this._list;
       _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         view = _ref1[_i];
-        view.on('ready', function() {
-          if (_this.isRendered()) {
-            return _this.trigger('ready');
-          }
-        });
+        view.on('ready', this.viewReadyHandler, this);
         _results.push(view.render());
       }
       return _results;
+    };
+
+    ViewsCollection.prototype.viewReadyHandler = function() {
+      if (this.isRendered()) {
+        this.trigger('ready');
+        return this.off('ready');
+      }
     };
 
     ViewsCollection.prototype.isRendered = function() {
@@ -81,6 +83,17 @@
       return _.find(this._list, function(view) {
         return view.id === id;
       });
+    };
+
+    ViewsCollection.prototype.reset = function() {
+      var view, _i, _len, _ref1, _results;
+      _ref1 = this._list;
+      _results = [];
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        view = _ref1[_i];
+        _results.push(view.ready = false);
+      }
+      return _results;
     };
 
     ViewsCollection.prototype.remove = function(view) {
@@ -123,13 +136,13 @@
     render: function() {
       var _this = this;
       this._loadTemplate(function(template) {
-        var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref1, _ref2;
-        _this.$el.html(template());
+        var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4;
+        _this.$el.html(template((_ref1 = (_ref2 = _this.options.dataManager) != null ? _ref2.getDataAsset() : void 0) != null ? _ref1 : {}));
         patchedOptions = _.clone(_this.options);
         patchedOptions.partials = [];
-        _ref1 = _this.partials;
-        for (idx = _i = 0, _len = _ref1.length; _i < _len; idx = ++_i) {
-          partial = _ref1[idx];
+        _ref3 = _this.partials;
+        for (idx = _i = 0, _len = _ref3.length; _i < _len; idx = ++_i) {
+          partial = _ref3[idx];
           $ctx = _this.$el.find("#" + partial.id);
           view = new Inn.View(_.extend({}, patchedOptions, {
             el: $ctx.get(0)
@@ -137,9 +150,9 @@
           view._parent = _this;
           _this.children.add(view);
         }
-        _ref2 = _this.pullChildren();
-        for (idx = _j = 0, _len1 = _ref2.length; _j < _len1; idx = ++_j) {
-          child = _ref2[idx];
+        _ref4 = _this.pullChildren();
+        for (idx = _j = 0, _len1 = _ref4.length; _j < _len1; idx = ++_j) {
+          child = _ref4[idx];
           $ctx = $(child);
           $ctx.removeClass(_this.options.partialClassName);
           view = new Inn.View(_.extend({}, patchedOptions, {
@@ -150,11 +163,16 @@
           _this.children.add(view);
         }
         if (_this.children.isEmpty()) {
-          _this.ready = true;
+          if (!_this.isRoot()) {
+            _this.ready = true;
+          }
           _this.trigger('ready');
         } else {
           _this.children.on('ready', function() {
-            _this.ready = true;
+            if (!_this.isRoot()) {
+              _this.ready = true;
+            }
+            _this.children.reset();
             return _this.trigger('ready');
           });
         }
@@ -163,8 +181,9 @@
       return this;
     },
     _loadTemplate: function(cb) {
-      var _this = this;
-      $.getScript(this._getTemplateURL(), function() {
+      var process,
+        _this = this;
+      process = function() {
         var template;
         template = function(data) {
           var renderedHTML;
@@ -175,7 +194,14 @@
           return renderedHTML;
         };
         return cb.call(_this, template);
-      });
+      };
+      if (dust.cache[this._getTemplateName()] != null) {
+        setTimeout(function() {
+          return process();
+        });
+      } else {
+        $.getScript(this._getTemplateURL(), process);
+      }
       return this;
     },
     _getTemplateURL: function() {

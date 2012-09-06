@@ -281,6 +281,21 @@
     });
   });
 
+  asyncTest('Repeated view rendering', 1, function() {
+    var count,
+      _this = this;
+    this.nestedViewSecondLevel.render();
+    count = 0;
+    return this.nestedViewSecondLevel.on('ready', function() {
+      if (++count === 2) {
+        equal(_this.nestedViewSecondLevel.$el.html(), '===Content===<div id="tags">===Tags===</div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>', 'Повторный рендеринг View и его детей');
+        return start();
+      } else {
+        return _this.nestedViewSecondLevel.render();
+      }
+    });
+  });
+
   asyncTest('Ability to find holes in template', 1, function() {
     var _this = this;
     this.nestedViewWithHoles.render();

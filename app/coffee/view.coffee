@@ -45,8 +45,13 @@ Inn.View = Backbone.View.extend({
   #
   # Генерирует событие **destroy**
   destroy: ->
+    # @todo: написать тесты!
     # Уничтожаем ссылку на родителя
     @parent = null
+    # Удаляем корневой элемент из DOM
+    @$el.remove()
+    # Вычищаем детей
+    @children.destroy()
 
     return @
 
@@ -57,8 +62,9 @@ Inn.View = Backbone.View.extend({
   # Рендерит View и всех его детей
   render: ->
     @_loadTemplate (template) =>
-      # @todo: Нужно реализовать получение данных!
-      @$el.html template()
+      # Получаем данные для рендеринга шаблона
+      # @todo: написать тесты!
+      @$el.html template @options.dataManager?.getDataAsset() ? {}
 
       # Унаследованные опции с очищенным полем partials
       patchedOptions = _.clone(@options)
@@ -81,13 +87,20 @@ Inn.View = Backbone.View.extend({
 
       # Если нет partial-ов, генериуем событие **ready**
       if @children.isEmpty()
-        # Устанавливаем флажок ready в true
-        @ready = on
+        # Устанавливаем флажок ready в true, если элемент не корневой
+        unless @isRoot()
+          @ready = on
+
         @trigger 'ready'
       else
         # Ожидаем завершения рендеринга **partial**-ов
         @children.on 'ready', => 
-          @ready = on
+          # Устанавливаем флажок ready в true, если элемент не корневой
+          unless @isRoot()
+            @ready = on
+
+          # Сбрасываем статус рендеринга дочерних View
+          @children.reset()
           @trigger 'ready'
 
       @children.render()
@@ -103,7 +116,7 @@ Inn.View = Backbone.View.extend({
   # 
   # **cb** - Колбэк
   _loadTemplate: (cb) ->
-    $.getScript @_getTemplateURL(), () =>
+    process = =>
       # Оборачивает загруженный шаблон во внутреннюю функцию
       template = (data) =>
         renderedHTML = ''
@@ -113,6 +126,11 @@ Inn.View = Backbone.View.extend({
 
       # По завершении загрузки вызывает **cb**, передавая ему функцию-шаблон
       cb.call @, template
+
+    if dust.cache[@_getTemplateName()]?
+      setTimeout -> process()
+    else
+      $.getScript @_getTemplateURL(), process
 
     return @
 
@@ -167,4 +185,4 @@ Inn.View = Backbone.View.extend({
     templateFormat: 'js'
 
 
-});
+})
