@@ -107,6 +107,13 @@ module.exports = function(grunt) {
           'app/js/utils.js'
         ],
         dest: 'app/utils.js'
+      },
+
+      templates: {
+        src: [
+          'app/templates/*.js'
+        ],
+        dest: 'app/js/templates.js'
       }
 
 
@@ -150,7 +157,8 @@ module.exports = function(grunt) {
     watch: {
       files: [
         '<config:coffee.app.src>',
-        '<config:coffee.tests.src>'
+        '<config:coffee.tests.src>',
+        '<config:concat.templates.src>'
       ],
       tasks: 'rebuild'
     },
