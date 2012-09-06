@@ -202,34 +202,34 @@ module "Inn.View",
     @canonicalFolderView = new Inn.View 
       id: 'movie'
 
-    @folder_view = new Inn.View
+    @folderView = new Inn.View
       id: 'movie',
       templateFolder: 'templates'
 
-    @format_view = new Inn.View
+    @formatView = new Inn.View
       id: 'movie',
       templateFormat: 'jade'
 
-    @overriden_view = new Inn.View
+    @overridenView = new Inn.View
       id: 'content',
       templateURL: 'bFrontpage'
 
-    @overriden_folder_view = new Inn.View
+    @overridenFolderView = new Inn.View
       id: 'content',
       templateURL: 'bFrontpage',
       templateFolder: 'templates'
     
-    @overriden_format_and_folder_view = new Inn.View
+    @overridenFormatAndFolderView = new Inn.View
       id: 'content',
       templateName: 'bFrontpage'
       templateFolder: 'templates'
       templateFormat: 'jade'
       
-    @real_view = new Inn.View
+    @realView = new Inn.View
       id: 'someView',
       templateFolder: 'app/templates'
     
-    @template_view = new Inn.View
+    @templateView = new Inn.View
       id: 'someView',
       templateName: 'bFrontpage'
       templateFolder: 'app/templates'
@@ -243,13 +243,13 @@ module "Inn.View",
     delete @viewWithAttribute
     delete @nestedViewWithHoles
     delete @canonicalFolderView
-    delete @folder_view
-    delete @format_view
-    delete @overriden_view
-    delete @overriden_folder_view
-    delete @overriden_format_and_folder_view
-    delete @real_view
-    delete @template_view
+    delete @folderView
+    delete @formatView
+    delete @overridenView
+    delete @overridenFolderView
+    delete @overridenFormatAndFolderView
+    delete @realView
+    delete @templateView
     # delete @overriden_view
 
 
@@ -302,14 +302,6 @@ asyncTest 'View may have attribute foo, with "bar" in value', 1, ->
     equal @viewWithAttribute.$el.attr('foo'), 'bar', 'Установка атрибута foo="bar"'
     start()
 
-asyncTest 'View.isRoot()', 2, ->
-  @nestedViewSecondLevel.render()
-
-  @nestedViewSecondLevel.on 'ready', =>
-    equal @nestedViewSecondLevel.isRoot(), on, 'Правильно ли определяется isRoot() для корневого View'
-    equal @nestedViewSecondLevel.children.get('tags').isRoot(), off, 'Правильно ли определяется isRoot() для дочернего View'
-    start()
-
 asyncTest 'First level View rendering', 1, ->
   @canonicalView.render()
 
@@ -324,52 +316,46 @@ asyncTest 'Second level View rendering', 1, ->
     equal @nestedViewSecondLevel.$el.html(), '===Content===<div id="tags">===Tags===</div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>', 'Рендеринг View второго уровня'
     start()
 
+asyncTest 'isRoot()', 2, ->
+  @nestedViewSecondLevel.render()
+
+  @nestedViewSecondLevel.on 'ready', =>
+    equal @nestedViewSecondLevel.isRoot(), on, 'Правильно ли определяется isRoot() для корневого View'
+    equal @nestedViewSecondLevel.children.get('tags').isRoot(), off, 'Правильно ли определяется isRoot() для дочернего View'
+    start()
+
+asyncTest '_loadTemplate()', 1, ->
+  @canonicalView.render()
+
+  @canonicalView._loadTemplate (template) =>
+    equal typeof template, 'function', 'Подгрузка шаблона'
+    start()
+
 test '_getTemplateURL()', 2, ->
   #по умолчанию путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%.js" Если жестко задан параметр "templateURL" то должен браться он
   equal @canonicalFolderView._getTemplateURL(), 'bMovie.js', 'Должно вернуть bMovie.js, а вернуло ' + @canonicalFolderView._getTemplateURL()
-  equal @overriden_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_view._getTemplateURL()
+  equal @overridenView._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overridenView._getTemplateURL()
 
 
 test '_getTemplateURL() with folder name', 2, ->
   #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.js"
-  equal @folder_view._getTemplateURL(), 'templates/bMovie.js', 'Должно вернуть templates/bMovie.js, а вернуло ' + @folder_view._getTemplateURL()
-  equal @overriden_folder_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_folder_view._getTemplateURL()
+  equal @folderView._getTemplateURL(), 'templates/bMovie.js', 'Должно вернуть templates/bMovie.js, а вернуло ' + @folderView._getTemplateURL()
+  equal @overridenFolderView._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overridenFolderView._getTemplateURL()
 
 
 test '_getTemplateURL() with folder name and template format', 2, ->
   #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
-  equal @format_view._getTemplateURL(), 'bMovie.jade', 'Должно вернуть templates/bMovie.jade, а вернуло ' + @folder_view._getTemplateURL()
-  equal @overriden_format_and_folder_view._getTemplateURL(), 'templates/bFrontpage.jade', 'Должно вернуть templates/bFrontpage.jade, а вернуло ' + @overriden_folder_view._getTemplateURL()
+  equal @formatView._getTemplateURL(), 'bMovie.jade', 'Должно вернуть templates/bMovie.jade, а вернуло ' + @folderView._getTemplateURL()
+  equal @overridenFormatAndFolderView._getTemplateURL(), 'templates/bFrontpage.jade', 'Должно вернуть templates/bFrontpage.jade, а вернуло ' + @overridenFormatAndFolderView._getTemplateURL()
 
 test '_getTemplateName()', 2, ->
   #путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%"
-  equal @overriden_format_and_folder_view._getTemplateName(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_format_and_folder_view._getTemplateName()
+  equal @overridenFormatAndFolderView._getTemplateName(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overridenFormatAndFolderView._getTemplateName()
   equal @canonicalFolderView._getTemplateName(), 'bMovie', 'Должно вернуть bMovie, а вернуло ' + @canonicalFolderView._getTemplateName()
 
 test '_getTemplateURL() with _getTemplateName()', 1, ->
   #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
-  equal @template_view._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + @template_view._getTemplateURL()
-
-
-# asyncTest 'render should define _template', 1, ->
-#   render = @real_view.render()
-  
-#   test = this
-  
-#   render.done ->
-#     ok test.real_view._template, 'При рендеренге должна создаваться функция-шаблон'
-#     start()
-
-
-# asyncTest 'render should render _template', 1, ->
-#   render = @real_view.render()
-  
-#   test = this
-  
-#   render.done ->
-#     equal test.real_view.$el.text(), 'Some content', 'Должнен отрендериться временный элемент'
-#     start()
-  
+  equal @templateView._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + @templateView._getTemplateURL()
 
 # test 'triggers remove event on remove()', 1, ->
 #   some_variable = false;
@@ -384,161 +370,10 @@ test '_getTemplateURL() with _getTemplateName()', 1, ->
 #   @real_view.remove()
 #   strictEqual typeof @real_view.getDataForView, 'function', 'View should have getDataForView method'
 
-
-
-# module "Inn.Layout",
-#   setup: ->
-#     @dataManager = new Inn.DataManager
-      
-#     @layout_config =
-#       partials:
-#         'header': {}
-#         'footer':
-#           templateURL: 'bFooter'
-#         'content':
-#           templateURL: 'bFrontpage'
-#           partials:
-#             'tags': {}
-#             'sortings': {}
-#             'promoMovie': {}
-#             'frontPageMovies':
-#               templateURL: 'bFrontPageMoviesList',
-#               partials: 
-#                 'pagination': {}
-#         'someView': {}
-#       dataManager: @dataManager
-#       templateFolder: 'app/templates'
-      
-#     @layout = new Inn.Layout @layout_config
-
-#     @layout_with_id = new Inn.Layout
-#       dataManager: @dataManager
-#       id: 'secondLayout'
-    
-#     @layout_with_templateFolder = new Inn.Layout
-#       dataManager: @dataManager
-#       viewOptions:
-#         templateFolder: 'app/templates'
-     
-#     @layout_with_templateFormat = new Inn.Layout
-#       dataManager: @dataManager
-#       templateFormat: 'jade'
-
-#     @layout_with_templateFormat_and_templateFolder = new Inn.Layout
-#       dataManager: @dataManager
-#       templateFolder: 'app/templates'
-#       templateFormat: 'jade'
-      
-#     @layout_with_overriden_templateName = new Inn.Layout
-#       dataManager: @dataManager
-#       templateName: 'other_layout'    
-      
-#     @layout_with_overriden_templateName_and_templateFolder = new Inn.Layout
-#       dataManager: @dataManager
-#       templateFolder: 'app/templates'
-#       templateName: 'other_layout'  
-      
-#     @layout_with_overriden_templateName_and_templateFolder_and_templateFormat = new Inn.Layout
-#       dataManager: @dataManager
-#       templateFormat: 'jade'
-#       templateFolder: 'app/templates'
-#       templateName: 'other_layout'
-
-#     @userModel = new Inn.Model
-#       id: 'user',
-#       name: 'user'
-      
-#     @collectionModel = new Inn.Collection()
-      
-#     @otherCollectionModel = new Inn.Collection()
-      
-#     @tagsModel = new Inn.Model
-#       id: 'tags'
-      
-#     @dataManager.addDataAsset @userModel
-#     @dataManager.addDataAsset @tagsModel
-#     @dataManager.addDataAsset @collectionModel, 'collection'
-#     @dataManager.addDataAsset @otherCollectionModel, 'otherCollection'
-      
-#     @tagsView = new Inn.View
-#       id: 'tags'
-      
-#     @userbarView = new Inn.View
-#       id: 'userbar',
-#       model: @userModel
-      
-#     @userbarCloneView = new Inn.View
-#       id: 'userbar'
-      
-#     @otherUserView = new Inn.View
-#       id: 'user',
-#       model: @userModel
-    
-#     @collectionView = new Inn.View
-#       id: 'collection'
-    
-      
-#     @collectionSetView = new Inn.View
-#       id: 'collectionSet',
-#       collection: @otherCollectionModel
-      
-#     @orphanView = new Inn.View
-#       id: 'orphan'
-      
-#     @realView = new Inn.View
-#       id: 'someView',
-#       templateFolder: 'app/templates'
-    
-#     @contentView = new Inn.View
-#       id: 'content',
-#       templateFolder: 'app/templates'
-      
-#     @frontpageView = new Inn.View
-#       id: 'frontPageMovies',
-#       templateFolder: 'app/templates'
-    
-    
-
-#   teardown: ->
-#     delete @dataManager
-#     delete @layout_config
-#     delete @layout
-#     delete @userModel
-#     delete @collectionModel
-#     delete @otherCollectionModel
-#     delete @tagsModel
-#     delete @tagsView
-#     delete @userbarView
-#     delete @otherUserView
-#     delete @collectionView
-#     delete @collectionSetView
-#     delete @orphanView
-#     delete @realView
-#     delete @contentView
-#     delete @frontapageView
-  
-
-# test "Наличие", 1, ->
-#   ok @layout instanceof Inn.Layout, 'Ожидаем объект мастер-шаблона (лэйаута, страницы)'
-
 # test "id", 2, ->
 #   strictEqual @layout.id, 'layout', 'Должен автоматически присвоиться id главного элемента мастер-шаблона'
 #   strictEqual @layout_with_id.id, 'secondLayout', 'Должен автоматически присвоиться id главного элемента мастер-шаблона'
 
-# test '_getTemplateName()', 2, ->
-#   #путь к шаблону должен генерироваться на основе ID по схеме "b%LayoutId%"
-#   equal @layout._getTemplateName(), 'bLayout', 'Должно вернуть bLayou, а вернуло ' + @layout._getTemplateName()
-#   equal @layout_with_id._getTemplateName(), 'bSecondLayout', 'Должно вернуть bSecondLayout, а вернуло ' + @layout_with_id._getTemplateName()
-
-# test '_getTemplateURL()', 7, ->
-#   strictEqual @layout._getTemplateURL(), 'app/templates/bLayout.js', 'Должно вернуться bLayout.js'
-#   strictEqual @layout_with_id._getTemplateURL(), 'bSecondLayout.js', 'Должно вернуться bSecondLayout.js'
-#   strictEqual @layout_with_templateFormat._getTemplateURL(), 'bLayout.jade', 'кастомный путь к шаблону, если он есть в настройках'
-#   strictEqual @layout_with_templateFormat_and_templateFolder._getTemplateURL(), 'app/templates/bLayout.jade', 'кастомный путь к шаблону, если он есть в настройках'
-#   strictEqual @layout_with_overriden_templateName._getTemplateURL(), 'other_layout.js', 'кастомный путь к шаблону, если он есть в настройках'
-#   strictEqual @layout_with_overriden_templateName_and_templateFolder._getTemplateURL(), 'app/templates/other_layout.js', 'кастомный путь к шаблону, если он есть в настройках'
-#   strictEqual @layout_with_overriden_templateName_and_templateFolder_and_templateFormat._getTemplateURL(), 'app/templates/other_layout.jade', 'кастомный путь к шаблону, если он есть в настройках'
-  
 # test "_dataManager link require", 2, ->
 #   raises ->
 #     new Inn.Layout()
@@ -553,16 +388,6 @@ test '_getTemplateURL() with _getTemplateName()', 1, ->
 # test "_dataManager link", 1, ->
 #   ok @layout._dataManager instanceof Inn.DataManager, 'При создании layout у нему должна крепиться ссылка на менеджер данных'
 
-
-# test 'render', 2, ->
-#   equal typeof @layout.render, 'function', 'Нет функции, рендерящей мастер-шаблон'
-#   equal typeof @layout.render().done, 'function', 'Функция, рендерящая мастер-шаблон должна вернуть deferred-объект, у которого будет метод done'
-
-
-# test 'render should not create several deferreds until resolve', 1, ->
-#   first_deferred = @layout.render()
-#   second_deferred = @layout.render()
-#   strictEqual first_deferred, second_deferred, 'Если неразрешен первый рендер, то должен возвращаться текущий'
 
 # test 'addView', 6, ->
 #   @layout.addView @tagsView

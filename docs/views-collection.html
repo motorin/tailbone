@@ -43,11 +43,12 @@
 
 <p>Сбрасывает состояние всех View в списке</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">reset: </span><span class="o">-&gt;</span>
     <span class="k">for</span> <span class="nx">view</span> <span class="k">in</span> <span class="nx">@_list</span>
-      <span class="nv">view.ready = </span><span class="kc">off</span></pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <h4>attachEvents()</h4>
+      <span class="nv">view.ready = </span><span class="kc">off</span></pre></div>             </td>           </tr>                               <tr id="section-16">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-16">&#182;</a>               </div>               <h4>destroy()</h4>
 
 <hr />
 
-<p>Вешает обработчики событий</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">remove: </span><span class="nf">(view) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <p>Вычищаем View</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">view</span><span class="p">.</span><span class="nx">destroy</span><span class="p">()</span>
+<p>Вешает обработчики событий</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">destroy: </span><span class="nf">() -&gt;</span>
+    <span class="k">for</span> <span class="nx">view</span> <span class="k">in</span> <span class="nx">@_list</span></pre></div>             </td>           </tr>                               <tr id="section-17">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-17">&#182;</a>               </div>               <p>Вычищаем View</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">view</span><span class="p">.</span><span class="nx">destroy</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="nx">@</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <h4>isEmpty()</h4>
 

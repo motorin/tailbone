@@ -37,6 +37,12 @@ Inn.View = Backbone.View.extend({
     # Отражает состояние View
     @ready = off
 
+    ##### _rendering
+    #
+    #---
+    # Отражает состояние рендеринга View
+    @_rendering = off
+
 
   ##### destroy()
   #
@@ -61,6 +67,10 @@ Inn.View = Backbone.View.extend({
   #---
   # Рендерит View и всех его детей
   render: ->
+    return @ if @_rendering
+
+    @_rendering = on
+
     @_loadTemplate (template) =>
       # Получаем данные для рендеринга шаблона
       # @todo: написать тесты!
@@ -91,6 +101,7 @@ Inn.View = Backbone.View.extend({
         unless @isRoot()
           @ready = on
 
+        @_rendering = off
         @trigger 'ready'
       else
         # Ожидаем завершения рендеринга **partial**-ов
@@ -101,6 +112,8 @@ Inn.View = Backbone.View.extend({
 
           # Сбрасываем статус рендеринга дочерних View
           @children.reset()
+          # Снимаем блокировку рендеринга
+          @_rendering = off
           @trigger 'ready'
 
       @children.render()

@@ -61,8 +61,13 @@
       return _results;
     };
 
-    ViewsCollection.prototype.remove = function(view) {
-      view.destroy();
+    ViewsCollection.prototype.destroy = function() {
+      var view, _i, _len, _ref1;
+      _ref1 = this._list;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        view = _ref1[_i];
+        view.destroy();
+      }
       return this;
     };
 

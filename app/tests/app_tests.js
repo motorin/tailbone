@@ -202,34 +202,34 @@
       this.canonicalFolderView = new Inn.View({
         id: 'movie'
       });
-      this.folder_view = new Inn.View({
+      this.folderView = new Inn.View({
         id: 'movie',
         templateFolder: 'templates'
       });
-      this.format_view = new Inn.View({
+      this.formatView = new Inn.View({
         id: 'movie',
         templateFormat: 'jade'
       });
-      this.overriden_view = new Inn.View({
+      this.overridenView = new Inn.View({
         id: 'content',
         templateURL: 'bFrontpage'
       });
-      this.overriden_folder_view = new Inn.View({
+      this.overridenFolderView = new Inn.View({
         id: 'content',
         templateURL: 'bFrontpage',
         templateFolder: 'templates'
       });
-      this.overriden_format_and_folder_view = new Inn.View({
+      this.overridenFormatAndFolderView = new Inn.View({
         id: 'content',
         templateName: 'bFrontpage',
         templateFolder: 'templates',
         templateFormat: 'jade'
       });
-      this.real_view = new Inn.View({
+      this.realView = new Inn.View({
         id: 'someView',
         templateFolder: 'app/templates'
       });
-      return this.template_view = new Inn.View({
+      return this.templateView = new Inn.View({
         id: 'someView',
         templateName: 'bFrontpage',
         templateFolder: 'app/templates'
@@ -243,13 +243,13 @@
       delete this.viewWithAttribute;
       delete this.nestedViewWithHoles;
       delete this.canonicalFolderView;
-      delete this.folder_view;
-      delete this.format_view;
-      delete this.overriden_view;
-      delete this.overriden_folder_view;
-      delete this.overriden_format_and_folder_view;
-      delete this.real_view;
-      return delete this.template_view;
+      delete this.folderView;
+      delete this.formatView;
+      delete this.overridenView;
+      delete this.overridenFolderView;
+      delete this.overridenFormatAndFolderView;
+      delete this.realView;
+      return delete this.templateView;
     }
   });
 
@@ -314,16 +314,6 @@
     });
   });
 
-  asyncTest('View.isRoot()', 2, function() {
-    var _this = this;
-    this.nestedViewSecondLevel.render();
-    return this.nestedViewSecondLevel.on('ready', function() {
-      equal(_this.nestedViewSecondLevel.isRoot(), true, 'Правильно ли определяется isRoot() для корневого View');
-      equal(_this.nestedViewSecondLevel.children.get('tags').isRoot(), false, 'Правильно ли определяется isRoot() для дочернего View');
-      return start();
-    });
-  });
-
   asyncTest('First level View rendering', 1, function() {
     var _this = this;
     this.canonicalView.render();
@@ -342,28 +332,47 @@
     });
   });
 
+  asyncTest('isRoot()', 2, function() {
+    var _this = this;
+    this.nestedViewSecondLevel.render();
+    return this.nestedViewSecondLevel.on('ready', function() {
+      equal(_this.nestedViewSecondLevel.isRoot(), true, 'Правильно ли определяется isRoot() для корневого View');
+      equal(_this.nestedViewSecondLevel.children.get('tags').isRoot(), false, 'Правильно ли определяется isRoot() для дочернего View');
+      return start();
+    });
+  });
+
+  asyncTest('_loadTemplate()', 1, function() {
+    var _this = this;
+    this.canonicalView.render();
+    return this.canonicalView._loadTemplate(function(template) {
+      equal(typeof template, 'function', 'Подгрузка шаблона');
+      return start();
+    });
+  });
+
   test('_getTemplateURL()', 2, function() {
     equal(this.canonicalFolderView._getTemplateURL(), 'bMovie.js', 'Должно вернуть bMovie.js, а вернуло ' + this.canonicalFolderView._getTemplateURL());
-    return equal(this.overriden_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + this.overriden_view._getTemplateURL());
+    return equal(this.overridenView._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + this.overridenView._getTemplateURL());
   });
 
   test('_getTemplateURL() with folder name', 2, function() {
-    equal(this.folder_view._getTemplateURL(), 'templates/bMovie.js', 'Должно вернуть templates/bMovie.js, а вернуло ' + this.folder_view._getTemplateURL());
-    return equal(this.overriden_folder_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + this.overriden_folder_view._getTemplateURL());
+    equal(this.folderView._getTemplateURL(), 'templates/bMovie.js', 'Должно вернуть templates/bMovie.js, а вернуло ' + this.folderView._getTemplateURL());
+    return equal(this.overridenFolderView._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + this.overridenFolderView._getTemplateURL());
   });
 
   test('_getTemplateURL() with folder name and template format', 2, function() {
-    equal(this.format_view._getTemplateURL(), 'bMovie.jade', 'Должно вернуть templates/bMovie.jade, а вернуло ' + this.folder_view._getTemplateURL());
-    return equal(this.overriden_format_and_folder_view._getTemplateURL(), 'templates/bFrontpage.jade', 'Должно вернуть templates/bFrontpage.jade, а вернуло ' + this.overriden_folder_view._getTemplateURL());
+    equal(this.formatView._getTemplateURL(), 'bMovie.jade', 'Должно вернуть templates/bMovie.jade, а вернуло ' + this.folderView._getTemplateURL());
+    return equal(this.overridenFormatAndFolderView._getTemplateURL(), 'templates/bFrontpage.jade', 'Должно вернуть templates/bFrontpage.jade, а вернуло ' + this.overridenFormatAndFolderView._getTemplateURL());
   });
 
   test('_getTemplateName()', 2, function() {
-    equal(this.overriden_format_and_folder_view._getTemplateName(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + this.overriden_format_and_folder_view._getTemplateName());
+    equal(this.overridenFormatAndFolderView._getTemplateName(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + this.overridenFormatAndFolderView._getTemplateName());
     return equal(this.canonicalFolderView._getTemplateName(), 'bMovie', 'Должно вернуть bMovie, а вернуло ' + this.canonicalFolderView._getTemplateName());
   });
 
   test('_getTemplateURL() with _getTemplateName()', 1, function() {
-    return equal(this.template_view._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + this.template_view._getTemplateURL());
+    return equal(this.templateView._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + this.templateView._getTemplateURL());
   });
 
 }).call(this);
