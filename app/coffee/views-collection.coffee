@@ -42,6 +42,10 @@ class Inn.ViewsCollection
   isRendered: ->
     return _.filter(@_list, (view) -> return not view.ready).length is 0
 
+  get: (id, recursive = off) ->
+    # @todo: implement recursive
+    return _.find(@_list, (view) -> view.id is id)
+
   ##### attachEvents()
   #
   #---

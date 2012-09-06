@@ -24,7 +24,18 @@ Inn.View = Backbone.View.extend({
     #---
     # Коллекция с дочерними View
     @children = new Inn.ViewsCollection
-    # @_load()
+   
+    ##### _parent
+    #
+    #---
+    # Родительский View
+    @_parent = null
+
+    ##### ready
+    #
+    #---
+    # Отражает состояние View
+    @ready = off
 
 
   ##### destroy()
@@ -49,20 +60,23 @@ Inn.View = Backbone.View.extend({
       # @todo: Нужно реализовать получение данных!
       @$el.html template()
 
-      patchedOptions = _.filter(@options, (item, key) -> key is 'partials')
+      # Унаследованные опции с очищенным полем partials
+      patchedOptions = _.clone(@options)
+      patchedOptions.partials = []
+
       # Добавляем partials в очередь рендеринга
       for partial, idx in @partials
         $ctx = @$el.find("##{partial.id}")
-        view = new Inn.View _.extend { el: $ctx.get(0) }, patchedOptions, partial
-        view.parent = @
+        view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0) }, partial
+        view._parent = @
         @children.add view
 
       # Вытаскиваем детей
       for child, idx in @pullChildren()
         $ctx = $(child)
         $ctx.removeClass @options.partialClassName
-        view = new Inn.View _.extend { el: $ctx.get(0), id: $ctx.attr('id') }, patchedOptions, $ctx.data('view-options')
-        view.parent = @
+        view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0), id: $ctx.attr('id') }, $ctx.data('view-options')
+        view._parent = @
         @children.add view
 
       # Если нет partial-ов, генериуем событие **ready**
@@ -143,27 +157,13 @@ Inn.View = Backbone.View.extend({
     return @_parent is null
 
 
-  ##### ready
-  #
-  #---
-  # Отражает состояние View
-  ready: off
-
-
-  ##### _parent
-  #
-  #---
-  # Родительский View
-  _parent: null
-
-
   ##### options
   #
   #---
   # Хеш настроек по умолчанию
   options:
     partialClassName: 'bPartial'
-    templateFolder: 'app/templates'
+    templateFolder: ''
     templateFormat: 'js'
 
 

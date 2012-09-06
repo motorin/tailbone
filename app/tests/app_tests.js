@@ -161,17 +161,24 @@
 
   module("Inn.View", {
     setup: function() {
-      this.canonicalView = new Inn.View({
+      this.DefaultView = Inn.View.extend({
+        options: {
+          partialClassName: 'bPartial',
+          templateFolder: 'app/templates',
+          templateFormat: 'js'
+        }
+      });
+      this.canonicalView = new this.DefaultView({
         id: 'frontpage'
       });
-      this.nestedViewSecondLevel = new Inn.View({
+      this.nestedViewSecondLevel = new this.DefaultView({
         id: 'frontpage'
       }, [
         {
           id: 'tags'
         }
       ]);
-      this.nestedViewThirdLevel = new Inn.View({
+      this.nestedViewThirdLevel = new this.DefaultView({
         id: 'frontpage'
       }, [
         {
@@ -183,64 +190,165 @@
           ]
         }
       ]);
-      this.nestedViewWithHoles = new Inn.View({
+      this.nestedViewWithHoles = new this.DefaultView({
         id: 'holyView'
       });
-      return this.viewWithAttribute = new Inn.View({
+      this.viewWithAttribute = new this.DefaultView({
         id: 'frontpage',
         'attributes': {
           foo: 'bar'
         }
       });
+      this.canonicalFolderView = new Inn.View({
+        id: 'movie'
+      });
+      this.folder_view = new Inn.View({
+        id: 'movie',
+        templateFolder: 'templates'
+      });
+      this.format_view = new Inn.View({
+        id: 'movie',
+        templateFormat: 'jade'
+      });
+      this.overriden_view = new Inn.View({
+        id: 'content',
+        templateURL: 'bFrontpage'
+      });
+      this.overriden_folder_view = new Inn.View({
+        id: 'content',
+        templateURL: 'bFrontpage',
+        templateFolder: 'templates'
+      });
+      this.overriden_format_and_folder_view = new Inn.View({
+        id: 'content',
+        templateName: 'bFrontpage',
+        templateFolder: 'templates',
+        templateFormat: 'jade'
+      });
+      this.real_view = new Inn.View({
+        id: 'someView',
+        templateFolder: 'app/templates'
+      });
+      return this.template_view = new Inn.View({
+        id: 'someView',
+        templateName: 'bFrontpage',
+        templateFolder: 'app/templates'
+      });
     },
     teardown: function() {
+      delete this.DefaultView;
       delete this.canonicalView;
       delete this.nestedViewSecondLevel;
       delete this.nestedViewThirdLevel;
       delete this.viewWithAttribute;
-      return delete this.nestedViewWithHoles;
+      delete this.nestedViewWithHoles;
+      delete this.canonicalFolderView;
+      delete this.folder_view;
+      delete this.format_view;
+      delete this.overriden_view;
+      delete this.overriden_folder_view;
+      delete this.overriden_format_and_folder_view;
+      delete this.real_view;
+      return delete this.template_view;
     }
   });
 
   test('extends Backbone.View', 1, function() {
-    ok(this.canonicalView instanceof Backbone.View, 'Inn.View должна наследоваться от Backbone.View');
-    asyncTest('triggers ready event on render()', 1, function() {
-      this.canonicalView.render();
-      return this.canonicalView.on('ready', function() {
-        ok(true, 'View должна триггерить событие ready при своем рендеринге');
-        return start();
-      });
+    return ok(this.canonicalView instanceof Backbone.View, 'Inn.View должна наследоваться от Backbone.View');
+  });
+
+  asyncTest('triggers ready event on render()', 1, function() {
+    this.canonicalView.render();
+    return this.canonicalView.on('ready', function() {
+      ok(true, 'View должна триггерить событие ready при своем рендеринге');
+      return start();
     });
-    asyncTest('triggers ready event on second level nested view.render()', 1, function() {
-      this.nestedViewSecondLevel.render();
-      return this.nestedViewSecondLevel.on('ready', function() {
-        ok(true, 'View второго уровня вложенности должна триггерить событие ready при своем рендеринге');
-        return start();
-      });
+  });
+
+  asyncTest('triggers ready event on second level nested view.render()', 1, function() {
+    this.nestedViewSecondLevel.render();
+    return this.nestedViewSecondLevel.on('ready', function() {
+      ok(true, 'View второго уровня вложенности должна триггерить событие ready при своем рендеринге');
+      return start();
     });
-    asyncTest('triggers ready event on third level nested view.render()', 1, function() {
-      this.nestedViewThirdLevel.render();
-      return this.nestedViewThirdLevel.on('ready', function() {
-        ok(true, 'View третьего уровня вложенности должна триггерить событие ready при своем рендеринге');
-        return start();
-      });
+  });
+
+  asyncTest('triggers ready event on third level nested view.render()', 1, function() {
+    this.nestedViewThirdLevel.render();
+    return this.nestedViewThirdLevel.on('ready', function() {
+      ok(true, 'View третьего уровня вложенности должна триггерить событие ready при своем рендеринге');
+      return start();
     });
-    asyncTest('Ability to find holes in template', 1, function() {
-      var _this = this;
-      this.nestedViewWithHoles.render();
-      return this.nestedViewWithHoles.on('ready', function() {
-        equal(_this.nestedViewWithHoles.$el.html(), '===Content===<div id="frontPageMovies" class="">===Frontpage movies===<div id="pagination" class="otherPlaceholder"></div></div>', 'Вытаскиваем partial из "дырки"');
-        return start();
-      });
+  });
+
+  asyncTest('Ability to find holes in template', 1, function() {
+    var _this = this;
+    this.nestedViewWithHoles.render();
+    return this.nestedViewWithHoles.on('ready', function() {
+      equal(_this.nestedViewWithHoles.$el.html(), '===Content===<div id="frontPageMovies" class="">===Frontpage movies===<div id="pagination" class="otherPlaceholder"></div></div>', 'Вытаскиваем partial из "дырки"');
+      return start();
     });
-    return asyncTest('View may have attribute foo, with "bar" in value', 1, function() {
-      var _this = this;
-      this.viewWithAttribute.render();
-      return this.viewWithAttribute.on('ready', function() {
-        equal(_this.viewWithAttribute.$el.attr('foo'), 'bar', 'Установка атрибута foo="bar"');
-        return start();
-      });
+  });
+
+  asyncTest('View may have attribute foo, with "bar" in value', 1, function() {
+    var _this = this;
+    this.viewWithAttribute.render();
+    return this.viewWithAttribute.on('ready', function() {
+      equal(_this.viewWithAttribute.$el.attr('foo'), 'bar', 'Установка атрибута foo="bar"');
+      return start();
     });
+  });
+
+  asyncTest('View.isRoot()', 2, function() {
+    var _this = this;
+    this.nestedViewSecondLevel.render();
+    return this.nestedViewSecondLevel.on('ready', function() {
+      equal(_this.nestedViewSecondLevel.isRoot(), true, 'Правильно ли определяется isRoot() для корневого View');
+      equal(_this.nestedViewSecondLevel.children.get('tags').isRoot(), false, 'Правильно ли определяется isRoot() для дочернего View');
+      return start();
+    });
+  });
+
+  asyncTest('First level View rendering', 1, function() {
+    var _this = this;
+    this.canonicalView.render();
+    return this.canonicalView.on('ready', function() {
+      equal(_this.canonicalView.$el.html(), '===Content===<div id="tags"></div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>', 'Рендеринг View первого уровня');
+      return start();
+    });
+  });
+
+  asyncTest('Second level View rendering', 1, function() {
+    var _this = this;
+    this.nestedViewSecondLevel.render();
+    return this.nestedViewSecondLevel.on('ready', function() {
+      equal(_this.nestedViewSecondLevel.$el.html(), '===Content===<div id="tags">===Tags===</div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>', 'Рендеринг View второго уровня');
+      return start();
+    });
+  });
+
+  test('_getTemplateURL()', 2, function() {
+    equal(this.canonicalFolderView._getTemplateURL(), 'bMovie.js', 'Должно вернуть bMovie.js, а вернуло ' + this.canonicalFolderView._getTemplateURL());
+    return equal(this.overriden_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + this.overriden_view._getTemplateURL());
+  });
+
+  test('_getTemplateURL() with folder name', 2, function() {
+    equal(this.folder_view._getTemplateURL(), 'templates/bMovie.js', 'Должно вернуть templates/bMovie.js, а вернуло ' + this.folder_view._getTemplateURL());
+    return equal(this.overriden_folder_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + this.overriden_folder_view._getTemplateURL());
+  });
+
+  test('_getTemplateURL() with folder name and template format', 2, function() {
+    equal(this.format_view._getTemplateURL(), 'bMovie.jade', 'Должно вернуть templates/bMovie.jade, а вернуло ' + this.folder_view._getTemplateURL());
+    return equal(this.overriden_format_and_folder_view._getTemplateURL(), 'templates/bFrontpage.jade', 'Должно вернуть templates/bFrontpage.jade, а вернуло ' + this.overriden_folder_view._getTemplateURL());
+  });
+
+  test('_getTemplateName()', 2, function() {
+    equal(this.overriden_format_and_folder_view._getTemplateName(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + this.overriden_format_and_folder_view._getTemplateName());
+    return equal(this.canonicalFolderView._getTemplateName(), 'bMovie', 'Должно вернуть bMovie, а вернуло ' + this.canonicalFolderView._getTemplateName());
+  });
+
+  test('_getTemplateURL() with _getTemplateName()', 1, function() {
+    return equal(this.template_view._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + this.template_view._getTemplateURL());
   });
 
 }).call(this);

@@ -169,119 +169,175 @@ test 'destroy', 3, ->
 
 module "Inn.View",
   setup: ->
-    @canonicalView = new Inn.View {id: 'frontpage'}
-    @nestedViewSecondLevel = new Inn.View {id: 'frontpage'}, [{id: 'tags'}]
-    @nestedViewThirdLevel = new Inn.View {id: 'frontpage'}, [{id: 'frontPageMovies', partials: [{id: 'pagination'}]}]
-    @nestedViewWithHoles = new Inn.View {id: 'holyView'}
-    @viewWithAttribute = new Inn.View {id: 'frontpage', 'attributes': {foo: 'bar'}}
-    
-    # @folder_view = new Inn.View
-    #   id: 'movie',
-    #   templateFolder: 'templates'
+    @DefaultView = Inn.View.extend
+        options:
+          partialClassName: 'bPartial'
+          templateFolder: 'app/templates'
+          templateFormat: 'js'
 
-    # @format_view = new Inn.View
-    #   id: 'movie',
-    #   templateFormat: 'jade'
 
-    # @overriden_view = new Inn.View
-    #   id: 'content',
-    #   templateURL: 'bFrontpage'
-      
-    # @overriden_folder_view = new Inn.View
-    #   id: 'content',
-    #   templateURL: 'bFrontpage',
-    #   templateFolder: 'templates'
+    @canonicalView = new @DefaultView 
+      id: 'frontpage'
     
-    # @overriden_format_and_folder_view = new Inn.View
-    #   id: 'content',
-    #   templateName: 'bFrontpage'
-    #   templateFolder: 'templates'
-    #   templateFormat: 'jade'
-      
-    # @real_view = new Inn.View
-    #   id: 'someView',
-    #   templateFolder: 'app/templates'
+    @nestedViewSecondLevel = new @DefaultView 
+      id: 'frontpage',
+      [{id: 'tags'}]
     
-    # @template_view = new Inn.View
-    #   id: 'someView',
-    #   templateName: 'bFrontpage'
-    #   templateFolder: 'app/templates'
+    @nestedViewThirdLevel = new @DefaultView 
+      id: 'frontpage',
+      [
+        {
+          id: 'frontPageMovies',
+          partials: [{id: 'pagination'}]
+        }
+      ]
+    
+    @nestedViewWithHoles = new @DefaultView 
+      id: 'holyView'
+    
+    @viewWithAttribute = new @DefaultView 
+      id: 'frontpage',
+      'attributes': {foo: 'bar'}
+
+    @canonicalFolderView = new Inn.View 
+      id: 'movie'
+
+    @folder_view = new Inn.View
+      id: 'movie',
+      templateFolder: 'templates'
+
+    @format_view = new Inn.View
+      id: 'movie',
+      templateFormat: 'jade'
+
+    @overriden_view = new Inn.View
+      id: 'content',
+      templateURL: 'bFrontpage'
+
+    @overriden_folder_view = new Inn.View
+      id: 'content',
+      templateURL: 'bFrontpage',
+      templateFolder: 'templates'
+    
+    @overriden_format_and_folder_view = new Inn.View
+      id: 'content',
+      templateName: 'bFrontpage'
+      templateFolder: 'templates'
+      templateFormat: 'jade'
+      
+    @real_view = new Inn.View
+      id: 'someView',
+      templateFolder: 'app/templates'
+    
+    @template_view = new Inn.View
+      id: 'someView',
+      templateName: 'bFrontpage'
+      templateFolder: 'app/templates'
     
   teardown: ->
+    delete @DefaultView
+
     delete @canonicalView
     delete @nestedViewSecondLevel
     delete @nestedViewThirdLevel
     delete @viewWithAttribute
     delete @nestedViewWithHoles
+    delete @canonicalFolderView
+    delete @folder_view
+    delete @format_view
+    delete @overriden_view
+    delete @overriden_folder_view
+    delete @overriden_format_and_folder_view
+    delete @real_view
+    delete @template_view
     # delete @overriden_view
 
 
 test 'extends Backbone.View', 1, ->
   ok @canonicalView instanceof Backbone.View, 'Inn.View должна наследоваться от Backbone.View'
 
-  asyncTest 'triggers ready event on render()', 1, ->
-    @canonicalView.render()
+asyncTest 'triggers ready event on render()', 1, ->
+  @canonicalView.render()
 
-    @canonicalView.on 'ready', ->
-      ok on, 'View должна триггерить событие ready при своем рендеринге'
-      start()
+  @canonicalView.on 'ready', ->
+    ok on, 'View должна триггерить событие ready при своем рендеринге'
+    start()
 
-  asyncTest 'triggers ready event on second level nested view.render()', 1, ->
-    @nestedViewSecondLevel.render()
+asyncTest 'triggers ready event on second level nested view.render()', 1, ->
+  @nestedViewSecondLevel.render()
 
-    @nestedViewSecondLevel.on 'ready', ->
-      ok on, 'View второго уровня вложенности должна триггерить событие ready при своем рендеринге'
-      start()
+  @nestedViewSecondLevel.on 'ready', ->
+    ok on, 'View второго уровня вложенности должна триггерить событие ready при своем рендеринге'
+    start()
 
-  asyncTest 'triggers ready event on third level nested view.render()', 1, ->
-    @nestedViewThirdLevel.render()
+asyncTest 'triggers ready event on third level nested view.render()', 1, ->
+  @nestedViewThirdLevel.render()
 
-    @nestedViewThirdLevel.on 'ready', ->
-      ok on, 'View третьего уровня вложенности должна триггерить событие ready при своем рендеринге'
-      start()
+  @nestedViewThirdLevel.on 'ready', ->
+    ok on, 'View третьего уровня вложенности должна триггерить событие ready при своем рендеринге'
+    start()
 
-  asyncTest 'Ability to find holes in template', 1, ->
-    @nestedViewWithHoles.render()
+asyncTest 'Ability to find holes in template', 1, ->
+  @nestedViewWithHoles.render()
 
-    @nestedViewWithHoles.on 'ready', =>
-      equal @nestedViewWithHoles.$el.html(), '===Content===<div id="frontPageMovies" class="">===Frontpage movies===<div id="pagination" class="otherPlaceholder"></div></div>', 'Вытаскиваем partial из "дырки"'
-      start()
+  @nestedViewWithHoles.on 'ready', =>
+    equal @nestedViewWithHoles.$el.html(), '===Content===<div id="frontPageMovies" class="">===Frontpage movies===<div id="pagination" class="otherPlaceholder"></div></div>', 'Вытаскиваем partial из "дырки"'
+    start()
 
-  asyncTest 'View may have attribute foo, with "bar" in value', 1, ->
-    @viewWithAttribute.render()
+asyncTest 'View may have attribute foo, with "bar" in value', 1, ->
+  @viewWithAttribute.render()
 
-    @viewWithAttribute.on 'ready', =>
-      equal @viewWithAttribute.$el.attr('foo'), 'bar', 'Установка атрибута foo="bar"'
-      start()
-    
-# test 'renders deferred style', 1, ->
-#   equal typeof @canonical_view.render().done, 'function', 'Функция, рендерящая шаблон должна вернуть deferred-объект, у которого будет метод done'
+  @viewWithAttribute.on 'ready', =>
+    equal @viewWithAttribute.$el.attr('foo'), 'bar', 'Установка атрибута foo="bar"'
+    start()
 
-# test '_getTemplateURL()', 2, ->
-#   #по умолчанию путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%.js" Если жестко задан параметр "templateURL" то должен браться он
-#   equal @canonical_view._getTemplateURL(), 'bMovie.js', 'Должно вернуть bMovie.js, а вернуло ' + @canonical_view._getTemplateURL()
-#   equal @overriden_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_view._getTemplateURL()
+asyncTest 'View.isRoot()', 2, ->
+  @nestedViewSecondLevel.render()
+
+  @nestedViewSecondLevel.on 'ready', =>
+    equal @nestedViewSecondLevel.isRoot(), on, 'Правильно ли определяется isRoot() для корневого View'
+    equal @nestedViewSecondLevel.children.get('tags').isRoot(), off, 'Правильно ли определяется isRoot() для дочернего View'
+    start()
+
+asyncTest 'First level View rendering', 1, ->
+  @canonicalView.render()
+
+  @canonicalView.on 'ready', =>
+    equal @canonicalView.$el.html(), '===Content===<div id="tags"></div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>', 'Рендеринг View первого уровня'
+    start()
+
+asyncTest 'Second level View rendering', 1, ->
+  @nestedViewSecondLevel.render()
+
+  @nestedViewSecondLevel.on 'ready', =>
+    equal @nestedViewSecondLevel.$el.html(), '===Content===<div id="tags">===Tags===</div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>', 'Рендеринг View второго уровня'
+    start()
+
+test '_getTemplateURL()', 2, ->
+  #по умолчанию путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%.js" Если жестко задан параметр "templateURL" то должен браться он
+  equal @canonicalFolderView._getTemplateURL(), 'bMovie.js', 'Должно вернуть bMovie.js, а вернуло ' + @canonicalFolderView._getTemplateURL()
+  equal @overriden_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_view._getTemplateURL()
 
 
-# test '_getTemplateURL() with folder name', 2, ->
-#   #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.js"
-#   equal @folder_view._getTemplateURL(), 'templates/bMovie.js', 'Должно вернуть templates/bMovie.js, а вернуло ' + @folder_view._getTemplateURL()
-#   equal @overriden_folder_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_folder_view._getTemplateURL()
+test '_getTemplateURL() with folder name', 2, ->
+  #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.js"
+  equal @folder_view._getTemplateURL(), 'templates/bMovie.js', 'Должно вернуть templates/bMovie.js, а вернуло ' + @folder_view._getTemplateURL()
+  equal @overriden_folder_view._getTemplateURL(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_folder_view._getTemplateURL()
 
 
-# test '_getTemplateURL() with folder name and template format', 2, ->
-#   #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
-#   equal @format_view._getTemplateURL(), 'bMovie.jade', 'Должно вернуть templates/bMovie.jade, а вернуло ' + @folder_view._getTemplateURL()
-#   equal @overriden_format_and_folder_view._getTemplateURL(), 'templates/bFrontpage.jade', 'Должно вернуть templates/bFrontpage.jade, а вернуло ' + @overriden_folder_view._getTemplateURL()
+test '_getTemplateURL() with folder name and template format', 2, ->
+  #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
+  equal @format_view._getTemplateURL(), 'bMovie.jade', 'Должно вернуть templates/bMovie.jade, а вернуло ' + @folder_view._getTemplateURL()
+  equal @overriden_format_and_folder_view._getTemplateURL(), 'templates/bFrontpage.jade', 'Должно вернуть templates/bFrontpage.jade, а вернуло ' + @overriden_folder_view._getTemplateURL()
 
-# test '_getTemplateName()', 2, ->
-#   #путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%"
-#   equal @overriden_format_and_folder_view._getTemplateName(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_format_and_folder_view._getTemplateName()
-#   equal @canonical_view._getTemplateName(), 'bMovie', 'Должно вернуть bMovie, а вернуло ' + @canonical_view._getTemplateName()
+test '_getTemplateName()', 2, ->
+  #путь к шаблону должен генерироваться на основе ID по схеме "b%ViewId%"
+  equal @overriden_format_and_folder_view._getTemplateName(), 'bFrontpage', 'Должно вернуть bFrontpage, а вернуло ' + @overriden_format_and_folder_view._getTemplateName()
+  equal @canonicalFolderView._getTemplateName(), 'bMovie', 'Должно вернуть bMovie, а вернуло ' + @canonicalFolderView._getTemplateName()
 
-# test '_getTemplateURL() with _getTemplateName()', 1, ->
-#   #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
-#   equal @template_view._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + @template_view._getTemplateURL()
+test '_getTemplateURL() with _getTemplateName()', 1, ->
+  #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
+  equal @template_view._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + @template_view._getTemplateURL()
 
 
 # asyncTest 'render should define _template', 1, ->

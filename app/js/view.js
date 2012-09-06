@@ -10,7 +10,9 @@
       var _ref1, _ref2;
       this.partials = partials != null ? partials : null;
       this.partials = (_ref1 = (_ref2 = this.partials) != null ? _ref2 : this.options.partials) != null ? _ref1 : [];
-      return this.children = new Inn.ViewsCollection;
+      this.children = new Inn.ViewsCollection;
+      this._parent = null;
+      return this.ready = false;
     },
     destroy: function() {
       this.parent = null;
@@ -21,17 +23,16 @@
       this._loadTemplate(function(template) {
         var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref1, _ref2;
         _this.$el.html(template());
-        patchedOptions = _.filter(_this.options, function(item, key) {
-          return key === 'partials';
-        });
+        patchedOptions = _.clone(_this.options);
+        patchedOptions.partials = [];
         _ref1 = _this.partials;
         for (idx = _i = 0, _len = _ref1.length; _i < _len; idx = ++_i) {
           partial = _ref1[idx];
           $ctx = _this.$el.find("#" + partial.id);
-          view = new Inn.View(_.extend({
+          view = new Inn.View(_.extend({}, patchedOptions, {
             el: $ctx.get(0)
-          }, patchedOptions, partial));
-          view.parent = _this;
+          }, partial));
+          view._parent = _this;
           _this.children.add(view);
         }
         _ref2 = _this.pullChildren();
@@ -39,11 +40,11 @@
           child = _ref2[idx];
           $ctx = $(child);
           $ctx.removeClass(_this.options.partialClassName);
-          view = new Inn.View(_.extend({
+          view = new Inn.View(_.extend({}, patchedOptions, {
             el: $ctx.get(0),
             id: $ctx.attr('id')
-          }, patchedOptions, $ctx.data('view-options')));
-          view.parent = _this;
+          }, $ctx.data('view-options')));
+          view._parent = _this;
           _this.children.add(view);
         }
         if (_this.children.isEmpty()) {
@@ -95,11 +96,9 @@
     isRoot: function() {
       return this._parent === null;
     },
-    ready: false,
-    _parent: null,
     options: {
       partialClassName: 'bPartial',
-      templateFolder: 'app/templates',
+      templateFolder: '',
       templateFormat: 'js'
     }
   });

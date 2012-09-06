@@ -39,6 +39,15 @@
       }).length === 0;
     };
 
+    ViewsCollection.prototype.get = function(id, recursive) {
+      if (recursive == null) {
+        recursive = false;
+      }
+      return _.find(this._list, function(view) {
+        return view.id === id;
+      });
+    };
+
     ViewsCollection.prototype.remove = function(view) {
       view.destroy();
       return this;
