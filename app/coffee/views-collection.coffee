@@ -13,30 +13,34 @@ class Inn.ViewsCollection
   #---
   # Конструктор
   # 
-  # constructor: ->
-
-  ##### collection
-  #
-  #---
-  # Список View
-  _list: _([])
+  constructor: ->
+    ##### collection
+    #
+    #---
+    # Список View
+    @_list = []
 
   # model: Inn.View
 
   add: (view) ->
     @_list.push view
 
-    # Ожидаем завершения рендеринга View
-    view.on 'ready', =>
-      # Если все View в коллекции отрендеренны, генерирует событие **ready**
-      unless @_list.filter((view) -> return not view.ready).length
-        @trigger 'ready'
-
-    # Запускает рендеринг View
-    view.render()
-
     return @
 
+  render: ->
+    for view in @_list
+      # Ожидаем завершения рендеринга View
+      # @todo: проверить на утечки
+      view.on 'ready', =>
+        # Если все View в коллекции отрендеренны, генерирует событие **ready**
+        if @isRendered()
+          @trigger 'ready'
+
+      # Запускает рендеринг View
+      view.render()
+
+  isRendered: ->
+    return _.filter(@_list, (view) -> return not view.ready).length is 0
 
   ##### attachEvents()
   #

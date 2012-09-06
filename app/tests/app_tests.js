@@ -162,31 +162,43 @@
   module("Inn.View", {
     setup: function() {
       this.canonicalView = new Inn.View({
-        id: 'movie'
+        id: 'frontpage'
       });
       this.nestedViewSecondLevel = new Inn.View({
-        id: 'movie'
+        id: 'frontpage'
       }, [
-        new Inn.View({
-          id: 'foo'
-        })
+        {
+          id: 'tags'
+        }
       ]);
-      return this.nestedViewThirdLevel = new Inn.View({
-        id: 'movie'
+      this.nestedViewThirdLevel = new Inn.View({
+        id: 'frontpage'
       }, [
-        new Inn.View({
-          id: 'foo'
-        }, [
-          new Inn.View({
-            id: 'bar'
-          })
-        ])
+        {
+          id: 'frontPageMovies',
+          partials: [
+            {
+              id: 'pagination'
+            }
+          ]
+        }
       ]);
+      this.nestedViewWithHoles = new Inn.View({
+        id: 'holyView'
+      });
+      return this.viewWithAttribute = new Inn.View({
+        id: 'frontpage',
+        'attributes': {
+          foo: 'bar'
+        }
+      });
     },
     teardown: function() {
       delete this.canonicalView;
       delete this.nestedViewSecondLevel;
-      return delete this.nestedViewThirdLevel;
+      delete this.nestedViewThirdLevel;
+      delete this.viewWithAttribute;
+      return delete this.nestedViewWithHoles;
     }
   });
 
@@ -206,10 +218,26 @@
         return start();
       });
     });
-    return asyncTest('triggers ready event on third level nested view.render()', 1, function() {
+    asyncTest('triggers ready event on third level nested view.render()', 1, function() {
       this.nestedViewThirdLevel.render();
       return this.nestedViewThirdLevel.on('ready', function() {
         ok(true, 'View третьего уровня вложенности должна триггерить событие ready при своем рендеринге');
+        return start();
+      });
+    });
+    asyncTest('Ability to find holes in template', 1, function() {
+      var _this = this;
+      this.nestedViewWithHoles.render();
+      return this.nestedViewWithHoles.on('ready', function() {
+        equal(_this.nestedViewWithHoles.$el.html(), '===Content===<div id="frontPageMovies" class="">===Frontpage movies===<div id="pagination" class="otherPlaceholder"></div></div>', 'Вытаскиваем partial из "дырки"');
+        return start();
+      });
+    });
+    return asyncTest('View may have attribute foo, with "bar" in value', 1, function() {
+      var _this = this;
+      this.viewWithAttribute.render();
+      return this.viewWithAttribute.on('ready', function() {
+        equal(_this.viewWithAttribute.$el.attr('foo'), 'bar', 'Установка атрибута foo="bar"');
         return start();
       });
     });

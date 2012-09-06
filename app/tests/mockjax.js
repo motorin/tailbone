@@ -61,6 +61,20 @@ Preparing Mockjax
   });
 
   $.mockjax({
+    url: 'app/templates/bHolyView.js',
+    contentType: 'script',
+    responseTime: 150,
+    response: function() {
+      var body_0;
+      body_0 = function(chk, ctx) {
+        return chk.write('===Content===<div id="frontPageMovies" class="bPartial"></div>');
+      };
+      dust.register("bHolyView", body_0);
+      return body_0;
+    }
+  });
+
+  $.mockjax({
     url: 'app/templates/bFrontPageMovies.js',
     contentType: 'script',
     responseTime: 150,

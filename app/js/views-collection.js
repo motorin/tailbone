@@ -7,22 +7,36 @@
 
   Inn.ViewsCollection = (function() {
 
-    function ViewsCollection() {}
-
-    ViewsCollection.prototype._list = _([]);
+    function ViewsCollection() {
+      this._list = [];
+    }
 
     ViewsCollection.prototype.add = function(view) {
-      var _this = this;
       this._list.push(view);
-      view.on('ready', function() {
-        if (!_this._list.filter(function(view) {
-          return !view.ready;
-        }).length) {
-          return _this.trigger('ready');
-        }
-      });
-      view.render();
       return this;
+    };
+
+    ViewsCollection.prototype.render = function() {
+      var view, _i, _len, _ref1, _results,
+        _this = this;
+      _ref1 = this._list;
+      _results = [];
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        view = _ref1[_i];
+        view.on('ready', function() {
+          if (_this.isRendered()) {
+            return _this.trigger('ready');
+          }
+        });
+        _results.push(view.render());
+      }
+      return _results;
+    };
+
+    ViewsCollection.prototype.isRendered = function() {
+      return _.filter(this._list, function(view) {
+        return !view.ready;
+      }).length === 0;
     };
 
     ViewsCollection.prototype.remove = function(view) {

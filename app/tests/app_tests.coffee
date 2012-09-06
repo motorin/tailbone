@@ -169,9 +169,11 @@ test 'destroy', 3, ->
 
 module "Inn.View",
   setup: ->
-    @canonicalView = new Inn.View {id: 'movie'}
-    @nestedViewSecondLevel = new Inn.View {id: 'movie'}, [new Inn.View {id: 'foo'}]
-    @nestedViewThirdLevel = new Inn.View {id: 'movie'}, [new Inn.View {id: 'foo'}, [new Inn.View {id: 'bar'}]]
+    @canonicalView = new Inn.View {id: 'frontpage'}
+    @nestedViewSecondLevel = new Inn.View {id: 'frontpage'}, [{id: 'tags'}]
+    @nestedViewThirdLevel = new Inn.View {id: 'frontpage'}, [{id: 'frontPageMovies', partials: [{id: 'pagination'}]}]
+    @nestedViewWithHoles = new Inn.View {id: 'holyView'}
+    @viewWithAttribute = new Inn.View {id: 'frontpage', 'attributes': {foo: 'bar'}}
     
     # @folder_view = new Inn.View
     #   id: 'movie',
@@ -209,6 +211,8 @@ module "Inn.View",
     delete @canonicalView
     delete @nestedViewSecondLevel
     delete @nestedViewThirdLevel
+    delete @viewWithAttribute
+    delete @nestedViewWithHoles
     # delete @overriden_view
 
 
@@ -234,6 +238,20 @@ test 'extends Backbone.View', 1, ->
 
     @nestedViewThirdLevel.on 'ready', ->
       ok on, 'View третьего уровня вложенности должна триггерить событие ready при своем рендеринге'
+      start()
+
+  asyncTest 'Ability to find holes in template', 1, ->
+    @nestedViewWithHoles.render()
+
+    @nestedViewWithHoles.on 'ready', =>
+      equal @nestedViewWithHoles.$el.html(), '===Content===<div id="frontPageMovies" class="">===Frontpage movies===<div id="pagination" class="otherPlaceholder"></div></div>', 'Вытаскиваем partial из "дырки"'
+      start()
+
+  asyncTest 'View may have attribute foo, with "bar" in value', 1, ->
+    @viewWithAttribute.render()
+
+    @viewWithAttribute.on 'ready', =>
+      equal @viewWithAttribute.$el.attr('foo'), 'bar', 'Установка атрибута foo="bar"'
       start()
     
 # test 'renders deferred style', 1, ->

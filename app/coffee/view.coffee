@@ -16,8 +16,15 @@ Inn.View = Backbone.View.extend({
   # **options** - Хеш с настройками
   # 
   # **partials** - Хеш с конфигурацией partial-ов
-  initialize: (options, @partials = []) ->
-    @_load()
+  initialize: (options, @partials = null) ->
+    @partials = (@partials ? @options.partials) ? []
+
+    ##### children
+    #
+    #---
+    # Коллекция с дочерними View
+    @children = new Inn.ViewsCollection
+    # @_load()
 
 
   ##### destroy()
@@ -38,41 +45,80 @@ Inn.View = Backbone.View.extend({
   #---
   # Рендерит View и всех его детей
   render: ->
-    #  ... тут будем рендерить себя ...
+    @_loadTemplate (template) =>
+      # @todo: Нужно реализовать получение данных!
+      @$el.html template()
 
-    # Добавляем partials в очередь рендеринга
-    for partial, idx in @partials
-      @children.add partial
+      patchedOptions = _.filter(@options, (item, key) -> key is 'partials')
+      # Добавляем partials в очередь рендеринга
+      for partial, idx in @partials
+        $ctx = @$el.find("##{partial.id}")
+        view = new Inn.View _.extend { el: $ctx.get(0) }, patchedOptions, partial
+        view.parent = @
+        @children.add view
 
-    # Вытаскиваем детей
-    for child, idx in @pullChildren()
-      @children.add child
+      # Вытаскиваем детей
+      for child, idx in @pullChildren()
+        $ctx = $(child)
+        $ctx.removeClass @options.partialClassName
+        view = new Inn.View _.extend { el: $ctx.get(0), id: $ctx.attr('id') }, patchedOptions, $ctx.data('view-options')
+        view.parent = @
+        @children.add view
 
-    # Если нет partial-ов, генериуем событие **ready**
-    if @children.isEmpty()
-      setTimeout =>
+      # Если нет partial-ов, генериуем событие **ready**
+      if @children.isEmpty()
         # Устанавливаем флажок ready в true
         @ready = on
         @trigger 'ready'
-    else
-      # Ожидаем завершения рендеринга **partial**-ов
-      @children.on 'ready', => 
-        @trigger 'ready'
+      else
+        # Ожидаем завершения рендеринга **partial**-ов
+        @children.on 'ready', => 
+          @ready = on
+          @trigger 'ready'
+
+      @children.render()
+
 
     return @
 
 
-  ##### load()
+  ##### _loadTemplate( *cb* )
   #
   #---
-  # Загружает шаблоны View и всех его детей
-  _load: ->
+  # Загружает шаблон View
+  # 
+  # **cb** - Колбэк
+  _loadTemplate: (cb) ->
+    $.getScript @_getTemplateURL(), () =>
+      # Оборачивает загруженный шаблон во внутреннюю функцию
+      template = (data) =>
+        renderedHTML = ''
+        dust.render @_getTemplateName(), data ? {}, (err, text)->
+          renderedHTML = text
+        return renderedHTML
 
-    setTimeout =>
-      # По завершении загрузки генерирует событие **loaded**
-      @trigger 'loaded'
+      # По завершении загрузки вызывает **cb**, передавая ему функцию-шаблон
+      cb.call @, template
 
     return @
+
+
+  ##### _getTemplateURL()
+  #
+  #---
+  # Определяет URL шаблона
+  _getTemplateURL: ->
+    divider = if @options.templateFolder then '/' else ''
+    return @options.templateFolder + divider + @_getTemplateName() + '.' + @options.templateFormat unless @options.templateURL?
+    return @options.templateURL
+  
+  ##### _getTemplateName()
+  #
+  #---
+  # Определяет название шаблона
+  _getTemplateName: ->
+    return 'b'+ @id[0].toUpperCase() + @id.slice(1) unless @options.templateName
+    return @options.templateName
 
 
   ##### pullChildren()
@@ -80,7 +126,13 @@ Inn.View = Backbone.View.extend({
   #---
   # Вытаскивает pratials из отрендеренного шаблона
   pullChildren: ->
-    return []
+    # Для создания вью по "дырке" используем класс options.partialClassName
+    # 
+    # Для оверрайдинга опций используем data-атрибут (data-view-options)
+    # 
+    # ID берём из атрибута id
+    return @$el.find ".#{@options.partialClassName}"
+    
 
 
   ##### isRoot()
@@ -105,20 +157,13 @@ Inn.View = Backbone.View.extend({
   _parent: null
 
 
-  ##### children
-  #
-  #---
-  # Коллекция с дочерними View
-  children: new Inn.ViewsCollection
-
-
   ##### options
   #
   #---
   # Хеш настроек по умолчанию
   options:
-    placeholderClassName: 'layoutPlaceholder'
-    templateFolder: ''
+    partialClassName: 'bPartial'
+    templateFolder: 'app/templates'
     templateFormat: 'js'
 
 
