@@ -172,6 +172,9 @@
             id: $ctx.attr('id')
           }, $ctx.data('view-options')));
           view._parent = _this;
+          if ($ctx.data('view-template') != null) {
+            view.options.templateName = $ctx.data('view-template');
+          }
           _this.children.add(view);
         }
         if (_this.children.isEmpty()) {

@@ -93,6 +93,8 @@ Inn.View = Backbone.View.extend({
         $ctx.removeClass @options.partialClassName
         view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0), id: $ctx.attr('id') }, $ctx.data('view-options')
         view._parent = @
+        # Переопределяем имя шаблона, если оно задано в data-view-template
+        view.options.templateName = $ctx.data('view-template') if $ctx.data('view-template')?
         @children.add view
 
       # Если нет partial-ов, генериуем событие **ready**
@@ -173,6 +175,8 @@ Inn.View = Backbone.View.extend({
     # Для создания вью по "дырке" используем класс options.partialClassName
     # 
     # Для оверрайдинга опций используем data-атрибут (data-view-options)
+    # 
+    # Для оверрайдинга имени шаблона используем data-атрибут (data-view-template)
     # 
     # ID берём из атрибута id
     return @$el.find ".#{@options.partialClassName}"
