@@ -263,7 +263,7 @@ test 'extends Backbone.View', 1, ->
 
 asyncTest 'create Inn.View with children instances of Inn.View', 1, ->
   @viewsTree.render()
-  
+
   @viewsTree.on 'ready', =>
       equal @viewsTree.children.get('tags'), @partialInstanceView, 'При передаче View в параметрах, не создавать новый инстанс'
       start()
@@ -369,15 +369,16 @@ test '_getTemplateURL() with _getTemplateName()', 1, ->
   #путь к шаблону должен генерироваться на основе ID по схеме "%templateFolder%/b%ViewId%.%templateFormat%"
   equal @templateView._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + @templateView._getTemplateURL()
 
-# test 'triggers remove event on remove()', 1, ->
-#   some_variable = false;
-#   @real_view.on 'remove', ->
-#     some_variable = true
+asyncTest 'triggers destroy event on remove()', 1, ->
+  @canonicalView.render()
+
+  @canonicalView.on 'ready', ->
+    @destroy()
+
+  @canonicalView.on 'destroy', ->
+    ok on
+    start()
   
-#   @real_view.remove()
-#   ok some_variable, 'View должна триггерить событие remove при уничтожении DOM-елемента'
-
-
 # test 'getDataForView', 1, ->
 #   @real_view.remove()
 #   strictEqual typeof @real_view.getDataForView, 'function', 'View should have getDataForView method'

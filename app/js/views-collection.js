@@ -22,10 +22,15 @@
       _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         view = _ref1[_i];
+        view.on('destroy', this.viewDestroyHandler);
         view.on('ready', this.viewReadyHandler, this);
         _results.push(view.render());
       }
       return _results;
+    };
+
+    ViewsCollection.prototype.viewDestroyHandler = function(view) {
+      return this.trigger('destroy', view);
     };
 
     ViewsCollection.prototype.viewReadyHandler = function() {

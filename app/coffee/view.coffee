@@ -58,6 +58,8 @@ Inn.View = Backbone.View.extend({
     @remove()
     # Вычищаем детей
     @children.destroy()
+    # Генерируем событие destroy
+    @trigger 'destroy', @
 
     return @
 

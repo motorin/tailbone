@@ -392,4 +392,15 @@
     return equal(this.templateView._getTemplateURL(), 'app/templates/bFrontpage.js', 'Должно вернуть app/templates/bFrontpage.js, а вернуло ' + this.templateView._getTemplateURL());
   });
 
+  asyncTest('triggers destroy event on remove()', 1, function() {
+    this.canonicalView.render();
+    this.canonicalView.on('ready', function() {
+      return this.destroy();
+    });
+    return this.canonicalView.on('destroy', function() {
+      ok(true);
+      return start();
+    });
+  });
+
 }).call(this);

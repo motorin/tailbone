@@ -37,13 +37,22 @@ class Inn.ViewsCollection
   # 
   render: ->
     for view in @_list
+      # При удалении View генерируем событие destroy
+      view.on 'destroy', @viewDestroyHandler
       # Ожидаем завершения рендеринга View
       view.on 'ready', @viewReadyHandler, @
-
       # Запускает рендеринг View
       view.render()
 
   ##### viewReadyHandler()
+  #
+  #---
+  # Обработчик уничтожения View
+  # 
+  viewDestroyHandler: (view) ->
+    @trigger 'destroy', view
+
+##### viewReadyHandler()
   #
   #---
   # Обработчик завершения рендеринга конкретной View
