@@ -43,6 +43,15 @@ $.mockjax
     dust.register "bContent", body_0
     return body_0
 
+$.mockjax
+  url: 'app/templates/bHolyView.js'
+  contentType: 'script'
+  responseTime: 150
+  response: ->
+    body_0 = (chk, ctx)->
+      return chk.write '===Content===<div id="frontPageMovies" class="bPartial"></div>'
+    dust.register "bHolyView", body_0
+    return body_0
 
 $.mockjax
   url: 'app/templates/bFrontPageMovies.js'
