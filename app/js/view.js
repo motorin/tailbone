@@ -17,7 +17,7 @@
     },
     destroy: function() {
       this.parent = null;
-      this.$el.remove();
+      this.remove();
       this.children.destroy();
       return this;
     },
