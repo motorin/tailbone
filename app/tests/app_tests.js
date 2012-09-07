@@ -403,4 +403,12 @@
     });
   });
 
+  test('children.add() unique views', 1, function() {
+    var initialLength;
+    this.canonicalView.children.add(this.partialInstanceView);
+    initialLength = this.canonicalView.children._list.length;
+    this.canonicalView.children.add(this.partialInstanceView);
+    return equal(initialLength, this.canonicalView.children._list.length, 'Shouldn\'t add duplicates');
+  });
+
 }).call(this);

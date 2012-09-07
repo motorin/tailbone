@@ -1,5 +1,6 @@
 (function() {
-  var _ref;
+  var _ref,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   if ((_ref = window.Inn) == null) {
     window.Inn = {};
@@ -12,7 +13,9 @@
     }
 
     ViewsCollection.prototype.add = function(view) {
-      this._list.push(view);
+      if (__indexOf.call(this._list, view) < 0) {
+        this._list.push(view);
+      }
       return this;
     };
 

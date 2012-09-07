@@ -15,7 +15,8 @@
 <hr />
 
 <p>Добавляет View в список</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">add: </span><span class="nf">(view) -&gt;</span>
-    <span class="nx">@_list</span><span class="p">.</span><span class="nx">push</span> <span class="nx">view</span>
+    <span class="nx">unless</span> <span class="nx">view</span> <span class="k">in</span> <span class="nx">@_list</span>
+      <span class="nx">@_list</span><span class="p">.</span><span class="nx">push</span> <span class="nx">view</span>
 
     <span class="k">return</span> <span class="nx">@</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <h4>render()</h4>
 

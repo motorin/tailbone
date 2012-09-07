@@ -378,3 +378,10 @@ asyncTest 'triggers destroy event on remove()', 1, ->
   @canonicalView.on 'destroy', ->
     ok on
     start()
+
+test 'children.add() unique views', 1, ->
+  @canonicalView.children.add @partialInstanceView
+  initialLength = @canonicalView.children._list.length
+  @canonicalView.children.add @partialInstanceView
+
+  equal initialLength, @canonicalView.children._list.length, 'Shouldn\'t add duplicates'

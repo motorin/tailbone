@@ -26,7 +26,8 @@ class Inn.ViewsCollection
   # Добавляет View в список
   # 
   add: (view) ->
-    @_list.push view
+    unless view in @_list
+      @_list.push view
 
     return @
 
