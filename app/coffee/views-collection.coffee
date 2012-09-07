@@ -28,6 +28,8 @@ class Inn.ViewsCollection
   add: (view) ->
     unless view in @_list
       @_list.push view
+      # При удалении View генерируем событие destroy
+      view.on 'destroy', @viewDestroyHandler
 
     return @
 
@@ -38,12 +40,25 @@ class Inn.ViewsCollection
   # 
   render: ->
     for view in @_list
-      # При удалении View генерируем событие destroy
-      view.on 'destroy', @viewDestroyHandler
       # Ожидаем завершения рендеринга View
       view.on 'ready', @viewReadyHandler, @
       # Запускает рендеринг View
       view.render()
+
+    return @
+
+  ##### stopRender()
+  #
+  #---
+  # Прекращает рендеринг шаблонов
+  # 
+  stopRender: ->
+    for view in @_list
+      view.off 'ready'
+      # Останавливает ренеринг текущего View
+      view.stopRender()
+
+    return @
 
   ##### viewReadyHandler()
   #
@@ -65,6 +80,8 @@ class Inn.ViewsCollection
 
       # Отписываемся от событий
       @off 'ready'
+
+    return @
 
   ##### isRendered()
   #
@@ -92,6 +109,8 @@ class Inn.ViewsCollection
   reset: ->
     for view in @_list
       view.ready = off
+
+    return @
 
 
   ##### destroy()

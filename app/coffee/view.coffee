@@ -68,7 +68,7 @@ Inn.View = Backbone.View.extend({
   #---
   # Рендерит View и всех его детей
   render: ->
-    return @ if @_rendering
+    @stopRender() if @_rendering
 
     @_rendering = on
 
@@ -121,19 +121,42 @@ Inn.View = Backbone.View.extend({
         @trigger 'ready'
       else
         # Ожидаем завершения рендеринга **partial**-ов
-        @children.on 'ready', => 
-          # Устанавливаем флажок ready в true, если элемент не корневой
-          unless @isRoot()
-            @ready = on
-
-          # Сбрасываем статус рендеринга дочерних View
-          @children.reset()
-          # Снимаем блокировку рендеринга
-          @_rendering = off
-          @trigger 'ready'
+        @children.on 'ready', @_readyHandler, @
 
       @children.render()
 
+
+    return @
+
+  ##### _readyHandler()
+  #
+  #---
+  # Обработчик завершения рендеринга
+  # 
+  _readyHandler: -> 
+    # Устанавливаем флажок ready в true, если элемент не корневой
+    unless @isRoot()
+      @ready = on
+
+    # Сбрасываем статус рендеринга дочерних View
+    @children.reset()
+    # Снимаем блокировку рендеринга
+    @_rendering = off
+    @trigger 'ready'
+
+  ##### stopRender()
+  #
+  #---
+  # Прекращает рендеринг шаблонов
+  # 
+  stopRender: ->
+    @_rendering = off
+    # Отписываемся от события завершения рендеринга
+    view.off 'ready', @_readyHandler, @
+
+    # Отписываемся от события завершения 
+    # рендеринга у всех детей
+    @children.stopRender()
 
     return @
 

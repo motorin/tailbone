@@ -50,21 +50,31 @@
     ViewsCollection.prototype.add = function(view) {
       if (__indexOf.call(this._list, view) < 0) {
         this._list.push(view);
+        view.on('destroy', this.viewDestroyHandler);
       }
       return this;
     };
 
     ViewsCollection.prototype.render = function() {
-      var view, _i, _len, _ref1, _results;
+      var view, _i, _len, _ref1;
       _ref1 = this._list;
-      _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         view = _ref1[_i];
-        view.on('destroy', this.viewDestroyHandler);
         view.on('ready', this.viewReadyHandler, this);
-        _results.push(view.render());
+        view.render();
       }
-      return _results;
+      return this;
+    };
+
+    ViewsCollection.prototype.stopRender = function() {
+      var view, _i, _len, _ref1;
+      _ref1 = this._list;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        view = _ref1[_i];
+        view.off('ready');
+        view.stopRender();
+      }
+      return this;
     };
 
     ViewsCollection.prototype.viewDestroyHandler = function(view) {
@@ -74,8 +84,9 @@
     ViewsCollection.prototype.viewReadyHandler = function() {
       if (this.isRendered()) {
         this.trigger('ready');
-        return this.off('ready');
+        this.off('ready');
       }
+      return this;
     };
 
     ViewsCollection.prototype.isRendered = function() {
@@ -94,14 +105,13 @@
     };
 
     ViewsCollection.prototype.reset = function() {
-      var view, _i, _len, _ref1, _results;
+      var view, _i, _len, _ref1;
       _ref1 = this._list;
-      _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         view = _ref1[_i];
-        _results.push(view.ready = false);
+        view.ready = false;
       }
-      return _results;
+      return this;
     };
 
     ViewsCollection.prototype.destroy = function() {
@@ -153,7 +163,7 @@
     render: function() {
       var _this = this;
       if (this._rendering) {
-        return this;
+        this.stopRender();
       }
       this._rendering = true;
       this._loadTemplate(function(template) {
@@ -199,17 +209,24 @@
           _this._rendering = false;
           _this.trigger('ready');
         } else {
-          _this.children.on('ready', function() {
-            if (!_this.isRoot()) {
-              _this.ready = true;
-            }
-            _this.children.reset();
-            _this._rendering = false;
-            return _this.trigger('ready');
-          });
+          _this.children.on('ready', _this._readyHandler, _this);
         }
         return _this.children.render();
       });
+      return this;
+    },
+    _readyHandler: function() {
+      if (!this.isRoot()) {
+        this.ready = true;
+      }
+      this.children.reset();
+      this._rendering = false;
+      return this.trigger('ready');
+    },
+    stopRender: function() {
+      this._rendering = false;
+      view.off('ready', this._readyHandler, this);
+      this.children.stopRender();
       return this;
     },
     _loadTemplate: function(callback) {

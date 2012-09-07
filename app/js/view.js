@@ -25,7 +25,7 @@
     render: function() {
       var _this = this;
       if (this._rendering) {
-        return this;
+        this.stopRender();
       }
       this._rendering = true;
       this._loadTemplate(function(template) {
@@ -71,17 +71,24 @@
           _this._rendering = false;
           _this.trigger('ready');
         } else {
-          _this.children.on('ready', function() {
-            if (!_this.isRoot()) {
-              _this.ready = true;
-            }
-            _this.children.reset();
-            _this._rendering = false;
-            return _this.trigger('ready');
-          });
+          _this.children.on('ready', _this._readyHandler, _this);
         }
         return _this.children.render();
       });
+      return this;
+    },
+    _readyHandler: function() {
+      if (!this.isRoot()) {
+        this.ready = true;
+      }
+      this.children.reset();
+      this._rendering = false;
+      return this.trigger('ready');
+    },
+    stopRender: function() {
+      this._rendering = false;
+      view.off('ready', this._readyHandler, this);
+      this.children.stopRender();
       return this;
     },
     _loadTemplate: function(callback) {

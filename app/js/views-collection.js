@@ -15,21 +15,31 @@
     ViewsCollection.prototype.add = function(view) {
       if (__indexOf.call(this._list, view) < 0) {
         this._list.push(view);
+        view.on('destroy', this.viewDestroyHandler);
       }
       return this;
     };
 
     ViewsCollection.prototype.render = function() {
-      var view, _i, _len, _ref1, _results;
+      var view, _i, _len, _ref1;
       _ref1 = this._list;
-      _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         view = _ref1[_i];
-        view.on('destroy', this.viewDestroyHandler);
         view.on('ready', this.viewReadyHandler, this);
-        _results.push(view.render());
+        view.render();
       }
-      return _results;
+      return this;
+    };
+
+    ViewsCollection.prototype.stopRender = function() {
+      var view, _i, _len, _ref1;
+      _ref1 = this._list;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        view = _ref1[_i];
+        view.off('ready');
+        view.stopRender();
+      }
+      return this;
     };
 
     ViewsCollection.prototype.viewDestroyHandler = function(view) {
@@ -39,8 +49,9 @@
     ViewsCollection.prototype.viewReadyHandler = function() {
       if (this.isRendered()) {
         this.trigger('ready');
-        return this.off('ready');
+        this.off('ready');
       }
+      return this;
     };
 
     ViewsCollection.prototype.isRendered = function() {
@@ -59,14 +70,13 @@
     };
 
     ViewsCollection.prototype.reset = function() {
-      var view, _i, _len, _ref1, _results;
+      var view, _i, _len, _ref1;
       _ref1 = this._list;
-      _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         view = _ref1[_i];
-        _results.push(view.ready = false);
+        view.ready = false;
       }
-      return _results;
+      return this;
     };
 
     ViewsCollection.prototype.destroy = function() {
