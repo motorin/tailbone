@@ -84,7 +84,7 @@
       });
       return this;
     },
-    _loadTemplate: function(cb) {
+    _loadTemplate: function(callback) {
       var process,
         _this = this;
       process = function() {
@@ -97,7 +97,7 @@
           });
           return renderedHTML;
         };
-        return cb.call(_this, template);
+        return callback.call(_this, template);
       };
       if (dust.cache[this._getTemplateName()] != null) {
         setTimeout(function() {

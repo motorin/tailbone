@@ -138,13 +138,13 @@ Inn.View = Backbone.View.extend({
     return @
 
 
-  ##### _loadTemplate( *cb* )
+  ##### _loadTemplate( *callback* )
   #
   #---
   # Загружает шаблон View
   # 
-  # **cb** - Колбэк
-  _loadTemplate: (cb) ->
+  # **callback** - Колбэк
+  _loadTemplate: (callback) ->
     process = =>
       # Оборачивает загруженный шаблон во внутреннюю функцию
       template = (data) =>
@@ -153,8 +153,8 @@ Inn.View = Backbone.View.extend({
           renderedHTML = text
         return renderedHTML
 
-      # По завершении загрузки вызывает **cb**, передавая ему функцию-шаблон
-      cb.call @, template
+      # По завершении загрузки вызывает **callback**, передавая ему функцию-шаблон
+      callback.call @, template
 
     if dust.cache[@_getTemplateName()]?
       setTimeout -> process()

@@ -70,18 +70,18 @@
       <span class="nx">@children</span><span class="p">.</span><span class="nx">render</span><span class="p">()</span>
 
 
-    <span class="k">return</span> <span class="nx">@</span></pre></div>             </td>           </tr>                               <tr id="section-29">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-29">&#182;</a>               </div>               <h4>_loadTemplate( <em>cb</em> )</h4>
+    <span class="k">return</span> <span class="nx">@</span></pre></div>             </td>           </tr>                               <tr id="section-29">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-29">&#182;</a>               </div>               <h4>_loadTemplate( <em>callback</em> )</h4>
 
 <hr />
 
 <p>Загружает шаблон View</p>
 
-<p><strong>cb</strong> - Колбэк</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_loadTemplate: </span><span class="nf">(cb) -&gt;</span>
+<p><strong>callback</strong> - Колбэк</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_loadTemplate: </span><span class="nf">(callback) -&gt;</span>
     <span class="nv">process = </span><span class="o">=&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-30">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-30">&#182;</a>               </div>               <p>Оборачивает загруженный шаблон во внутреннюю функцию</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nv">template = </span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="o">=&gt;</span>
         <span class="nv">renderedHTML = </span><span class="s">&#39;&#39;</span>
         <span class="nx">dust</span><span class="p">.</span><span class="nx">render</span> <span class="nx">@_getTemplateName</span><span class="p">(),</span> <span class="nx">data</span> <span class="o">?</span> <span class="p">{},</span> <span class="nf">(err, text)-&gt;</span>
           <span class="nv">renderedHTML = </span><span class="nx">text</span>
-        <span class="k">return</span> <span class="nx">renderedHTML</span></pre></div>             </td>           </tr>                               <tr id="section-31">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-31">&#182;</a>               </div>               <p>По завершении загрузки вызывает <strong>cb</strong>, передавая ему функцию-шаблон</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">cb</span><span class="p">.</span><span class="nx">call</span> <span class="nx">@</span><span class="p">,</span> <span class="nx">template</span>
+        <span class="k">return</span> <span class="nx">renderedHTML</span></pre></div>             </td>           </tr>                               <tr id="section-31">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-31">&#182;</a>               </div>               <p>По завершении загрузки вызывает <strong>callback</strong>, передавая ему функцию-шаблон</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">callback</span><span class="p">.</span><span class="nx">call</span> <span class="nx">@</span><span class="p">,</span> <span class="nx">template</span>
 
     <span class="k">if</span> <span class="nx">dust</span><span class="p">.</span><span class="nx">cache</span><span class="p">[</span><span class="nx">@_getTemplateName</span><span class="p">()]</span><span class="o">?</span>
       <span class="nx">setTimeout</span> <span class="o">-&gt;</span> <span class="nx">process</span><span class="p">()</span>
