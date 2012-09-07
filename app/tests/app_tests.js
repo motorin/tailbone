@@ -304,7 +304,7 @@
     this.nestedViewSecondLevel.render();
     count = 0;
     return this.nestedViewSecondLevel.on('ready', function() {
-      if (++count === 2) {
+      if (++count === 3) {
         equal(_this.nestedViewSecondLevel.$el.html(), '===Content===<div id="tags">===Tags===</div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>', 'Повторный рендеринг View и его детей');
         return start();
       } else {
@@ -406,9 +406,9 @@
   test('children.add() unique views', 1, function() {
     var initialLength;
     this.canonicalView.children.add(this.partialInstanceView);
-    initialLength = this.canonicalView.children._list.length;
+    initialLength = _.keys(this.canonicalView.children._list).length;
     this.canonicalView.children.add(this.partialInstanceView);
-    return equal(initialLength, this.canonicalView.children._list.length, 'Shouldn\'t add duplicates');
+    return equal(initialLength, _.keys(this.canonicalView.children._list).length, 'Shouldn\'t add duplicates');
   });
 
 }).call(this);

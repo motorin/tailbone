@@ -152,7 +152,7 @@ Inn.View = Backbone.View.extend({
   stopRender: ->
     @_rendering = off
     # Отписываемся от события завершения рендеринга
-    view.off 'ready', @_readyHandler, @
+    @off 'ready', @_readyHandler, @
 
     # Отписываемся от события завершения 
     # рендеринга у всех детей

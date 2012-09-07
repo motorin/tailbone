@@ -18,7 +18,7 @@ class Inn.ViewsCollection
     #
     #---
     # Список View
-    @_list = []
+    @_list = [] # @todo: понять, почему не работает с объектом???
 
   ##### add()
   #

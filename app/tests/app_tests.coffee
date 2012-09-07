@@ -294,7 +294,7 @@ asyncTest 'Repeated view rendering', 1, ->
   count = 0
 
   @nestedViewSecondLevel.on 'ready', =>
-    if ++count is 2
+    if ++count is 3
       equal @nestedViewSecondLevel.$el.html(), '===Content===<div id="tags">===Tags===</div><div id="sortings"></div><div id="promoMovie"></div><div id="frontPageMovies"></div>', 'Повторный рендеринг View и его детей'
       start()
     else
@@ -381,7 +381,7 @@ asyncTest 'triggers destroy event on remove()', 1, ->
 
 test 'children.add() unique views', 1, ->
   @canonicalView.children.add @partialInstanceView
-  initialLength = @canonicalView.children._list.length
+  initialLength = _.keys(@canonicalView.children._list).length
   @canonicalView.children.add @partialInstanceView
 
-  equal initialLength, @canonicalView.children._list.length, 'Shouldn\'t add duplicates'
+  equal initialLength, _.keys(@canonicalView.children._list).length, 'Shouldn\'t add duplicates'

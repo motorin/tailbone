@@ -225,7 +225,7 @@
     },
     stopRender: function() {
       this._rendering = false;
-      view.off('ready', this._readyHandler, this);
+      this.off('ready', this._readyHandler, this);
       this.children.stopRender();
       return this;
     },
