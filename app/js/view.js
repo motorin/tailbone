@@ -36,9 +36,15 @@
         for (idx = _i = 0, _len = _ref3.length; _i < _len; idx = ++_i) {
           partial = _ref3[idx];
           $ctx = _this.$el.find("#" + partial.id);
-          view = new Inn.View(_.extend({}, patchedOptions, {
-            el: $ctx.get(0)
-          }, partial));
+          if (partial instanceof Inn.View) {
+            view = partial;
+            view.options = _.extend({}, patchedOptions, view.options);
+            view.setElement($ctx.get(0));
+          } else {
+            view = new Inn.View(_.extend({}, patchedOptions, {
+              el: $ctx.get(0)
+            }, partial));
+          }
           view._parent = _this;
           _this.children.add(view);
         }

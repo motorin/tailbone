@@ -171,6 +171,12 @@
       this.canonicalView = new this.DefaultView({
         id: 'frontpage'
       });
+      this.partialInstanceView = new this.DefaultView({
+        id: 'tags'
+      });
+      this.viewsTree = new this.DefaultView({
+        id: 'frontpage'
+      }, [this.partialInstanceView]);
       this.nestedViewSecondLevel = new this.DefaultView({
         id: 'frontpage'
       }, [
@@ -238,6 +244,8 @@
     teardown: function() {
       delete this.DefaultView;
       delete this.canonicalView;
+      delete this.partialInstanceView;
+      delete this.viewsTree;
       delete this.nestedViewSecondLevel;
       delete this.nestedViewThirdLevel;
       delete this.viewWithAttribute;
@@ -255,6 +263,15 @@
 
   test('extends Backbone.View', 1, function() {
     return ok(this.canonicalView instanceof Backbone.View, 'Inn.View должна наследоваться от Backbone.View');
+  });
+
+  asyncTest('create Inn.View with children instances of Inn.View', 1, function() {
+    var _this = this;
+    this.viewsTree.render();
+    return this.viewsTree.on('ready', function() {
+      equal(_this.viewsTree.children.get('tags'), _this.partialInstanceView, 'При передаче View в параметрах, не создавать новый инстанс');
+      return start();
+    });
   });
 
   asyncTest('triggers ready event on render()', 1, function() {

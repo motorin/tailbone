@@ -179,6 +179,9 @@ module "Inn.View",
     @canonicalView = new @DefaultView 
       id: 'frontpage'
 
+    @partialInstanceView = new @DefaultView({id: 'tags'})
+    @viewsTree = new @DefaultView  {id: 'frontpage'}, [@partialInstanceView]
+
     @nestedViewSecondLevel = new @DefaultView 
       id: 'frontpage',
       [{id: 'tags'}]
@@ -238,6 +241,8 @@ module "Inn.View",
     delete @DefaultView
 
     delete @canonicalView
+    delete @partialInstanceView
+    delete @viewsTree
     delete @nestedViewSecondLevel
     delete @nestedViewThirdLevel
     delete @viewWithAttribute
@@ -255,6 +260,13 @@ module "Inn.View",
 
 test 'extends Backbone.View', 1, ->
   ok @canonicalView instanceof Backbone.View, 'Inn.View должна наследоваться от Backbone.View'
+
+asyncTest 'create Inn.View with children instances of Inn.View', 1, ->
+  @viewsTree.render()
+  
+  @viewsTree.on 'ready', =>
+      equal @viewsTree.children.get('tags'), @partialInstanceView, 'При передаче View в параметрах, не создавать новый инстанс'
+      start()
 
 asyncTest 'triggers ready event on render()', 1, ->
   @canonicalView.render()
