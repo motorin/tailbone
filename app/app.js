@@ -34,13 +34,225 @@
 }).call(this);
 
 (function() {
+  var _ref,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  if ((_ref = window.Inn) == null) {
+    window.Inn = {};
+  }
+
+  Inn.ViewsCollection = (function() {
+
+    function ViewsCollection() {
+      this._list = [];
+    }
+
+    ViewsCollection.prototype.add = function(view) {
+      if (__indexOf.call(this._list, view) < 0) {
+        this._list.push(view);
+        view.on('destroy', this.viewDestroyHandler);
+      }
+      return this;
+    };
+
+    ViewsCollection.prototype.render = function() {
+      var view, _i, _len, _ref1;
+      _ref1 = this._list;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        view = _ref1[_i];
+        view.on('ready', this.viewReadyHandler, this);
+        view.render();
+      }
+      return this;
+    };
+
+    ViewsCollection.prototype.stopRender = function() {
+      var view, _i, _len, _ref1;
+      _ref1 = this._list;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        view = _ref1[_i];
+        view.off('ready');
+        view.stopRender();
+      }
+      return this;
+    };
+
+    ViewsCollection.prototype.viewDestroyHandler = function(view) {
+      return this.trigger('destroy', view);
+    };
+
+    ViewsCollection.prototype.viewReadyHandler = function() {
+      if (this.isRendered()) {
+        this.trigger('ready');
+        this.off('ready');
+      }
+      return this;
+    };
+
+    ViewsCollection.prototype.isRendered = function() {
+      return _.filter(this._list, function(view) {
+        return !view.ready;
+      }).length === 0;
+    };
+
+    ViewsCollection.prototype.get = function(id, recursive) {
+      if (recursive == null) {
+        recursive = false;
+      }
+      return _.find(this._list, function(view) {
+        return view.id === id;
+      });
+    };
+
+    ViewsCollection.prototype.reset = function() {
+      var view, _i, _len, _ref1;
+      _ref1 = this._list;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        view = _ref1[_i];
+        view.ready = false;
+      }
+      return this;
+    };
+
+    ViewsCollection.prototype.destroy = function() {
+      var view, _i, _len, _ref1;
+      _ref1 = this._list;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        view = _ref1[_i];
+        view.destroy();
+      }
+      return this;
+    };
+
+    ViewsCollection.prototype.isEmpty = function() {
+      return !this._list.length;
+    };
+
+    _.extend(ViewsCollection.prototype, Backbone.Events);
+
+    return ViewsCollection;
+
+  })();
+
+}).call(this);
+
+(function() {
   var _ref;
 
   if ((_ref = window.Inn) == null) {
     window.Inn = {};
   }
 
-  Inn.TemplateMixin = {
+  Inn.View = Backbone.View.extend({
+    initialize: function(options, partials) {
+      var _ref1, _ref2;
+      this.partials = partials != null ? partials : null;
+      this.partials = (_ref1 = (_ref2 = this.partials) != null ? _ref2 : this.options.partials) != null ? _ref1 : [];
+      this.children = new Inn.ViewsCollection;
+      this._parent = null;
+      this.ready = false;
+      return this._rendering = false;
+    },
+    destroy: function() {
+      this.parent = null;
+      this.remove();
+      this.children.destroy();
+      this.trigger('destroy', this);
+      return this;
+    },
+    render: function() {
+      var _this = this;
+      if (this._rendering) {
+        this.stopRender();
+      }
+      this._rendering = true;
+      this._loadTemplate(function(template) {
+        var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4;
+        _this.$el.html(template((_ref1 = (_ref2 = _this.options.dataManager) != null ? _ref2.getDataAsset() : void 0) != null ? _ref1 : {}));
+        patchedOptions = _.clone(_this.options);
+        patchedOptions.partials = [];
+        _ref3 = _this.partials;
+        for (idx = _i = 0, _len = _ref3.length; _i < _len; idx = ++_i) {
+          partial = _ref3[idx];
+          $ctx = _this.$el.find("#" + partial.id);
+          if (partial instanceof Inn.View) {
+            view = partial;
+            view.options = _.extend({}, patchedOptions, view.options);
+            view.setElement($ctx.get(0));
+          } else {
+            view = new Inn.View(_.extend({}, patchedOptions, {
+              el: $ctx.get(0)
+            }, partial));
+          }
+          view._parent = _this;
+          _this.children.add(view);
+        }
+        _ref4 = _this.pullChildren();
+        for (idx = _j = 0, _len1 = _ref4.length; _j < _len1; idx = ++_j) {
+          child = _ref4[idx];
+          $ctx = $(child);
+          $ctx.removeClass(_this.options.partialClassName);
+          view = new Inn.View(_.extend({}, patchedOptions, {
+            el: $ctx.get(0),
+            id: $ctx.attr('id')
+          }, $ctx.data('view-options')));
+          view._parent = _this;
+          if ($ctx.data('view-template') != null) {
+            view.options.templateName = $ctx.data('view-template');
+          }
+          _this.children.add(view);
+        }
+        if (_this.children.isEmpty()) {
+          if (!_this.isRoot()) {
+            _this.ready = true;
+          }
+          _this._rendering = false;
+          _this.trigger('ready');
+        } else {
+          _this.children.on('ready', _this._readyHandler, _this);
+        }
+        return _this.children.render();
+      });
+      return this;
+    },
+    _readyHandler: function() {
+      if (!this.isRoot()) {
+        this.ready = true;
+      }
+      this.children.reset();
+      this._rendering = false;
+      return this.trigger('ready');
+    },
+    stopRender: function() {
+      this._rendering = false;
+      this.off('ready', this._readyHandler, this);
+      this.children.stopRender();
+      return this;
+    },
+    _loadTemplate: function(callback) {
+      var process,
+        _this = this;
+      process = function() {
+        var template;
+        template = function(data) {
+          var renderedHTML;
+          renderedHTML = '';
+          dust.render(_this._getTemplateName(), data != null ? data : {}, function(err, text) {
+            return renderedHTML = text;
+          });
+          return renderedHTML;
+        };
+        return callback.call(_this, template);
+      };
+      if (dust.cache[this._getTemplateName()] != null) {
+        setTimeout(function() {
+          return process();
+        });
+      } else {
+        $.getScript(this._getTemplateURL(), process);
+      }
+      return this;
+    },
     _getTemplateURL: function() {
       var divider;
       divider = this.options.templateFolder ? '/' : '';
@@ -55,344 +267,18 @@
       }
       return this.options.templateName;
     },
-    _getTemplate: function() {
-      var view, _ref1;
-      if (((_ref1 = this.templateDeferred) != null ? _ref1.state() : void 0) === 'pending') {
-        return this.templateDeferred;
-      }
-      this.templateDeferred = new $.Deferred();
-      if (typeof this._template === 'function') {
-        this.templateDeferred.resolve();
-        return this.templateDeferred;
-      }
-      view = this;
-      $.getScript(this._getTemplateURL(), function() {
-        view._template = function(data) {
-          var rendered_html;
-          rendered_html = '';
-          dust.render(this._getTemplateName(), data, function(err, text) {
-            return rendered_html = text;
-          });
-          return rendered_html;
-        };
-        return view.templateDeferred.resolve();
-      });
-      return this.templateDeferred;
+    pullChildren: function() {
+      return this.$el.find("." + this.options.partialClassName);
     },
-    render: function() {
-      if (this._renderDeferred && this._renderDeferred.state() === 'pending') {
-        return this._renderDeferred;
-      }
-      this._renderDeferred = new $.Deferred();
-      this.renderSelf();
-      return this._renderDeferred;
-    }
-  };
-
-}).call(this);
-
-(function() {
-  var _ref;
-
-  if ((_ref = window.Inn) == null) {
-    window.Inn = {};
-  }
-
-  Inn.View = Backbone.View.extend({
-    initialize: function(options) {
-      this.options = $.extend({}, {
-        templateFolder: '',
-        templateFormat: 'js'
-      }, options);
-      return this;
+    isRoot: function() {
+      return this._parent === null;
     },
-    getDataForView: function() {
-      if (this.model) {
-        return this.model.toJSON();
-      }
-    },
-    renderSelf: function() {
-      var _this = this;
-      if (this.options.layout) {
-        this.options.layout._viewsUnrendered.push(this);
-      }
-      this._getTemplate().done(function() {
-        if (_this.attributes) {
-          if (typeof _this.attributes === 'function') {
-            _this.$el.attr(_this.attributes());
-          } else {
-            _this.$el.attr(_this.attributes);
-          }
-        }
-        _this.$el.html(_this._template(_this.getDataForView()));
-        _this.trigger('render', _this);
-        return _this._renderDeferred.resolve();
-      });
-      return this;
-    },
-    remove: function() {
-      this.undelegateEvents();
-      this.$el.empty().remove();
-      this.trigger('remove');
-      this.options.isInDOM = false;
-      return this;
+    options: {
+      partialClassName: 'bPartial',
+      templateFolder: '',
+      templateFormat: 'js'
     }
   });
-
-  _.extend(Inn.View.prototype, Inn.TemplateMixin);
-
-}).call(this);
-
-(function() {
-  var _ref,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-  if ((_ref = window.Inn) == null) {
-    window.Inn = {};
-  }
-
-  Inn.Layout = (function() {
-
-    function Layout(options) {
-      if (!(options && options.dataManager && options.dataManager instanceof Inn.DataManager)) {
-        throw new Inn.Error('dataManager should be in options');
-      }
-      this.options = $.extend(true, {}, Inn.Layout.defaults, options);
-      this._dataManager = options.dataManager;
-      this._views = [];
-      this._viewsUnrendered = [];
-      this.id = this.options.id ? this.options.id : 'layout';
-      _.extend(this, Backbone.Events);
-    }
-
-    Layout.prototype.renderSelf = function() {
-      var _this = this;
-      this._getTemplate().done(function() {
-        var name, partial, _ref1, _results;
-        $("#" + _this.id).html(_this._template());
-        _this._processPartials();
-        _this._parsePartials();
-        _ref1 = _this.options.partials;
-        _results = [];
-        for (name in _ref1) {
-          partial = _ref1[name];
-          if (_this.getView(name)) {
-            _results.push(_this.getView(name).render());
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      });
-      return this;
-    };
-
-    Layout.prototype.addView = function(view) {
-      var data, viewInLayout;
-      if (!(view instanceof Inn.View)) {
-        throw new Inn.Error('view shold be an instance of Inn.View');
-      }
-      viewInLayout = _.find(this._views, function(existingView) {
-        return existingView.id === view.id;
-      });
-      if (!(__indexOf.call(this._views, view) >= 0 || viewInLayout)) {
-        this._views.push(view);
-      }
-      view.options.layout = this;
-      if (!(view.model || view.collection)) {
-        data = this._dataManager.getDataAsset(view.id);
-        if (data) {
-          if (data instanceof Inn.Model) {
-            view.model = data;
-          }
-          if (data instanceof Inn.Collection) {
-            view.collection = data;
-          }
-        } else {
-          delete view.model;
-          delete view.collection;
-        }
-      }
-      view.on('render', _.bind(this._recheckSubViews, this, view));
-      view.on('remove', _.bind(this._clearSubViews, this, view));
-      view.on('remove', _.bind(this._onViewRemovedFromDOM, this, view));
-      this.trigger('add:view', view);
-      return this;
-    };
-
-    Layout.prototype.getView = function(name) {
-      var _ref1;
-      return (_ref1 = _.find(this._views, function(view) {
-        return view.id === name;
-      })) != null ? _ref1 : null;
-    };
-
-    Layout.prototype.removeView = function(name) {
-      var survived;
-      if ((survived = _.reject(this._views, function(view) {
-        return view.id === name;
-      })).length === this._views.length) {
-        return null;
-      }
-      this._views = survived;
-      return this.trigger('remove:view');
-    };
-
-    Layout.prototype._processPartials = function(partials) {
-      var name, partial, view, viewOverriddenOptions, _ref1, _ref2;
-      if (!partials) {
-        partials = this.options.partials;
-      }
-      for (name in partials) {
-        partial = partials[name];
-        viewOverriddenOptions = _.extend({
-          id: name,
-          templateFolder: (_ref1 = this.options.templateFolder) != null ? _ref1 : void 0,
-          templateFormat: (_ref2 = this.options.templateFormat) != null ? _ref2 : void 0
-        }, this.options.viewOptions);
-        this.addView(new Inn.View(viewOverriddenOptions));
-        view = this.getView(name);
-        view.options._viewBranch = partial;
-        if (partial.templateName) {
-          view.options.templateName = partial.templateName;
-        }
-        if (partial.templateURL) {
-          view.options.templateURL = partial.templateURL;
-        }
-        view.attributes = partial.attributes;
-        if (partial.partials) {
-          this._processPartials(partial.partials);
-        }
-      }
-      return this;
-    };
-
-    Layout.prototype._parsePartials = function(partialContent) {
-      var element, idx, layout, name, partial, partialId, partialsObject, _i, _len, _ref1, _ref2, _results;
-      layout = this;
-      if (!partialContent) {
-        partialContent = $("#" + this.id);
-      }
-      partialId = partialContent.attr('id');
-      partialsObject = {
-        partials: {}
-      };
-      _ref1 = $(partialContent).children("." + this.options.placeholderClassName);
-      for (idx = _i = 0, _len = _ref1.length; _i < _len; idx = ++_i) {
-        element = _ref1[idx];
-        partialsObject.partials[$(element).attr('id')] = {};
-      }
-      if (this.options.partials == null) {
-        this._processPartials(partialsObject.partials);
-        if (this.getView(partialId)) {
-          this.getView(partialId).options._viewBranch = partialsObject;
-        }
-        _ref2 = partialsObject.partials;
-        _results = [];
-        for (name in _ref2) {
-          partial = _ref2[name];
-          if (this.getView(name)) {
-            _results.push(this.getView(name).render());
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      }
-    };
-
-    Layout.prototype._recheckSubViews = function(view) {
-      var name, partial, _ref1;
-      this._viewsUnrendered.splice(_.indexOf(this._viewsUnrendered, view), 1);
-      if (view.el.parentNode === null && $("#" + view.id).length) {
-        $("#" + view.id).replaceWith(view.$el);
-        view.options.isInDOM = true;
-      }
-      if (!view.options._viewBranch.partials) {
-        this._parsePartials(view.$el);
-      }
-      if (view.options._viewBranch.partials) {
-        _ref1 = view.options._viewBranch.partials;
-        for (name in _ref1) {
-          partial = _ref1[name];
-          this.getView(name).render();
-        }
-      }
-      if (this._viewsUnrendered.length <= 0) {
-        this._renderDeferred.resolve();
-      }
-      return this;
-    };
-
-    Layout.prototype._clearSubViews = function(view) {
-      var name, partial, _ref1, _results;
-      if (this._destroyDeferred) {
-        this._destroyDeferred.notify();
-      }
-      if (view.options._viewBranch.partials) {
-        _ref1 = view.options._viewBranch.partials;
-        _results = [];
-        for (name in _ref1) {
-          partial = _ref1[name];
-          if (this.getView(name)) {
-            _results.push(this.getView(name).remove());
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      }
-    };
-
-    Layout.prototype._onViewRemovedFromDOM = function(view) {};
-
-    Layout.prototype.destroy = function() {
-      var layout, name, partial, _ref1,
-        _this = this;
-      $("#" + this.id).empty();
-      layout = this;
-      this._destroyDeferred = new $.Deferred();
-      this._destroyDeferred.progress(function() {
-        var viewsInDOM;
-        viewsInDOM = _.filter(layout._views, function(view) {
-          return view.options.isInDOM;
-        });
-        if (viewsInDOM.length === 0) {
-          return this.resolve();
-        }
-      });
-      this._destroyDeferred.done(function() {
-        var view, _i, _len, _ref1, _results;
-        _ref1 = layout._views;
-        _results = [];
-        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-          view = _ref1[_i];
-          _results.push(_this.removeView(view.id));
-        }
-        return _results;
-      });
-      _ref1 = this.options.partials;
-      for (name in _ref1) {
-        partial = _ref1[name];
-        if (this.getView(name)) {
-          this.getView(name).remove();
-        }
-      }
-      return this._destroyDeferred;
-    };
-
-    Layout.defaults = {
-      placeholderClassName: 'layoutPlaceholder',
-      templateFolder: '',
-      templateFormat: 'js',
-      viewOptions: {}
-    };
-
-    _.extend(Layout.prototype, Inn.TemplateMixin);
-
-    return Layout;
-
-  })();
 
 }).call(this);
 
