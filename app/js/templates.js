@@ -1,44 +1,8 @@
 (function() {
-  dust.register("bPagination", body_0);
+  dust.register("bFooter", body_0);
 
   function body_0(chk, ctx) {
-    return chk.write("===Pagination===");
-  }
-  return body_0;
-})();
-
-(function() {
-  dust.register("bFrontPageMovies", body_0);
-
-  function body_0(chk, ctx) {
-    return chk.write('===Frontpage movies===<div id="pagination" class="otherPlaceholder"></div>');
-  }
-  return body_0;
-})();
-
-(function() {
-  dust.register("bHolyView", body_0);
-
-  function body_0(chk, ctx) {
-    return chk.write('===Content===<div id="frontPageMovies" class="bPartial"></div>');
-  }
-  return body_0;
-})();
-
-(function() {
-  dust.register("bHeader", body_0);
-
-  function body_0(chk, ctx) {
-    return chk.write("===Header===");
-  }
-  return body_0;
-})();
-
-(function() {
-  dust.register("bPromoMovie", body_0);
-
-  function body_0(chk, ctx) {
-    return chk.write("===PromoMovie===");
+    return chk.write("===Footer===");
   }
   return body_0;
 })();
@@ -53,19 +17,46 @@
 })();
 
 (function() {
-  dust.register("bFooter", body_0);
+  dust.register("bFrontPageMovies", body_0);
 
   function body_0(chk, ctx) {
-    return chk.write("===Footer===");
+    return chk.write('===Frontpage movies===<div id="pagination" class="otherPlaceholder"></div>');
   }
   return body_0;
 })();
 
 (function() {
-  dust.register("bTags", body_0);
+  dust.register("bHeader", body_0);
 
   function body_0(chk, ctx) {
-    return chk.write("===Tags===");
+    return chk.write("===Header===");
+  }
+  return body_0;
+})();
+
+(function() {
+  dust.register("bHolyView", body_0);
+
+  function body_0(chk, ctx) {
+    return chk.write('===Content===<div id="frontPageMovies" class="bPartial"></div>');
+  }
+  return body_0;
+})();
+
+(function() {
+  dust.register("bPagination", body_0);
+
+  function body_0(chk, ctx) {
+    return chk.write("===Pagination===");
+  }
+  return body_0;
+})();
+
+(function() {
+  dust.register("bPromoMovie", body_0);
+
+  function body_0(chk, ctx) {
+    return chk.write("===PromoMovie===");
   }
   return body_0;
 })();
@@ -84,6 +75,15 @@
 
   function body_0(chk, ctx) {
     return chk.write("===Sortings===");
+  }
+  return body_0;
+})();
+
+(function() {
+  dust.register("bTags", body_0);
+
+  function body_0(chk, ctx) {
+    return chk.write("===Tags===");
   }
   return body_0;
 })();
