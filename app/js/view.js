@@ -29,31 +29,29 @@
       }
       this._rendering = true;
       this._loadTemplate(function(template) {
-        var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4;
-        _this.$el.html(template((_ref1 = (_ref2 = _this.options.dataManager) != null ? _ref2.getDataAsset() : void 0) != null ? _ref1 : {}));
+        var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
+        _this.$el.html(template((_ref1 = (_ref2 = (_ref3 = _this.options.model) != null ? _ref3.toJSON() : void 0) != null ? _ref2 : (_ref4 = _this.options.dataManager) != null ? _ref4.getDataAsset() : void 0) != null ? _ref1 : {}));
         patchedOptions = _.clone(_this.options);
         patchedOptions.partials = [];
-        if (_this.partials != null) {
-          _ref3 = _this.partials;
-          for (idx = _i = 0, _len = _ref3.length; _i < _len; idx = ++_i) {
-            partial = _ref3[idx];
-            $ctx = _this.$el.find("#" + partial.id);
-            if (partial instanceof Inn.View) {
-              view = partial;
-              view.options = _.extend({}, patchedOptions, view.options);
-              view.setElement($ctx.get(0));
-            } else {
-              view = new Inn.View(_.extend({}, patchedOptions, {
-                el: $ctx.get(0)
-              }, partial));
-            }
-            view._parent = _this;
-            _this.children.add(view);
+        _ref5 = _this.partials;
+        for (idx = _i = 0, _len = _ref5.length; _i < _len; idx = ++_i) {
+          partial = _ref5[idx];
+          $ctx = _this.$el.find("#" + partial.id);
+          if (partial instanceof Inn.View) {
+            view = partial;
+            view.options = _.extend({}, patchedOptions, view.options);
+            view.setElement($ctx.get(0));
+          } else {
+            view = new Inn.View(_.extend({}, patchedOptions, {
+              el: $ctx.get(0)
+            }, partial));
           }
+          view._parent = _this;
+          _this.children.add(view);
         }
-        _ref4 = _this.pullChildren();
-        for (idx = _j = 0, _len1 = _ref4.length; _j < _len1; idx = ++_j) {
-          child = _ref4[idx];
+        _ref6 = _this.pullChildren();
+        for (idx = _j = 0, _len1 = _ref6.length; _j < _len1; idx = ++_j) {
+          child = _ref6[idx];
           $ctx = $(child);
           $ctx.removeClass(_this.options.partialClassName);
           view = new Inn.View(_.extend({}, patchedOptions, {

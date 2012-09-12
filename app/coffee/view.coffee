@@ -75,32 +75,31 @@ Inn.View = Backbone.View.extend({
     @_loadTemplate (template) =>
       # Получаем данные для рендеринга шаблона
       # @todo: написать тесты!
-      @$el.html template @options.dataManager?.getDataAsset() ? {}
+      @$el.html template @options.model?.toJSON() ? @options.dataManager?.getDataAsset() ? {}
 
       # Унаследованные опции с очищенным полем partials
       patchedOptions = _.clone(@options)
       patchedOptions.partials = []
 
       # Добавляем partials в очередь рендеринга
-      if @partials?
-        for partial, idx in @partials
-          $ctx = @$el.find("##{partial.id}")
+      for partial, idx in @partials
+        $ctx = @$el.find("##{partial.id}")
 
-          # Если View передана в виде экземпляра Backbone.View,
-          # просто устанавливаем ему корневой элемент
-          if partial instanceof Inn.View
-            view = partial
-            view.options = _.extend {}, patchedOptions, view.options
-            view.setElement $ctx.get(0)
-          # Если передан конфиг-хеш, создаём новый объект Inn.View
-          else
-            view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0) }, partial
+        # Если View передана в виде экземпляра Backbone.View,
+        # просто устанавливаем ему корневой элемент
+        if partial instanceof Inn.View
+          view = partial
+          view.options = _.extend {}, patchedOptions, view.options
+          view.setElement $ctx.get(0)
+        # Если передан конфиг-хеш, создаём новый объект Inn.View
+        else
+          view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0) }, partial
 
-          # Устанавливаем родителя
-          view._parent = @
+        # Устанавливаем родителя
+        view._parent = @
 
-          # Добавляем в очередь на рендеринг
-          @children.add view
+        # Добавляем в очередь на рендеринг
+        @children.add view
 
       # Вытаскиваем детей
       for child, idx in @pullChildren()
