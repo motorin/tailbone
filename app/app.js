@@ -55,6 +55,11 @@
       return this;
     };
 
+    ViewsCollection.prototype.remove = function(view) {
+      this._list.splice(_.indexOf(this._list, view), 1);
+      return this;
+    };
+
     ViewsCollection.prototype.render = function() {
       var view, _i, _len, _ref1;
       _ref1 = this._list;
@@ -224,8 +229,9 @@
       }, $ctx.data('view-options')));
       view._parent = this;
       if (!silent) {
-        return this.children.add(view);
+        this.children.add(view);
       }
+      return view;
     },
     _readyHandler: function() {
       if (!this.isRoot()) {

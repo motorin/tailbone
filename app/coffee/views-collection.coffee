@@ -33,6 +33,16 @@ class Inn.ViewsCollection
 
     return @
 
+  ##### remove()
+  #
+  #---
+  # Удаляет View из списка
+  #
+  remove: (view) ->
+    @_list.splice _.indexOf(@_list, view), 1
+
+    return @
+
   ##### render()
   #
   #---

@@ -86,8 +86,9 @@
       }, $ctx.data('view-options')));
       view._parent = this;
       if (!silent) {
-        return this.children.add(view);
+        this.children.add(view);
       }
+      return view;
     },
     _readyHandler: function() {
       if (!this.isRoot()) {

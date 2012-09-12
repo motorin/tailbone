@@ -135,6 +135,7 @@ Inn.View = Backbone.View.extend({
     view = new Inn.View _.extend {}, config, { el: $ctx.get(0), id: $ctx.attr('id') }, $ctx.data('view-options')
     view._parent = @
     @children.add view unless silent
+    return view
 
 
   ##### _readyHandler()
