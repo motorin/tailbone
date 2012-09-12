@@ -169,17 +169,10 @@ Inn.View = Backbone.View.extend({
   # **callback** - Колбэк
   _loadTemplate: (callback) ->
     process = =>
-      # Оборачивает загруженный шаблон во внутреннюю функцию
-      template = (data) =>
-        renderedHTML = ''
-        dust.render @_getTemplateName(), data ? {}, (err, text)->
-          renderedHTML = text
-        return renderedHTML
-
       # По завершении загрузки вызывает **callback**, передавая ему функцию-шаблон
-      callback.call @, template
+      callback.call @, jade.templates[@_getTemplateName()]
 
-    if dust.cache[@_getTemplateName()]?
+    if jade.templates[@_getTemplateName()]?
       setTimeout -> process()
     else
       $.getScript @_getTemplateURL(), process

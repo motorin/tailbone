@@ -95,18 +95,9 @@
       var process,
         _this = this;
       process = function() {
-        var template;
-        template = function(data) {
-          var renderedHTML;
-          renderedHTML = '';
-          dust.render(_this._getTemplateName(), data != null ? data : {}, function(err, text) {
-            return renderedHTML = text;
-          });
-          return renderedHTML;
-        };
-        return callback.call(_this, template);
+        return callback.call(_this, jade.templates[_this._getTemplateName()]);
       };
-      if (dust.cache[this._getTemplateName()] != null) {
+      if (jade.templates[this._getTemplateName()] != null) {
         setTimeout(function() {
           return process();
         });
