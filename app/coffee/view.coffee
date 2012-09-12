@@ -72,6 +72,9 @@ Inn.View = Backbone.View.extend({
 
     @_rendering = on
 
+    # Переопределяем имя шаблона, если оно задано в data-view-template
+    @options.templateName = this.$el.data('view-template') if this.$el.data('view-template')?
+
     @_loadTemplate (template) =>
       # Получаем данные для рендеринга шаблона
       # @todo: написать тесты!
@@ -107,8 +110,6 @@ Inn.View = Backbone.View.extend({
         $ctx.removeClass @options.partialClassName
         view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0), id: $ctx.attr('id') }, $ctx.data('view-options')
         view._parent = @
-        # Переопределяем имя шаблона, если оно задано в data-view-template
-        view.options.templateName = $ctx.data('view-template') if $ctx.data('view-template')?
         @children.add view
 
       # Если нет partial-ов, генериуем событие **ready**

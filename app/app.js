@@ -166,6 +166,9 @@
         this.stopRender();
       }
       this._rendering = true;
+      if (this.$el.data('view-template') != null) {
+        this.options.templateName = this.$el.data('view-template');
+      }
       this._loadTemplate(function(template) {
         var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
         _this.$el.html(template((_ref1 = (_ref2 = (_ref3 = _this.options.model) != null ? _ref3.toJSON() : void 0) != null ? _ref2 : (_ref4 = _this.options.dataManager) != null ? _ref4.getDataAsset() : void 0) != null ? _ref1 : {}));
@@ -197,9 +200,6 @@
             id: $ctx.attr('id')
           }, $ctx.data('view-options')));
           view._parent = _this;
-          if ($ctx.data('view-template') != null) {
-            view.options.templateName = $ctx.data('view-template');
-          }
           _this.children.add(view);
         }
         if (_this.children.isEmpty()) {
