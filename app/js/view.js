@@ -92,17 +92,23 @@
       return this;
     },
     _loadTemplate: function(callback) {
-      var process,
+      var template,
         _this = this;
-      process = function() {
-        return callback.call(_this, jade.templates[_this._getTemplateName()]);
+      template = function() {
+        try {
+          return jade.templates[_this._getTemplateName()];
+        } catch (e) {
+          return '';
+        }
       };
       if (jade.templates[this._getTemplateName()] != null) {
         setTimeout(function() {
-          return process();
+          return callback.call(this, template);
         });
       } else {
-        $.getScript(this._getTemplateURL(), process);
+        $.getScript(this._getTemplateURL(), function() {
+          return callback.call(this, template);
+        });
       }
       return this;
     },

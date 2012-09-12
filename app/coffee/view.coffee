@@ -168,14 +168,18 @@ Inn.View = Backbone.View.extend({
   # 
   # **callback** - Колбэк
   _loadTemplate: (callback) ->
-    process = =>
-      # По завершении загрузки вызывает **callback**, передавая ему функцию-шаблон
-      callback.call @, jade.templates[@_getTemplateName()]
+    template = =>
+        try
+          return jade.templates[@_getTemplateName()]
+        catch e
+          return ''
 
     if jade.templates[@_getTemplateName()]?
-      setTimeout -> process()
+      setTimeout ->
+        callback.call @, template
     else
-      $.getScript @_getTemplateURL(), process
+      $.getScript @_getTemplateURL(), ->
+        callback.call @, template
 
     return @
 

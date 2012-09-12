@@ -89,14 +89,20 @@
 <p>Загружает шаблон View</p>
 
 <p><strong>callback</strong> - Колбэк</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_loadTemplate: </span><span class="nf">(callback) -&gt;</span>
-    <span class="nv">process = </span><span class="o">=&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-34">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-34">&#182;</a>               </div>               <p>По завершении загрузки вызывает <strong>callback</strong>, передавая ему функцию-шаблон</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">callback</span><span class="p">.</span><span class="nx">call</span> <span class="nx">@</span><span class="p">,</span> <span class="nx">jade</span><span class="p">.</span><span class="nx">templates</span><span class="p">[</span><span class="nx">@_getTemplateName</span><span class="p">()]</span>
+    <span class="nv">template = </span><span class="o">=&gt;</span>
+        <span class="k">try</span>
+          <span class="k">return</span> <span class="nx">jade</span><span class="p">.</span><span class="nx">templates</span><span class="p">[</span><span class="nx">@_getTemplateName</span><span class="p">()]</span>
+        <span class="k">catch</span> <span class="nx">e</span>
+          <span class="k">return</span> <span class="s">&#39;&#39;</span>
 
     <span class="k">if</span> <span class="nx">jade</span><span class="p">.</span><span class="nx">templates</span><span class="p">[</span><span class="nx">@_getTemplateName</span><span class="p">()]</span><span class="o">?</span>
-      <span class="nx">setTimeout</span> <span class="o">-&gt;</span> <span class="nx">process</span><span class="p">()</span>
+      <span class="nx">setTimeout</span> <span class="o">-&gt;</span>
+        <span class="nx">callback</span><span class="p">.</span><span class="nx">call</span> <span class="nx">@</span><span class="p">,</span> <span class="nx">template</span>
     <span class="k">else</span>
-      <span class="nx">$</span><span class="p">.</span><span class="nx">getScript</span> <span class="nx">@_getTemplateURL</span><span class="p">(),</span> <span class="nx">process</span>
+      <span class="nx">$</span><span class="p">.</span><span class="nx">getScript</span> <span class="nx">@_getTemplateURL</span><span class="p">(),</span> <span class="o">-&gt;</span>
+        <span class="nx">callback</span><span class="p">.</span><span class="nx">call</span> <span class="nx">@</span><span class="p">,</span> <span class="nx">template</span>
 
-    <span class="k">return</span> <span class="nx">@</span></pre></div>             </td>           </tr>                               <tr id="section-35">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-35">&#182;</a>               </div>               <h4>_getTemplateURL()</h4>
+    <span class="k">return</span> <span class="nx">@</span></pre></div>             </td>           </tr>                               <tr id="section-34">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-34">&#182;</a>               </div>               <h4>_getTemplateURL()</h4>
 
 <hr />
 
@@ -104,29 +110,29 @@
     <span class="nv">divider = </span><span class="k">if</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateFolder</span> <span class="k">then</span> <span class="s">&#39;/&#39;</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
     <span class="k">return</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateFolder</span> <span class="o">+</span> <span class="nx">divider</span> <span class="o">+</span> <span class="nx">@_getTemplateName</span><span class="p">()</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateFormat</span> <span class="nx">unless</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateURL</span><span class="o">?</span>
     <span class="k">return</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateURL</span>
-  </pre></div>             </td>           </tr>                               <tr id="section-36">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-36">&#182;</a>               </div>               <h4>_getTemplateName()</h4>
+  </pre></div>             </td>           </tr>                               <tr id="section-35">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-35">&#182;</a>               </div>               <h4>_getTemplateName()</h4>
 
 <hr />
 
 <p>Определяет название шаблона</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">_getTemplateName: </span><span class="o">-&gt;</span>
     <span class="k">return</span> <span class="s">&#39;b&#39;</span><span class="o">+</span> <span class="nx">@id</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">toUpperCase</span><span class="p">()</span> <span class="o">+</span> <span class="nx">@id</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="nx">unless</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateName</span>
-    <span class="k">return</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateName</span></pre></div>             </td>           </tr>                               <tr id="section-37">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-37">&#182;</a>               </div>               <h4>pullChildren()</h4>
+    <span class="k">return</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">templateName</span></pre></div>             </td>           </tr>                               <tr id="section-36">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-36">&#182;</a>               </div>               <h4>pullChildren()</h4>
 
 <hr />
 
-<p>Вытаскивает pratials из отрендеренного шаблона</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">pullChildren: </span><span class="o">-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-38">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-38">&#182;</a>               </div>               <p>Для создания вью по "дырке" используем класс options.partialClassName</p>
+<p>Вытаскивает pratials из отрендеренного шаблона</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">pullChildren: </span><span class="o">-&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-37">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-37">&#182;</a>               </div>               <p>Для создания вью по "дырке" используем класс options.partialClassName</p>
 
 <p>Для оверрайдинга опций используем data-атрибут (data-view-options)</p>
 
 <p>Для оверрайдинга имени шаблона используем data-атрибут (data-view-template)</p>
 
 <p>ID берём из атрибута id</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">return</span> <span class="nx">@$el</span><span class="p">.</span><span class="nx">find</span> <span class="s">&quot;.</span><span class="si">#{</span><span class="nx">@options</span><span class="p">.</span><span class="nx">partialClassName</span><span class="si">}</span><span class="s">&quot;</span>
-    </pre></div>             </td>           </tr>                               <tr id="section-39">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-39">&#182;</a>               </div>               <h4>isRoot()</h4>
+    </pre></div>             </td>           </tr>                               <tr id="section-38">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-38">&#182;</a>               </div>               <h4>isRoot()</h4>
 
 <hr />
 
 <p>Устанавливает, является ли этот View корневым</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">isRoot: </span><span class="o">-&gt;</span>
-    <span class="k">return</span> <span class="nx">@_parent</span> <span class="o">is</span> <span class="kc">null</span></pre></div>             </td>           </tr>                               <tr id="section-40">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-40">&#182;</a>               </div>               <h4>options</h4>
+    <span class="k">return</span> <span class="nx">@_parent</span> <span class="o">is</span> <span class="kc">null</span></pre></div>             </td>           </tr>                               <tr id="section-39">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-39">&#182;</a>               </div>               <h4>options</h4>
 
 <hr />
 
