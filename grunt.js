@@ -5,6 +5,9 @@ module.exports = function(grunt) {
   // CoffeeScript plugin
   grunt.loadNpmTasks('grunt-coffee');
 
+  // Jade plugin
+  grunt.loadNpmTasks('grunt-jade');
+
   // Docco plugin
   grunt.loadNpmTasks('grunt-docco');
 
@@ -61,6 +64,15 @@ module.exports = function(grunt) {
       // 'app/tests/*.coffee'
     },
 
+    jade: {
+        templates: {
+            src: ['app/templates/jade/*.jade'],
+            dest: 'app/templates/',
+            options: {
+                runtime: false
+            }
+        }
+    },
 
     coffee: {
 
@@ -144,7 +156,8 @@ module.exports = function(grunt) {
 
     lint: {
       files: [
-        'app/js/*.js',
+        'app/js/app.js',
+        'app/js/utils.js',
         'app/app.js.bak'
         // 'app/tests/*.js' // Из-за хитрости тестов было много хинтов, решили отключить
       ]
@@ -180,8 +193,8 @@ module.exports = function(grunt) {
   });
 
   // Default task.
-  registerTask('default', 'coffee lint concat min junit docco');
-  registerTask('rebuild', 'coffee lint concat docco')
+  registerTask('default', 'coffee lint concat jade min junit docco');
+  registerTask('rebuild', 'coffee lint concat jade docco')
   registerTask('test', 'qunit')
 
 };
