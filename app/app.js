@@ -193,14 +193,7 @@
         _ref6 = _this.pullChildren();
         for (idx = _j = 0, _len1 = _ref6.length; _j < _len1; idx = ++_j) {
           child = _ref6[idx];
-          $ctx = $(child);
-          $ctx.removeClass(_this.options.partialClassName);
-          view = new Inn.View(_.extend({}, patchedOptions, {
-            el: $ctx.get(0),
-            id: $ctx.attr('id')
-          }, $ctx.data('view-options')));
-          view._parent = _this;
-          _this.children.add(view);
+          _this.initPartial(child, patchedOptions, false);
         }
         if (_this.children.isEmpty()) {
           if (!_this.isRoot()) {
@@ -214,6 +207,25 @@
         return _this.children.render();
       });
       return this;
+    },
+    initPartial: function(el, config, silent) {
+      var $ctx, view;
+      if (config == null) {
+        config = {};
+      }
+      if (silent == null) {
+        silent = false;
+      }
+      $ctx = $(el);
+      $ctx.removeClass(this.options.partialClassName);
+      view = new Inn.View(_.extend({}, config, {
+        el: $ctx.get(0),
+        id: $ctx.attr('id')
+      }, $ctx.data('view-options')));
+      view._parent = this;
+      if (!silent) {
+        return this.children.add(view);
+      }
     },
     _readyHandler: function() {
       if (!this.isRoot()) {

@@ -106,11 +106,7 @@ Inn.View = Backbone.View.extend({
 
       # Вытаскиваем детей
       for child, idx in @pullChildren()
-        $ctx = $(child)
-        $ctx.removeClass @options.partialClassName
-        view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0), id: $ctx.attr('id') }, $ctx.data('view-options')
-        view._parent = @
-        @children.add view
+        @initPartial child, patchedOptions, off
 
       # Если нет partial-ов, генериуем событие **ready**
       if @children.isEmpty()
@@ -128,6 +124,18 @@ Inn.View = Backbone.View.extend({
 
 
     return @
+
+  ##### initPartial(*el*, *config*, *silent*)
+  #
+  #---
+  # Создаёт дочерний View из DOM-элемента
+  initPartial: (el, config = {}, silent = off) ->
+    $ctx = $(el)
+    $ctx.removeClass @options.partialClassName
+    view = new Inn.View _.extend {}, config, { el: $ctx.get(0), id: $ctx.attr('id') }, $ctx.data('view-options')
+    view._parent = @
+    @children.add view unless silent
+
 
   ##### _readyHandler()
   #
