@@ -72,10 +72,13 @@ Inn.View = Backbone.View.extend({
 
     @_rendering = on
 
+    # Переопределяем имя шаблона, если оно задано в data-view-template
+    @options.templateName = this.$el.data('view-template') if this.$el.data('view-template')?
+
     @_loadTemplate (template) =>
       # Получаем данные для рендеринга шаблона
       # @todo: написать тесты!
-      @$el.html template @options.dataManager?.getDataAsset() ? {}
+      @$el.html template @options.model?.toJSON() ? @options.dataManager?.getDataAsset() ? {}
 
       # Унаследованные опции с очищенным полем partials
       patchedOptions = _.clone(@options)
@@ -103,13 +106,7 @@ Inn.View = Backbone.View.extend({
 
       # Вытаскиваем детей
       for child, idx in @pullChildren()
-        $ctx = $(child)
-        $ctx.removeClass @options.partialClassName
-        view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0), id: $ctx.attr('id') }, $ctx.data('view-options')
-        view._parent = @
-        # Переопределяем имя шаблона, если оно задано в data-view-template
-        view.options.templateName = $ctx.data('view-template') if $ctx.data('view-template')?
-        @children.add view
+        @initPartial child, patchedOptions, off
 
       # Если нет partial-ов, генериуем событие **ready**
       if @children.isEmpty()
@@ -127,6 +124,19 @@ Inn.View = Backbone.View.extend({
 
 
     return @
+
+  ##### initPartial(*el*, *config*, *silent*)
+  #
+  #---
+  # Создаёт дочерний View из DOM-элемента
+  initPartial: (el, config = {}, silent = off) ->
+    $ctx = $(el)
+    $ctx.removeClass @options.partialClassName
+    view = new Inn.View _.extend {}, config, { el: $ctx.get(0), id: $ctx.attr('id') }, $ctx.data('view-options')
+    view._parent = @
+    @children.add view unless silent
+    return view
+
 
   ##### _readyHandler()
   #
@@ -168,21 +178,18 @@ Inn.View = Backbone.View.extend({
   # 
   # **callback** - Колбэк
   _loadTemplate: (callback) ->
-    process = =>
-      # Оборачивает загруженный шаблон во внутреннюю функцию
-      template = (data) =>
-        renderedHTML = ''
-        dust.render @_getTemplateName(), data ? {}, (err, text)->
-          renderedHTML = text
-        return renderedHTML
+    template = =>
+        try
+          return jade.templates[@_getTemplateName()]
+        catch e
+          return ''
 
-      # По завершении загрузки вызывает **callback**, передавая ему функцию-шаблон
-      callback.call @, template
-
-    if dust.cache[@_getTemplateName()]?
-      setTimeout -> process()
+    if jade.templates[@_getTemplateName()]?
+      setTimeout ->
+        callback.call @, template
     else
-      $.getScript @_getTemplateURL(), process
+      $.getScript @_getTemplateURL(), ->
+        callback.call @, template
 
     return @
 

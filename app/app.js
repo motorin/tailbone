@@ -55,6 +55,11 @@
       return this;
     };
 
+    ViewsCollection.prototype.remove = function(view) {
+      this._list.splice(_.indexOf(this._list, view), 1);
+      return this;
+    };
+
     ViewsCollection.prototype.render = function() {
       var view, _i, _len, _ref1;
       _ref1 = this._list;
@@ -166,14 +171,17 @@
         this.stopRender();
       }
       this._rendering = true;
+      if (this.$el.data('view-template') != null) {
+        this.options.templateName = this.$el.data('view-template');
+      }
       this._loadTemplate(function(template) {
-        var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4;
-        _this.$el.html(template((_ref1 = (_ref2 = _this.options.dataManager) != null ? _ref2.getDataAsset() : void 0) != null ? _ref1 : {}));
+        var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
+        _this.$el.html(template((_ref1 = (_ref2 = (_ref3 = _this.options.model) != null ? _ref3.toJSON() : void 0) != null ? _ref2 : (_ref4 = _this.options.dataManager) != null ? _ref4.getDataAsset() : void 0) != null ? _ref1 : {}));
         patchedOptions = _.clone(_this.options);
         patchedOptions.partials = [];
-        _ref3 = _this.partials;
-        for (idx = _i = 0, _len = _ref3.length; _i < _len; idx = ++_i) {
-          partial = _ref3[idx];
+        _ref5 = _this.partials;
+        for (idx = _i = 0, _len = _ref5.length; _i < _len; idx = ++_i) {
+          partial = _ref5[idx];
           $ctx = _this.$el.find("#" + partial.id);
           if (partial instanceof Inn.View) {
             view = partial;
@@ -187,20 +195,10 @@
           view._parent = _this;
           _this.children.add(view);
         }
-        _ref4 = _this.pullChildren();
-        for (idx = _j = 0, _len1 = _ref4.length; _j < _len1; idx = ++_j) {
-          child = _ref4[idx];
-          $ctx = $(child);
-          $ctx.removeClass(_this.options.partialClassName);
-          view = new Inn.View(_.extend({}, patchedOptions, {
-            el: $ctx.get(0),
-            id: $ctx.attr('id')
-          }, $ctx.data('view-options')));
-          view._parent = _this;
-          if ($ctx.data('view-template') != null) {
-            view.options.templateName = $ctx.data('view-template');
-          }
-          _this.children.add(view);
+        _ref6 = _this.pullChildren();
+        for (idx = _j = 0, _len1 = _ref6.length; _j < _len1; idx = ++_j) {
+          child = _ref6[idx];
+          _this.initPartial(child, patchedOptions, false);
         }
         if (_this.children.isEmpty()) {
           if (!_this.isRoot()) {
@@ -214,6 +212,26 @@
         return _this.children.render();
       });
       return this;
+    },
+    initPartial: function(el, config, silent) {
+      var $ctx, view;
+      if (config == null) {
+        config = {};
+      }
+      if (silent == null) {
+        silent = false;
+      }
+      $ctx = $(el);
+      $ctx.removeClass(this.options.partialClassName);
+      view = new Inn.View(_.extend({}, config, {
+        el: $ctx.get(0),
+        id: $ctx.attr('id')
+      }, $ctx.data('view-options')));
+      view._parent = this;
+      if (!silent) {
+        this.children.add(view);
+      }
+      return view;
     },
     _readyHandler: function() {
       if (!this.isRoot()) {
@@ -230,26 +248,23 @@
       return this;
     },
     _loadTemplate: function(callback) {
-      var process,
+      var template,
         _this = this;
-      process = function() {
-        var template;
-        template = function(data) {
-          var renderedHTML;
-          renderedHTML = '';
-          dust.render(_this._getTemplateName(), data != null ? data : {}, function(err, text) {
-            return renderedHTML = text;
-          });
-          return renderedHTML;
-        };
-        return callback.call(_this, template);
+      template = function() {
+        try {
+          return jade.templates[_this._getTemplateName()];
+        } catch (e) {
+          return '';
+        }
       };
-      if (dust.cache[this._getTemplateName()] != null) {
+      if (jade.templates[this._getTemplateName()] != null) {
         setTimeout(function() {
-          return process();
+          return callback.call(this, template);
         });
       } else {
-        $.getScript(this._getTemplateURL(), process);
+        $.getScript(this._getTemplateURL(), function() {
+          return callback.call(this, template);
+        });
       }
       return this;
     },
