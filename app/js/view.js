@@ -17,7 +17,6 @@
     },
     destroy: function() {
       this.parent = null;
-      this.remove();
       this.children.destroy();
       this.trigger('destroy', this);
       return this;

@@ -54,7 +54,7 @@ Inn.View = Backbone.View.extend({
     # Уничтожаем ссылку на родителя
     @parent = null
     # Удаляем корневой элемент из DOM
-    @remove()
+    # @remove()
     # Вычищаем детей
     @children.destroy()
     # Генерируем событие destroy
