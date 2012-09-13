@@ -145,7 +145,7 @@
       var options;
       options = view.options;
       this.children.remove(view);
-      this.initPartial(view.$el, options).render();
+      this.children.add(this.initPartial(view.$el, options).render());
       return view.destroy();
     },
     isRoot: function() {

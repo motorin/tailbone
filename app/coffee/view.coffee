@@ -233,7 +233,7 @@ Inn.View = Backbone.View.extend({
   reInitPartial: (view) ->
     options = view.options
     @children.remove(view)
-    @initPartial(view.$el, options).render()
+    @children.add @initPartial(view.$el, options).render()
     view.destroy()
 
 ##### isRoot()
