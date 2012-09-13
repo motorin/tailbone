@@ -76,7 +76,7 @@ class Inn.ViewsCollection
   # Обработчик уничтожения View
   # 
   viewDestroyHandler: (view) ->
-    @trigger 'destroy', view
+    view.trigger 'destroy', view
 
 ##### viewReadyHandler()
   #

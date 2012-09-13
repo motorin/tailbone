@@ -83,7 +83,7 @@
     };
 
     ViewsCollection.prototype.viewDestroyHandler = function(view) {
-      return this.trigger('destroy', view);
+      return view.trigger('destroy', view);
     };
 
     ViewsCollection.prototype.viewReadyHandler = function() {
