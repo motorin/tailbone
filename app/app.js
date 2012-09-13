@@ -283,8 +283,8 @@
       var options;
       options = view.options;
       this.children.remove(view);
-      view.destroy();
-      return this.initPartial(view.$el, options).render();
+      this.initPartial(view.$el, options).render();
+      return view.destroy();
     },
     isRoot: function() {
       return this._parent === null;
