@@ -17,7 +17,6 @@
     },
     destroy: function() {
       this.parent = null;
-      this.remove();
       this.children.destroy();
       this.trigger('destroy', this);
       return this;
@@ -141,6 +140,13 @@
     },
     pullChildren: function() {
       return this.$el.find("." + this.options.partialClassName);
+    },
+    reInitPartial: function(view) {
+      var options;
+      options = view.options;
+      this.children.remove(view);
+      this.children.add(this.initPartial(view.$el, options).render());
+      return view.destroy();
     },
     isRoot: function() {
       return this._parent === null;

@@ -54,7 +54,7 @@ Inn.View = Backbone.View.extend({
     # Уничтожаем ссылку на родителя
     @parent = null
     # Удаляем корневой элемент из DOM
-    @remove()
+    # @remove()
     # Вычищаем детей
     @children.destroy()
     # Генерируем событие destroy
@@ -224,10 +224,19 @@ Inn.View = Backbone.View.extend({
     # 
     # ID берём из атрибута id
     return @$el.find ".#{@options.partialClassName}"
-    
 
+  ##### reInitPartial()
+  #
+  #---
+  # Повторно инициализирует View
+  #
+  reInitPartial: (view) ->
+    options = view.options
+    @children.remove(view)
+    @children.add @initPartial(view.$el, options).render()
+    view.destroy()
 
-  ##### isRoot()
+##### isRoot()
   #
   #---
   # Устанавливает, является ли этот View корневым
