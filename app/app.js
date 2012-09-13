@@ -279,6 +279,13 @@
     pullChildren: function() {
       return this.$el.find("." + this.options.partialClassName);
     },
+    reInitPartial: function(view) {
+      var options;
+      options = view.options;
+      this.children.remove(view);
+      view.destroy();
+      return this.initPartial(view.$el, layout.config).render();
+    },
     isRoot: function() {
       return this._parent === null;
     },

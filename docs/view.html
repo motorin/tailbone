@@ -134,13 +134,20 @@
 
 <p>Для оверрайдинга имени шаблона используем data-атрибут (data-view-template)</p>
 
-<p>ID берём из атрибута id</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">return</span> <span class="nx">@$el</span><span class="p">.</span><span class="nx">find</span> <span class="s">&quot;.</span><span class="si">#{</span><span class="nx">@options</span><span class="p">.</span><span class="nx">partialClassName</span><span class="si">}</span><span class="s">&quot;</span>
-    </pre></div>             </td>           </tr>                               <tr id="section-38">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-38">&#182;</a>               </div>               <h4>isRoot()</h4>
+<p>ID берём из атрибута id</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">return</span> <span class="nx">@$el</span><span class="p">.</span><span class="nx">find</span> <span class="s">&quot;.</span><span class="si">#{</span><span class="nx">@options</span><span class="p">.</span><span class="nx">partialClassName</span><span class="si">}</span><span class="s">&quot;</span></pre></div>             </td>           </tr>                               <tr id="section-38">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-38">&#182;</a>               </div>               <h4>reInitPartial()</h4>
+
+<hr />
+
+<p>Повторно инициализирует View</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">reInitPartial: </span><span class="nf">(view) -&gt;</span>
+    <span class="nv">options = </span><span class="nx">view</span><span class="p">.</span><span class="nx">options</span>
+    <span class="nx">@children</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="nx">view</span><span class="p">)</span>
+    <span class="nx">view</span><span class="p">.</span><span class="nx">destroy</span><span class="p">()</span>
+    <span class="nx">@initPartial</span><span class="p">(</span><span class="nx">view</span><span class="p">.</span><span class="nx">$el</span><span class="p">,</span> <span class="nx">layout</span><span class="p">.</span><span class="nx">config</span><span class="p">).</span><span class="nx">render</span><span class="p">()</span></pre></div>             </td>           </tr>                               <tr id="section-39">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-39">&#182;</a>               </div>               <h4>isRoot()</h4>
 
 <hr />
 
 <p>Устанавливает, является ли этот View корневым</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">isRoot: </span><span class="o">-&gt;</span>
-    <span class="k">return</span> <span class="nx">@_parent</span> <span class="o">is</span> <span class="kc">null</span></pre></div>             </td>           </tr>                               <tr id="section-39">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-39">&#182;</a>               </div>               <h4>options</h4>
+    <span class="k">return</span> <span class="nx">@_parent</span> <span class="o">is</span> <span class="kc">null</span></pre></div>             </td>           </tr>                               <tr id="section-40">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-40">&#182;</a>               </div>               <h4>options</h4>
 
 <hr />
 

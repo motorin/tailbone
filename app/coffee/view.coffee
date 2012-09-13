@@ -224,8 +224,17 @@ Inn.View = Backbone.View.extend({
     # 
     # ID берём из атрибута id
     return @$el.find ".#{@options.partialClassName}"
-    
 
+  ##### reInitPartial()
+  #
+  #---
+  # Повторно инициализирует View
+  #
+  reInitPartial: (view) ->
+    options = view.options
+    @children.remove(view)
+    view.destroy()
+    @initPartial(view.$el, layout.config).render()
 
   ##### isRoot()
   #
