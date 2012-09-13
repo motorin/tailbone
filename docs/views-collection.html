@@ -16,9 +16,8 @@
 
 <p>Добавляет View в список</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">add: </span><span class="nf">(view) -&gt;</span>
     <span class="nx">unless</span> <span class="nx">view</span> <span class="k">in</span> <span class="nx">@_list</span>
-      <span class="nx">@_list</span><span class="p">.</span><span class="nx">push</span> <span class="nx">view</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>При удалении View генерируем событие destroy</p>             </td>             <td class="code">               <div class="highlight"><pre>      <span class="nx">view</span><span class="p">.</span><span class="kc">on</span> <span class="s">&#39;destroy&#39;</span><span class="p">,</span> <span class="nx">@viewDestroyHandler</span>
-
-    <span class="k">return</span> <span class="nx">@</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <h4>remove()</h4>
+      <span class="nx">@_list</span><span class="p">.</span><span class="nx">push</span> <span class="nx">view</span></pre></div>             </td>           </tr>                               <tr id="section-6">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-6">&#182;</a>               </div>               <p>При удалении View генерируем событие destroy
+view.on 'destroy', @viewDestroyHandler</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="k">return</span> <span class="nx">@</span></pre></div>             </td>           </tr>                               <tr id="section-7">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-7">&#182;</a>               </div>               <h4>remove()</h4>
 
 <hr />
 
@@ -44,8 +43,10 @@
 
 <hr />
 
-<p>Обработчик уничтожения View</p>             </td>             <td class="code">               <div class="highlight"><pre>  <span class="nv">viewDestroyHandler: </span><span class="nf">(view) -&gt;</span>
-    <span class="nx">view</span><span class="p">.</span><span class="nx">trigger</span> <span class="s">&#39;destroy&#39;</span><span class="p">,</span> <span class="nx">view</span></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <h4>viewReadyHandler()</h4>
+<p>Обработчик уничтожения View</p>
+
+<p>viewDestroyHandler: (view) ->
+   view.trigger 'destroy', view</p>             </td>             <td class="code">               <div class="highlight"><pre></pre></div>             </td>           </tr>                               <tr id="section-14">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-14">&#182;</a>               </div>               <h4>viewReadyHandler()</h4>
 
 <hr />
 

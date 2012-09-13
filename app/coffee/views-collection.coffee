@@ -29,7 +29,7 @@ class Inn.ViewsCollection
     unless view in @_list
       @_list.push view
       # При удалении View генерируем событие destroy
-      view.on 'destroy', @viewDestroyHandler
+      # view.on 'destroy', @viewDestroyHandler
 
     return @
 
@@ -75,8 +75,8 @@ class Inn.ViewsCollection
   #---
   # Обработчик уничтожения View
   # 
-  viewDestroyHandler: (view) ->
-    view.trigger 'destroy', view
+  #  viewDestroyHandler: (view) ->
+  #    view.trigger 'destroy', view
 
 ##### viewReadyHandler()
   #
