@@ -15,7 +15,6 @@
     ViewsCollection.prototype.add = function(view) {
       if (__indexOf.call(this._list, view) < 0) {
         this._list.push(view);
-        view.on('destroy', this.viewDestroyHandler);
       }
       return this;
     };
@@ -45,10 +44,6 @@
         view.stopRender();
       }
       return this;
-    };
-
-    ViewsCollection.prototype.viewDestroyHandler = function(view) {
-      return this.trigger('destroy', view);
     };
 
     ViewsCollection.prototype.viewReadyHandler = function() {
