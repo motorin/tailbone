@@ -284,7 +284,7 @@
       options = view.options;
       this.children.remove(view);
       view.destroy();
-      return this.initPartial(view.$el, layout.config).render();
+      return this.initPartial(view.$el, options).render();
     },
     isRoot: function() {
       return this._parent === null;
