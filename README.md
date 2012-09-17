@@ -7,7 +7,6 @@ Tailbone
 
 
 ## Contribution ##
------------------
 
 Для сборки проекта используется [Grunt.js](http://gruntjs.com).
 
