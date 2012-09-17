@@ -1,5 +1,6 @@
 (function() {
-  var _ref;
+  var _ref,
+    __hasProp = {}.hasOwnProperty;
 
   if ((_ref = window.Inn) == null) {
     window.Inn = {};
@@ -29,6 +30,7 @@
       var idx, view, _ref1;
       _ref1 = this._list;
       for (idx in _ref1) {
+        if (!__hasProp.call(_ref1, idx)) continue;
         view = _ref1[idx];
         view.on('ready', this.viewReadyHandler, this);
         view.render();
@@ -40,6 +42,7 @@
       var idx, view, _ref1;
       _ref1 = this._list;
       for (idx in _ref1) {
+        if (!__hasProp.call(_ref1, idx)) continue;
         view = _ref1[idx];
         view.off('ready');
         view.stopRender();
@@ -59,6 +62,7 @@
       var idx, view, _ref1;
       _ref1 = this._list;
       for (idx in _ref1) {
+        if (!__hasProp.call(_ref1, idx)) continue;
         view = _ref1[idx];
         if (!view.ready) {
           return false;
@@ -78,6 +82,7 @@
       var idx, view, _ref1;
       _ref1 = this._list;
       for (idx in _ref1) {
+        if (!__hasProp.call(_ref1, idx)) continue;
         view = _ref1[idx];
         view.ready = false;
       }
@@ -95,8 +100,10 @@
     };
 
     ViewsCollection.prototype.isEmpty = function() {
-      var idx;
-      for (idx in this._list) {
+      var idx, _ref1;
+      _ref1 = this._list;
+      for (idx in _ref1) {
+        if (!__hasProp.call(_ref1, idx)) continue;
         return false;
       }
       return true;

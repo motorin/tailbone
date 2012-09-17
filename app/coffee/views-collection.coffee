@@ -47,7 +47,7 @@ class Inn.ViewsCollection
   # Рендерит дочерние View
   # 
   render: ->
-    for idx, view of @_list
+    for own idx, view of @_list
       # Ожидаем завершения рендеринга View
       view.on 'ready', @viewReadyHandler, @
       # Запускает рендеринг View
@@ -61,7 +61,7 @@ class Inn.ViewsCollection
   # Прекращает рендеринг шаблонов
   # 
   stopRender: ->
-    for idx, view of @_list
+    for own idx, view of @_list
       view.off 'ready'
       # Останавливает ренеринг текущего View
       view.stopRender()
@@ -89,7 +89,7 @@ class Inn.ViewsCollection
   # Отрендеренны ли View
   # 
   isRendered: ->
-    for idx, view of @_list
+    for own idx, view of @_list
       return off unless view.ready
 
     return on
@@ -110,7 +110,7 @@ class Inn.ViewsCollection
   # Сбрасывает состояние всех View в списке
   # 
   reset: ->
-    for idx, view of @_list
+    for own idx, view of @_list
       view.ready = off
 
     return @
@@ -134,7 +134,7 @@ class Inn.ViewsCollection
   # Содержит ли список элементы
   # 
   isEmpty: ->
-    for idx of @_list
+    for own idx of @_list
       return off
 
     return on
