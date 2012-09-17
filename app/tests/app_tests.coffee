@@ -387,7 +387,7 @@ asyncTest 'triggers destroy event on remove()', 1, ->
   @canonicalView.on 'ready', ->
     @destroy()
 
-  @canonicalView.on 'destroy', ->
+  @canonicalView.on 'destroyed', ->
     ok on
     start()
 

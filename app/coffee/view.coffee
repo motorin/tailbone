@@ -49,7 +49,7 @@ Inn.View = Backbone.View.extend({
   #---
   # Уничтожает View и всех его детей
   #
-  # Генерирует событие **destroy**
+  # Генерирует событие **destroyed**
   destroy: ->
     # Уничтожаем ссылку на родителя
     @parent = null
@@ -57,8 +57,8 @@ Inn.View = Backbone.View.extend({
     # @remove()
     # Вычищаем детей
     @children.destroy()
-    # Генерируем событие destroy
-    @trigger 'destroy', @
+    # Генерируем событие destroyed
+    @trigger 'destroyed', @
 
     return @
 

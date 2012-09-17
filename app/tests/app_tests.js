@@ -411,7 +411,7 @@
     this.canonicalView.on('ready', function() {
       return this.destroy();
     });
-    return this.canonicalView.on('destroy', function() {
+    return this.canonicalView.on('destroyed', function() {
       ok(true);
       return start();
     });
