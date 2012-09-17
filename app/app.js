@@ -169,41 +169,44 @@
         this.options.templateName = this.$el.data('view-template');
       }
       this._loadTemplate(function(template) {
-        var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
-        _this.$el.html(template((_ref1 = (_ref2 = (_ref3 = _this.options.model) != null ? _ref3.toJSON() : void 0) != null ? _ref2 : (_ref4 = _this.options.dataManager) != null ? _ref4.getDataAsset() : void 0) != null ? _ref1 : {}));
-        patchedOptions = _.clone(_this.options);
-        patchedOptions.partials = [];
-        _ref5 = _this.partials;
-        for (idx = _i = 0, _len = _ref5.length; _i < _len; idx = ++_i) {
-          partial = _ref5[idx];
-          $ctx = _this.$el.find("#" + partial.id);
-          if (partial instanceof Inn.View) {
-            view = partial;
-            view.options = _.extend({}, patchedOptions, view.options);
-            view.setElement($ctx.get(0));
+        var _ref1;
+        return require((_ref1 = _this.options.i18nRequire) != null ? _ref1 : [], function() {
+          var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+          _this.$el.html(template((_ref2 = (_ref3 = (_ref4 = _this.options.model) != null ? _ref4.toJSON() : void 0) != null ? _ref3 : (_ref5 = _this.options.dataManager) != null ? _ref5.getDataAsset() : void 0) != null ? _ref2 : {}));
+          patchedOptions = _.clone(_this.options);
+          patchedOptions.partials = [];
+          _ref6 = _this.partials;
+          for (idx = _i = 0, _len = _ref6.length; _i < _len; idx = ++_i) {
+            partial = _ref6[idx];
+            $ctx = _this.$el.find("#" + partial.id);
+            if (partial instanceof Inn.View) {
+              view = partial;
+              view.options = _.extend({}, patchedOptions, view.options);
+              view.setElement($ctx.get(0));
+            } else {
+              view = new Inn.View(_.extend({}, patchedOptions, {
+                el: $ctx.get(0)
+              }, partial));
+            }
+            view._parent = _this;
+            _this.children.add(view);
+          }
+          _ref7 = _this.pullChildren();
+          for (idx = _j = 0, _len1 = _ref7.length; _j < _len1; idx = ++_j) {
+            child = _ref7[idx];
+            _this.initPartial(child, patchedOptions, false);
+          }
+          if (_this.children.isEmpty()) {
+            if (!_this.isRoot()) {
+              _this.ready = true;
+            }
+            _this._rendering = false;
+            _this.trigger('ready');
           } else {
-            view = new Inn.View(_.extend({}, patchedOptions, {
-              el: $ctx.get(0)
-            }, partial));
+            _this.children.on('ready', _this._readyHandler, _this);
           }
-          view._parent = _this;
-          _this.children.add(view);
-        }
-        _ref6 = _this.pullChildren();
-        for (idx = _j = 0, _len1 = _ref6.length; _j < _len1; idx = ++_j) {
-          child = _ref6[idx];
-          _this.initPartial(child, patchedOptions, false);
-        }
-        if (_this.children.isEmpty()) {
-          if (!_this.isRoot()) {
-            _this.ready = true;
-          }
-          _this._rendering = false;
-          _this.trigger('ready');
-        } else {
-          _this.children.on('ready', _this._readyHandler, _this);
-        }
-        return _this.children.render();
+          return _this.children.render();
+        });
       });
       return this;
     },

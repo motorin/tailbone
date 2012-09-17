@@ -199,6 +199,10 @@
       this.nestedViewWithHoles = new this.DefaultView({
         id: 'holyView'
       });
+      this.translatedView = new this.DefaultView({
+        id: 'translated',
+        i18nRequire: ['i18n/Game-Panel']
+      });
       this.viewWithAttribute = new this.DefaultView({
         id: 'frontpage',
         'attributes': {
@@ -257,7 +261,8 @@
       delete this.overridenFolderView;
       delete this.overridenFormatAndFolderView;
       delete this.realView;
-      return delete this.templateView;
+      delete this.templateView;
+      return delete this.translatedView;
     }
   });
 
@@ -310,6 +315,15 @@
       } else {
         return _this.nestedViewSecondLevel.render();
       }
+    });
+  });
+
+  asyncTest('Translated view rendering', 1, function() {
+    var _this = this;
+    this.translatedView.render();
+    return this.translatedView.on('ready', function() {
+      equal(_this.translatedView.$el.html(), '<div>Проверка существующих файлов</div>', 'Должна выводиться строка на русском');
+      return start();
     });
   });
 

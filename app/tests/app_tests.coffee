@@ -194,9 +194,13 @@ module "Inn.View",
           partials: [{id: 'pagination'}]
         }
       ]
-    
-    @nestedViewWithHoles = new @DefaultView 
+
+    @nestedViewWithHoles = new @DefaultView
       id: 'holyView'
+
+    @translatedView = new @DefaultView
+      id: 'translated'
+      i18nRequire: ['i18n/Game-Panel']
     
     @viewWithAttribute = new @DefaultView 
       id: 'frontpage',
@@ -255,6 +259,7 @@ module "Inn.View",
     delete @overridenFormatAndFolderView
     delete @realView
     delete @templateView
+    delete @translatedView
     # delete @overriden_view
 
 
@@ -299,6 +304,13 @@ asyncTest 'Repeated view rendering', 1, ->
       start()
     else
       @nestedViewSecondLevel.render()
+
+asyncTest 'Translated view rendering', 1, ->
+  @translatedView.render()
+
+  @translatedView.on 'ready', =>
+    equal @translatedView.$el.html(), '<div>Проверка существующих файлов</div>', 'Должна выводиться строка на русском'
+    start()
 
 asyncTest 'Ability to find holes in template', 1, ->
   @nestedViewWithHoles.render()

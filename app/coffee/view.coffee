@@ -76,52 +76,52 @@ Inn.View = Backbone.View.extend({
     @options.templateName = this.$el.data('view-template') if this.$el.data('view-template')?
 
     @_loadTemplate (template) =>
-      # Получаем данные для рендеринга шаблона
-      # @todo: написать тесты!
-      @$el.html template @options.model?.toJSON() ? @options.dataManager?.getDataAsset() ? {}
+      require @options.i18nRequire ? [], =>
+        # Получаем данные для рендеринга шаблона
+        # @todo: написать тесты!
+        @$el.html template @options.model?.toJSON() ? @options.dataManager?.getDataAsset() ? {}
 
-      # Унаследованные опции с очищенным полем partials
-      patchedOptions = _.clone(@options)
-      patchedOptions.partials = []
+        # Унаследованные опции с очищенным полем partials
+        patchedOptions = _.clone(@options)
+        patchedOptions.partials = []
 
-      # Добавляем partials в очередь рендеринга
-      for partial, idx in @partials
-        $ctx = @$el.find("##{partial.id}")
+        # Добавляем partials в очередь рендеринга
+        for partial, idx in @partials
+          $ctx = @$el.find("##{partial.id}")
 
-        # Если View передана в виде экземпляра Backbone.View,
-        # просто устанавливаем ему корневой элемент
-        if partial instanceof Inn.View
-          view = partial
-          view.options = _.extend {}, patchedOptions, view.options
-          view.setElement $ctx.get(0)
-        # Если передан конфиг-хеш, создаём новый объект Inn.View
+          # Если View передана в виде экземпляра Backbone.View,
+          # просто устанавливаем ему корневой элемент
+          if partial instanceof Inn.View
+            view = partial
+            view.options = _.extend {}, patchedOptions, view.options
+            view.setElement $ctx.get(0)
+          # Если передан конфиг-хеш, создаём новый объект Inn.View
+          else
+            view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0) }, partial
+
+          # Устанавливаем родителя
+          view._parent = @
+
+          # Добавляем в очередь на рендеринг
+          @children.add view
+
+        # Вытаскиваем детей
+        for child, idx in @pullChildren()
+          @initPartial child, patchedOptions, off
+
+        # Если нет partial-ов, генериуем событие **ready**
+        if @children.isEmpty()
+          # Устанавливаем флажок ready в true, если элемент не корневой
+          unless @isRoot()
+            @ready = on
+
+          @_rendering = off
+          @trigger 'ready'
         else
-          view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0) }, partial
+          # Ожидаем завершения рендеринга **partial**-ов
+          @children.on 'ready', @_readyHandler, @
 
-        # Устанавливаем родителя
-        view._parent = @
-
-        # Добавляем в очередь на рендеринг
-        @children.add view
-
-      # Вытаскиваем детей
-      for child, idx in @pullChildren()
-        @initPartial child, patchedOptions, off
-
-      # Если нет partial-ов, генериуем событие **ready**
-      if @children.isEmpty()
-        # Устанавливаем флажок ready в true, если элемент не корневой
-        unless @isRoot()
-          @ready = on
-
-        @_rendering = off
-        @trigger 'ready'
-      else
-        # Ожидаем завершения рендеринга **partial**-ов
-        @children.on 'ready', @_readyHandler, @
-
-      @children.render()
-
+        @children.render()
 
     return @
 
