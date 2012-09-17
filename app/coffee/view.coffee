@@ -87,23 +87,27 @@ Inn.View = Backbone.View.extend({
 
         # Добавляем partials в очередь рендеринга
         for partial, idx in @partials
+          foundPartial = @children.get partial.id ? partial.cid
           $ctx = @$el.find("##{partial.id}")
 
-          # Если View передана в виде экземпляра Backbone.View,
-          # просто устанавливаем ему корневой элемент
-          if partial instanceof Inn.View
-            view = partial
-            view.options = _.extend {}, patchedOptions, view.options
-            view.setElement $ctx.get(0)
-          # Если передан конфиг-хеш, создаём новый объект Inn.View
+          if foundPartial?
+            foundPartial.setElement $ctx
           else
-            view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0) }, partial
+            # Если View передана в виде экземпляра Backbone.View,
+            # просто устанавливаем ему корневой элемент
+            if partial instanceof Inn.View
+              view = partial
+              view.options = _.extend {}, patchedOptions, view.options
+              view.setElement $ctx.get(0)
+            # Если передан конфиг-хеш, создаём новый объект Inn.View
+            else
+              view = new Inn.View _.extend {}, patchedOptions, { el: $ctx.get(0) }, partial
 
-          # Устанавливаем родителя
-          view._parent = @
+            # Устанавливаем родителя
+            view._parent = @
 
-          # Добавляем в очередь на рендеринг
-          @children.add view
+            # Добавляем в очередь на рендеринг
+            @children.add view
 
         # Вытаскиваем детей
         for child, idx in @pullChildren()
