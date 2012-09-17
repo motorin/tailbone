@@ -70,3 +70,66 @@ shim: {
 	// ...
 }
 ```
+
+
+## Usage ##
+
+Tailbone содержит следующие классы:
+
+* Inn.Collection
+* Inn.Model
+* Inn.DataManager
+* Inn.View
+* Inn.ViewsCollection
+
+### Inn.Collection и Inn.Model ###
+
+Пока что, это просто обёртки над Backbone.Collection и Backbone.Model.
+
+Их стоит использовать с учётом того, что в будущем они могут быть расширены 
+и Вы получите дополнительный функционал.
+
+### Inn.View ###
+
+Inn.View - это сердце Tailbone. Этот класс предназначен для декларации, рендеринга и обновления больших, вложенных блоков.
+
+#### Partials ####
+
+Одним из основных достоинств Inn.View является поддержка partials. Partials могут быть определены двумя путями.
+
+Во-первых - при создании экземляра Inn.View, для этого достаточно просто передать массив вложенных View либо их конфигов, 
+вторым параметром, в конструктор Inn.View.
+
+Второй вариант в шаблоне View создать тег с классом **bPartial** и атрибутом **data-view-template**, указывающим на имя шаблона дочерней View
+
+Все partials будут собраны и отрендеренны при рендеринге основного View.
+
+Вложенность partials не ограниченна, однако стоит учитывать, что большая вложенность может негативно сказаться на производительности.
+
+#### Создание ####
+
+Пример создания простого View:
+
+```coffescript
+# объявляем новый класс унаследованный от Inn.View
+MyAwesomeView = Inn.View.extend
+    options:
+      partialClassName: 'bPartial' # класс для поиска pratials
+
+# создаём экземпляр новоиспечённого класса
+myAwesomeView = new MyAwesomeView
+	id: myAwesomeView # не забываем задать id корневому элементу
+```
+
+#### Рендеринг ####
+
+Пример рендеринга View:
+
+```coffescript
+myAwesomeView.render()
+myAwesomeView.on 'ready', ->
+	console.log "Holy macaroni! It's rendered!" 
+```
+
+Нужно учитывать, что корневая View (которая не явлеятся чьим-либо partial) не будет добалена в DOM 
+после завершения рендеринга. Это необходимо сделать руками. `myAwesomeView.$el.appendTo(document.body)`
