@@ -200,3 +200,15 @@ view = new MyAwesomeView
 ViewsCollection генерирует следующие события:
 
 * ready
+
+
+### Примеры ###
+
+Шаблон с patials
+
+```jade
+#layout
+	#header.bPartial(data-view-template="bHeader")
+	#content.bPartial(data-view-template="bContent")
+	#footer.bPartial(data-view-template="bFooter")
+```
