@@ -34,8 +34,7 @@
 }).call(this);
 
 (function() {
-  var _ref,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var _ref;
 
   if ((_ref = window.Inn) == null) {
     window.Inn = {};
@@ -44,26 +43,28 @@
   Inn.ViewsCollection = (function() {
 
     function ViewsCollection() {
-      this._list = [];
+      this._list = {};
     }
 
     ViewsCollection.prototype.add = function(view) {
-      if (__indexOf.call(this._list, view) < 0) {
-        this._list.push(view);
+      var _ref1, _ref2;
+      if (this._list[(_ref1 = view.id) != null ? _ref1 : view.cid] == null) {
+        this._list[(_ref2 = view.id) != null ? _ref2 : view.cid] = view;
       }
       return this;
     };
 
     ViewsCollection.prototype.remove = function(view) {
-      this._list.splice(_.indexOf(this._list, view), 1);
+      var _ref1;
+      this._list[(_ref1 = view.id) != null ? _ref1 : view.cid] = void 0;
       return this;
     };
 
     ViewsCollection.prototype.render = function() {
-      var view, _i, _len, _ref1;
+      var idx, view, _ref1;
       _ref1 = this._list;
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        view = _ref1[_i];
+      for (idx in _ref1) {
+        view = _ref1[idx];
         view.on('ready', this.viewReadyHandler, this);
         view.render();
       }
@@ -71,10 +72,10 @@
     };
 
     ViewsCollection.prototype.stopRender = function() {
-      var view, _i, _len, _ref1;
+      var idx, view, _ref1;
       _ref1 = this._list;
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        view = _ref1[_i];
+      for (idx in _ref1) {
+        view = _ref1[idx];
         view.off('ready');
         view.stopRender();
       }
@@ -90,42 +91,50 @@
     };
 
     ViewsCollection.prototype.isRendered = function() {
-      return _.filter(this._list, function(view) {
-        return !view.ready;
-      }).length === 0;
+      var idx, view, _ref1;
+      _ref1 = this._list;
+      for (idx in _ref1) {
+        view = _ref1[idx];
+        if (!view.ready) {
+          return false;
+        }
+      }
+      return true;
     };
 
     ViewsCollection.prototype.get = function(id, recursive) {
       if (recursive == null) {
         recursive = false;
       }
-      return _.find(this._list, function(view) {
-        return view.id === id;
-      });
+      return this._list[id];
     };
 
     ViewsCollection.prototype.reset = function() {
-      var view, _i, _len, _ref1;
+      var idx, view, _ref1;
       _ref1 = this._list;
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        view = _ref1[_i];
+      for (idx in _ref1) {
+        view = _ref1[idx];
         view.ready = false;
       }
       return this;
     };
 
     ViewsCollection.prototype.destroy = function() {
-      var view, _i, _len, _ref1;
+      var idx, view, _ref1;
       _ref1 = this._list;
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        view = _ref1[_i];
+      for (idx in _ref1) {
+        view = _ref1[idx];
         view.destroy();
       }
       return this;
     };
 
     ViewsCollection.prototype.isEmpty = function() {
-      return !this._list.length;
+      var idx;
+      for (idx in this._list) {
+        return false;
+      }
+      return true;
     };
 
     _.extend(ViewsCollection.prototype, Backbone.Events);
@@ -171,29 +180,34 @@
       this._loadTemplate(function(template) {
         var _ref1;
         return require((_ref1 = _this.options.i18nRequire) != null ? _ref1 : [], function() {
-          var $ctx, child, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+          var $ctx, child, foundPartial, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
           _this.$el.html(template((_ref2 = (_ref3 = (_ref4 = _this.options.model) != null ? _ref4.toJSON() : void 0) != null ? _ref3 : (_ref5 = _this.options.dataManager) != null ? _ref5.getDataAsset() : void 0) != null ? _ref2 : {}));
           patchedOptions = _.clone(_this.options);
           patchedOptions.partials = [];
           _ref6 = _this.partials;
           for (idx = _i = 0, _len = _ref6.length; _i < _len; idx = ++_i) {
             partial = _ref6[idx];
+            foundPartial = _this.children.get((_ref7 = partial.id) != null ? _ref7 : partial.cid);
             $ctx = _this.$el.find("#" + partial.id);
-            if (partial instanceof Inn.View) {
-              view = partial;
-              view.options = _.extend({}, patchedOptions, view.options);
-              view.setElement($ctx.get(0));
+            if (foundPartial != null) {
+              foundPartial.setElement($ctx);
             } else {
-              view = new Inn.View(_.extend({}, patchedOptions, {
-                el: $ctx.get(0)
-              }, partial));
+              if (partial instanceof Inn.View) {
+                view = partial;
+                view.options = _.extend({}, patchedOptions, view.options);
+                view.setElement($ctx.get(0));
+              } else {
+                view = new Inn.View(_.extend({}, patchedOptions, {
+                  el: $ctx.get(0)
+                }, partial));
+              }
+              view._parent = _this;
+              _this.children.add(view);
             }
-            view._parent = _this;
-            _this.children.add(view);
           }
-          _ref7 = _this.pullChildren();
-          for (idx = _j = 0, _len1 = _ref7.length; _j < _len1; idx = ++_j) {
-            child = _ref7[idx];
+          _ref8 = _this.pullChildren();
+          for (idx = _j = 0, _len1 = _ref8.length; _j < _len1; idx = ++_j) {
+            child = _ref8[idx];
             _this.initPartial(child, patchedOptions, false);
           }
           if (_this.children.isEmpty()) {

@@ -8,17 +8,17 @@ window.Inn ?= {}
 class Inn.ViewsCollection
 
 
-  ##### constructor()
-  #
-  #---
-  # Конструктор
-  # 
+##### constructor()
+#
+#---
+# Конструктор
+#
   constructor: ->
     ##### collection
     #
     #---
     # Список View
-    @_list = [] # @todo: понять, почему не работает с объектом???
+    @_list = {}
 
   ##### add()
   #
@@ -26,10 +26,8 @@ class Inn.ViewsCollection
   # Добавляет View в список
   # 
   add: (view) ->
-    unless view in @_list
-      @_list.push view
-      # При удалении View генерируем событие destroy
-      # view.on 'destroy', @viewDestroyHandler
+    unless @_list[view.id ? view.cid]?
+      @_list[view.id ? view.cid] = view
 
     return @
 
@@ -39,7 +37,7 @@ class Inn.ViewsCollection
   # Удаляет View из списка
   #
   remove: (view) ->
-    @_list.splice _.indexOf(@_list, view), 1
+    @_list[view.id ? view.cid] = undefined
 
     return @
 
@@ -49,7 +47,7 @@ class Inn.ViewsCollection
   # Рендерит дочерние View
   # 
   render: ->
-    for view in @_list
+    for idx, view of @_list
       # Ожидаем завершения рендеринга View
       view.on 'ready', @viewReadyHandler, @
       # Запускает рендеринг View
@@ -63,7 +61,7 @@ class Inn.ViewsCollection
   # Прекращает рендеринг шаблонов
   # 
   stopRender: ->
-    for view in @_list
+    for idx, view of @_list
       view.off 'ready'
       # Останавливает ренеринг текущего View
       view.stopRender()
@@ -71,14 +69,6 @@ class Inn.ViewsCollection
     return @
 
   ##### viewReadyHandler()
-  #
-  #---
-  # Обработчик уничтожения View
-  # 
-  #  viewDestroyHandler: (view) ->
-  #    view.trigger 'destroy', view
-
-##### viewReadyHandler()
   #
   #---
   # Обработчик завершения рендеринга конкретной View
@@ -99,7 +89,10 @@ class Inn.ViewsCollection
   # Отрендеренны ли View
   # 
   isRendered: ->
-    return _.filter(@_list, (view) -> return not view.ready).length is 0
+    for idx, view of @_list
+      return off unless view.ready
+
+    on
 
   ##### get( *recursive* )
   #
@@ -109,7 +102,7 @@ class Inn.ViewsCollection
   # 
   get: (id, recursive = off) ->
     # @todo: implement recursive
-    return _.find(@_list, (view) -> view.id is id)
+    @_list[id]
 
   ##### reset()
   #
@@ -117,7 +110,7 @@ class Inn.ViewsCollection
   # Сбрасывает состояние всех View в списке
   # 
   reset: ->
-    for view in @_list
+    for idx, view of @_list
       view.ready = off
 
     return @
@@ -129,7 +122,7 @@ class Inn.ViewsCollection
   # Вешает обработчики событий
   # 
   destroy: () ->
-    for view in @_list
+    for idx, view of @_list
       # Вычищаем View
       view.destroy()
 
@@ -140,7 +133,11 @@ class Inn.ViewsCollection
   #---
   # Содержит ли список элементы
   # 
-  isEmpty: -> not @_list.length
+  isEmpty: ->
+    for idx of @_list
+      return off
+
+    on
 
 
   _.extend @prototype, Backbone.Events
