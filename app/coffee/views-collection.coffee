@@ -92,7 +92,7 @@ class Inn.ViewsCollection
     for idx, view of @_list
       return off unless view.ready
 
-    on
+    return on
 
   ##### get( *recursive* )
   #
@@ -137,7 +137,7 @@ class Inn.ViewsCollection
     for idx of @_list
       return off
 
-    on
+    return on
 
 
   _.extend @prototype, Backbone.Events
