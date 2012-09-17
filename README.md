@@ -1,192 +1,214 @@
-app-dust-backbone
+Tailbone
 =================
 
-Строим client-side application.
-Считаем его пока чем-то смешанным между менеджером шаблонов, и менеджером разметки.
+Каркас JavaScript приложения. Обеспечивает логическую структуру для рендеринга вложенных блоков на фронтенде.
 
-Building
-----------
-To build project you may just run `grunt` in working directory
+Спроектирован с учётом потребности в минимальном взаимодействии верстальщика с JavaScript-ом.
 
 
-Also available following tasks:
-* `watch` - tracks files for changes and will be recompile it on-fly
-* `test` - launches qUnit tests (requires PhantomJS)
-* `lint` - launches jshint
+## Структура каталогов ##
+	|-- app
+	|   |-- coffee # исходники Tailbone на CoffeeScript
+	|   |-- i18n # примеры бандлов i18n
+	|   |-- js # скомпилированные компоненты
+	|   |-- templates # примеры шаблонов для тестов
+	|   |   `-- jade 
+	|   `-- tests # тесты
+	|-- docs # annotated sources
+	`-- lib # зависимости и библиотеки для тестирования
+	    |-- dust # рантайм и компилятор dust (сейчас не используется)
+	    `-- qunit # библиотека тестов qunit
 
 
-Inn.View
---------
+## Contribution ##
 
-extends Backbone.View
+Для сборки проекта используется [Grunt.js](http://gruntjs.com).
 
-**initialize(options)**
+Чтобы пересобрать проект выполните `grunt` в каталоге проекта.
 
-Internally called on *new Inn.View()* invocation
+Также Вы можете выполнить сборку отдельных частей. Для этого выполните `grunt <target>`.
 
-Accepts options object.
+Доступны следующие цели:
 
-*model, collection, el, id, className, tagName and attributes* options are attached directly to view object
-Other options attached to *view.options* object
+* lint - проверяет код на соответствие стандартам
+* test - запускает тесты
+* docco - генерирует документацию в стиле "annotated source"
+* watch - следит за изменениями файлов и пересобирает проект
 
-*Inn-specific options:*
-templateFolder (default: '') - template file folder for ajax loading
-templateFormat (default: 'js') - template file format for ajax loading
-templateName - override template filename with predefined value
-templateURL - ovveride full template URL with predefined value
 
+## Тестирование ##
 
-**render**
+Тесты написаны с использованием библиотеки [qUnit](http://qunitjs.com).
 
-Renders view
+Чтобы запускать тесты из консоли необходимо установить [PhantomJS](http://phantomjs.org/). 
+Инструкцию по установке для вашей системы можно найти [тут](http://phantomjs.org/download.html)
 
-Uses attached model as data source
+Для запуска тестов необходимо выполнить `grunt test`, либо открыть /app_tests.html в браузере. 
+Также тесты выполняются автоматически при каждом запуске `grunt`.
 
+Результаты тестов в формате **JUnit XML** складываются в папку `/.junit-output/`. 
+Вы можете изменить название каталога для вывода результатов тестов, задав 
+значение переменной окружения `JUNIT_OUTPUT`.
 
-**remove**
 
-Undelegates all event listeners and clears view.el to its initial state
+## Загрузка и подключение ##
 
+Для работы Tailbone необходимы:
 
-**getDataForView**
+* [jQuery](http://jquery.com)
+* [Underscore.JS](http://underscorejs.org)
+* [Backbone.JS](http://backbonejs.org)
+* [Require.JS](http://requirejs.org)
 
-returns this.model.toJSON() if this.model
+На данный момент, также есть необходимость в подключении [jade runtime](https://github.com/visionmedia/jade/blob/master/runtime.js)
 
-You should override this method if custom model-to-view data conversion required
+После подключения этих зависимостей, может быть загружен Tailbone.
 
+### AMD ###
 
-Inn.Model
----------
+Tailbone поддерживает загрузку в экосистеме [AMD](http://requirejs.org/docs/whyamd.html). 
+Вот шаблон конфига [Reguire.JS shim](http://requirejs.org/docs/api.html#config-shim).
 
-extends Backbone.Model
+``` javascript
+shim: {
 
+	// ...
 
+	'backbone.layoutmanager': {
+		deps: ['jquery', , 'backbone'],
+		exports: function() {
+			return window.Inn;
+		}
+	}
 
-Inn.Collection
---------------
+	// ...
+}
+```
 
-extends Backbone.Collection
 
+## Usage ##
 
+Tailbone содержит следующие классы:
 
-Inn.DataManager
----------------
+* Inn.Collection
+* Inn.Model
+* Inn.DataManager
+* Inn.View
+* Inn.ViewsCollection
 
-**addDataAsset(dataAsset, id)**
+### Inn.Collection и Inn.Model ###
 
-Accepts Inn.Model or Inn.Collection instances and stores them by their id.
+Пока что, это просто обёртки над Backbone.Collection и Backbone.Model.
 
-If id parameter is present, uses it to store and retrieve dataAsset.
+Их стоит использовать с учётом того, что в будущем они могут быть расширены 
+и Вы получите дополнительный функционал.
 
+### Inn.View ###
 
-**getDataAsset(name)**
+Inn.View - это сердце Tailbone. Этот класс предназначен для декларации, рендеринга и обновления больших, вложенных блоков.
 
-Retrives dataAsset by its name (id). If asset is not found returns null.
+#### Partials ####
 
+Одним из основных достоинств Inn.View является поддержка partials. Partials могут быть определены двумя путями.
 
-**removeDataAsset(name)**
+Во-первых - при создании экземляра Inn.View, для этого достаточно просто передать массив вложенных View либо их конфигов, 
+вторым параметром, в конструктор Inn.View.
 
-Removes dataAsset from manager by it's name (id). If asset is not found returns null.
+Второй вариант в шаблоне View создать тег с классом **bPartial** и атрибутом **data-view-template**, указывающим на имя шаблона дочерней View
 
+Все partials будут собраны и отрендеренны при рендеринге основного View.
 
+Вложенность partials не ограничена, однако стоит учитывать, что большая вложенность может негативно сказаться на производительности.
 
-Inn.Layout
-----------
+После рендеринга View, все его partials будут находиться в поле `children`, которое является экземпляром Inn.ViewsCollection.
 
-Template manager. Think of layout as one page of an app.
+#### Создание ####
 
-Extends Backbone.Events
+Пример создания простого View:
 
-Requires an instance of Inn.DataManager as *options.dataManager*
+```ruby
+# объявляем новый класс унаследованный от Inn.View
+MyAwesomeView = Inn.View.extend
+    options:
+      partialClassName: 'bPartial' # класс для поиска partials
 
-Requiers *options.partials* object
+# создаём экземпляр новоиспечённого класса
+myAwesomeView = new MyAwesomeView
+	id: 'myAwesomeView' # не забываем задать id корневому элементу
+```
 
-`
-  'header': {}
-  'footer':
-    'attributes':
-      'class': 'bHeader'
-      'data-some': 'some_data'
-    'templateURL': 'bFooter'
-  'content':
-    'templateURL': 'bFrontpage'
-    'partials':
-      'tags': {}
-      'sortings': {}
-      'promoMovie': {}
-      'frontPageMovies':
-        'templateURL': 'bFrontPageMoviesList',
-        'partials':
-          'pagination': {}
-  'someView': {}
-`
+#### Рендеринг ####
 
-For each index of partials processRoutes function creates or associates view by the name if the index
+Пример рендеринга View:
 
-templateName overrides view's templateName
+```ruby
+myAwesomeView.render()
+myAwesomeView.on 'ready', ->
+	console.log "Holy macaroni! It's rendered!" 
+```
 
-templateURL overrides view's templateURL
+Нужно учитывать, что корневая View (которая не явлеятся чьим-либо partial) не будет добалена в DOM 
+после завершения рендеринга. Это необходимо сделать вручную. `myAwesomeView.$el.appendTo(document.body)`
 
-Each route can contain partials with same principles
+Вы можете рендерить View столько раз, сколько понадобится. При каждом повторном вызове `.render()`, предыдущий 
+render-job будет остановлен.
 
-Each partial can also have partials
 
-For each parital processRoutes function created or associated view by it's name (index in object)
+#### Уничтожение ####
 
-Routes and partials should have unique names
+Если Ваша работа с View завершенаа, его необходимо уничтожить. Для этого вызовите метод `.destroy()`, который уничтожит 
+View и всех его детей. После чего можно вызывать `.remove()`, который отпишется от событий и удалит `$el` из DOM.
 
-Attributes object will be passed to Inn.View constructor on processPartials
+#### События ####
 
+View умеет генерировать следующие события:
 
-**Accepts**
+* ready
+* destroy
 
-*templateOptions* object
-templateOptions.templateFolder (default: '') - template file folder for ajax loading, used for automatically created views also
-templateOptions.templateFormat (default: 'js') - template file format for ajax loading, used for automatically created views also
-templateName - override template filename of the layout with predefined value
-templateURL - ovveride full template URL of the layout with predefined value
+#### Передача данных ####
 
-*id*
+Разумеется, рендеринг шаблона не имеет особого смысла без передачи данных.
 
-if id is not defined, id is set to 'layout'
+View берёт свои данные из модели, переданной  в `options.model`, которая 
+должна быть экземпляром Backbone.View, Inn.View или их наследником.
 
+Все partials берут данные из своей модели, если она определена. В противном 
+случае, данные будут взяты из корневого View.
 
-**render**
+Соответственно, чтобы связать модель данных с определённой View необходимо выполнить 
+следующие действия:
 
-Renders layout and appends it to #%layout.id% element on page
+```ruby
+data = new Inn.Model
+	foo: bar
 
-Then renders all of the views defined in layout_config object
+view = new MyAwesomeView
+	id: 'myAwesomeView'
+	model: data
+```
 
 
-**processPartials**
+### Inn.ViewsCollection ###
 
-Parsed options.partials and assocciates each view with corresponding options.partials branch
+Это внутренний класс, который используется для организации работы partials во View.
 
-If view with needed index is not added to layout, it is created autamatically
+В основном ViewsCollection выполняет задачи агрегации тасков рендеринга и определения состояния partials.
 
-For all already defined and added views template options are set according to options.partials object
+Взаимодействие с классом осуществляется при помощи вызва методов и генерации событий.
 
+ViewsCollection генерирует следующие события:
 
-**addView(view)**
+* ready
 
-Adds view to layout by its name
 
-Does not overwrite already added view with the same name
+### Примеры ###
 
+Шаблон с patials:
 
-**getView(view)**
-
-Retrieves view from Layout by name
-
-If view is not found returns null
-
-
-**removeView(view)**
-
-Removes view from layout by name
-
-If view is not found returns null
-
-**destroy**
-
-Clears all views and removes links to them
+```jade
+#layout
+	#header.bPartial(data-view-template="bHeader")
+	#content.bPartial(data-view-template="bContent")
+	#footer.bPartial(data-view-template="bFooter")
+```

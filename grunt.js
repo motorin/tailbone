@@ -195,6 +195,6 @@ module.exports = function(grunt) {
   // Default task.
   registerTask('default', 'coffee lint concat jade min junit docco');
   registerTask('rebuild', 'coffee lint concat jade docco')
-  registerTask('test', 'qunit')
+  registerTask('test', 'junit')
 
 };
