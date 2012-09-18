@@ -118,6 +118,9 @@
         try {
           return jade.templates[_this._getTemplateName()]();
         } catch (e) {
+          if (typeof window.console !== 'undefined' && typeof window.console.debug === 'function') {
+            console.debug(e);
+          }
           return '';
         }
       };

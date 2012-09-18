@@ -186,6 +186,9 @@ Inn.View = Backbone.View.extend({
         try
           return jade.templates[@_getTemplateName()]()
         catch e
+          if typeof window.console isnt 'undefined' and typeof window.console.debug is 'function'
+            console.debug e
+            
           return ''
 
     if jade.templates[@_getTemplateName()]?
