@@ -67,7 +67,7 @@ Inn.View = Backbone.View.extend({
   #
   #---
   # Рендерит View и всех его детей
-  render: ->
+  render: (skipChildren = off) ->
     @stopRender() if @_rendering
 
     @_rendering = on
@@ -114,7 +114,7 @@ Inn.View = Backbone.View.extend({
           @initPartial child, patchedOptions, off
 
         # Если нет partial-ов, генериуем событие **ready**
-        if @children.isEmpty()
+        if skipChildren or @children.isEmpty()
           # Устанавливаем флажок ready в true, если элемент не корневой
           unless @isRoot()
             @ready = on
@@ -125,7 +125,7 @@ Inn.View = Backbone.View.extend({
           # Ожидаем завершения рендеринга **partial**-ов
           @children.on 'ready', @_readyHandler, @
 
-        @children.render()
+          @children.render()
 
     return @
 
