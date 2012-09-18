@@ -126,6 +126,8 @@ class Inn.ViewsCollection
       # Вычищаем View
       view.destroy()
 
+    @_list = {}
+
     return @
 
   ##### isEmpty()
