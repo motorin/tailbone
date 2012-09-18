@@ -176,8 +176,11 @@
       this.trigger('destroyed', this);
       return this;
     },
-    render: function() {
+    render: function(skipChildren) {
       var _this = this;
+      if (skipChildren == null) {
+        skipChildren = false;
+      }
       if (this._rendering) {
         this.stopRender();
       }
@@ -218,16 +221,16 @@
             child = _ref8[idx];
             _this.initPartial(child, patchedOptions, false);
           }
-          if (_this.children.isEmpty()) {
+          if (skipChildren || _this.children.isEmpty()) {
             if (!_this.isRoot()) {
               _this.ready = true;
             }
             _this._rendering = false;
-            _this.trigger('ready');
+            return _this.trigger('ready');
           } else {
             _this.children.on('ready', _this._readyHandler, _this);
+            return _this.children.render();
           }
-          return _this.children.render();
         });
       });
       return this;
