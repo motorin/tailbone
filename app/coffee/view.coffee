@@ -79,7 +79,8 @@ Inn.View = Backbone.View.extend({
       require @options.i18nRequire ? [], =>
         # Получаем данные для рендеринга шаблона
         # @todo: написать тесты!
-        @$el.html template @options.model?.toJSON() ? @options.dataManager?.getDataAsset() ? {}
+        renderedHTML = template(@options.model?.toJSON() ? @options.dataManager?.getDataAsset() ? {})
+        @$el.html renderedHTML
 
         # Унаследованные опции с очищенным полем partials
         patchedOptions = _.clone(@options)

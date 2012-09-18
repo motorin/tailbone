@@ -187,8 +187,9 @@
       this._loadTemplate(function(template) {
         var _ref1;
         return require((_ref1 = _this.options.i18nRequire) != null ? _ref1 : [], function() {
-          var $ctx, child, foundPartial, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
-          _this.$el.html(template((_ref2 = (_ref3 = (_ref4 = _this.options.model) != null ? _ref4.toJSON() : void 0) != null ? _ref3 : (_ref5 = _this.options.dataManager) != null ? _ref5.getDataAsset() : void 0) != null ? _ref2 : {}));
+          var $ctx, child, foundPartial, idx, partial, patchedOptions, renderedHTML, view, _i, _j, _len, _len1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
+          renderedHTML = template((_ref2 = (_ref3 = (_ref4 = _this.options.model) != null ? _ref4.toJSON() : void 0) != null ? _ref3 : (_ref5 = _this.options.dataManager) != null ? _ref5.getDataAsset() : void 0) != null ? _ref2 : {});
+          _this.$el.html(renderedHTML);
           patchedOptions = _.clone(_this.options);
           patchedOptions.partials = [];
           _ref6 = _this.partials;
