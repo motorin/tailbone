@@ -131,6 +131,7 @@
         view = _ref1[idx];
         view.destroy();
       }
+      this._list = {};
       return this;
     };
 
