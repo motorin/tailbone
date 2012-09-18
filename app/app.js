@@ -271,7 +271,7 @@
         _this = this;
       template = function() {
         try {
-          return jade.templates[_this._getTemplateName()];
+          return jade.templates[_this._getTemplateName()]();
         } catch (e) {
           return '';
         }

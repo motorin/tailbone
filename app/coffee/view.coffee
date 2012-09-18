@@ -185,7 +185,7 @@ Inn.View = Backbone.View.extend({
   _loadTemplate: (callback) ->
     template = =>
         try
-          return jade.templates[@_getTemplateName()]
+          return jade.templates[@_getTemplateName()]()
         catch e
           return ''
 
