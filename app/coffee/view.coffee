@@ -187,8 +187,8 @@ Inn.View = Backbone.View.extend({
           return jade.templates[@_getTemplateName()]()
         catch e
           if typeof window.console isnt 'undefined' and typeof window.console.debug is 'function'
-            console.debug e
-            
+            console.debug 'tailbone view error:', e
+
           return ''
 
     if jade.templates[@_getTemplateName()]?
