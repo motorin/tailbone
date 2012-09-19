@@ -69,7 +69,7 @@ Inn.View = Backbone.View.extend({
   # Рендерит View и всех его детей
   #
   # **skipChildren** - Не выполняет рендеринг partials, при этом добавляя их в children
-  render: (skipChildren = off) ->
+  render: (skipChildren = off, flipContext = on) ->
     @stopRender() if @_rendering
 
     @_rendering = on
@@ -82,6 +82,10 @@ Inn.View = Backbone.View.extend({
       require @options.i18nRequire ? [], =>
         # Получаем данные для рендеринга шаблона
         # @todo: написать тесты!
+        @_$memorizedEl = @$el
+        @$el = @$el.clone on, on
+        @el = @$el.get()
+
         @$el.html template @options.model?.toJSON() ? @options.dataManager?.getDataAsset() ? {}
 
         # Унаследованные опции с очищенным полем partials
@@ -123,10 +127,16 @@ Inn.View = Backbone.View.extend({
             @ready = on
 
           @_rendering = off
+
+          if flipContext
+            @flip()
+          else
+            @trigger 'readyForFlip', @
+
           @trigger 'ready'
         else
           # Ожидаем завершения рендеринга **partial**-ов
-          @children.on 'ready', @_readyHandler, @
+          @children.on 'ready', _.bind(@_readyHandler, @, flipContext)
 
           @children.render()
 
@@ -144,13 +154,16 @@ Inn.View = Backbone.View.extend({
     @children.add view unless silent
     return view
 
+  flip: ->
+    @_$memorizedEl.replaceWith @$el
+    @_$memorizedEl = undefined
 
   ##### _readyHandler()
   #
   #---
   # Обработчик завершения рендеринга
   # 
-  _readyHandler: -> 
+  _readyHandler: (flipContext) -> 
     # Устанавливаем флажок ready в true, если элемент не корневой
     unless @isRoot()
       @ready = on
@@ -159,6 +172,12 @@ Inn.View = Backbone.View.extend({
     @children.reset()
     # Снимаем блокировку рендеринга
     @_rendering = off
+
+    if flipContext
+      @flip()
+    else
+      @trigger 'readyForFlip', @
+
     @trigger 'ready'
 
   ##### stopRender()
