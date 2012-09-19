@@ -21,13 +21,13 @@
       this.trigger('destroyed', this);
       return this;
     },
-    render: function(skipChildren, flipContext) {
+    render: function(skipChildren, replaceContext) {
       var _this = this;
       if (skipChildren == null) {
         skipChildren = false;
       }
-      if (flipContext == null) {
-        flipContext = true;
+      if (replaceContext == null) {
+        replaceContext = true;
       }
       if (this._rendering) {
         this.stopRender();
@@ -77,14 +77,14 @@
               _this.ready = true;
             }
             _this._rendering = false;
-            if (flipContext) {
-              _this.flip();
+            if (replaceContext) {
+              _this.replaceContext();
             } else {
-              _this.trigger('readyForFlip', _this);
+              _this.trigger('readyForReplacement', _this);
             }
             return _this.trigger('ready');
           } else {
-            _this.children.on('ready', _.bind(_this._readyHandler, _this, flipContext));
+            _this.children.on('ready', _.bind(_this._readyHandler, _this, replaceContext));
             return _this.children.render();
           }
         });
@@ -111,20 +111,20 @@
       }
       return view;
     },
-    flip: function() {
+    replaceContext: function() {
       this._$memorizedEl.replaceWith(this.$el);
       return this._$memorizedEl = void 0;
     },
-    _readyHandler: function(flipContext) {
+    _readyHandler: function(replaceContext) {
       if (!this.isRoot()) {
         this.ready = true;
       }
       this.children.reset();
       this._rendering = false;
-      if (flipContext) {
-        this.flip();
+      if (replaceContext) {
+        this.replaceContext();
       } else {
-        this.trigger('readyForFlip', this);
+        this.trigger('readyForReplacement', this);
       }
       return this.trigger('ready');
     },

@@ -69,7 +69,7 @@ Inn.View = Backbone.View.extend({
   # Рендерит View и всех его детей
   #
   # **skipChildren** - Не выполняет рендеринг partials, при этом добавляя их в children
-  render: (skipChildren = off, flipContext = on) ->
+  render: (skipChildren = off, replaceContext = on) ->
     @stopRender() if @_rendering
 
     @_rendering = on
@@ -128,15 +128,15 @@ Inn.View = Backbone.View.extend({
 
           @_rendering = off
 
-          if flipContext
-            @flip()
+          if replaceContext
+            @replaceContext()
           else
-            @trigger 'readyForFlip', @
+            @trigger 'readyForReplacement', @
 
           @trigger 'ready'
         else
           # Ожидаем завершения рендеринга **partial**-ов
-          @children.on 'ready', _.bind(@_readyHandler, @, flipContext)
+          @children.on 'ready', _.bind(@_readyHandler, @, replaceContext)
 
           @children.render()
 
@@ -154,7 +154,7 @@ Inn.View = Backbone.View.extend({
     @children.add view unless silent
     return view
 
-  flip: ->
+  replaceContext: ->
     @_$memorizedEl.replaceWith @$el
     @_$memorizedEl = undefined
 
@@ -163,7 +163,7 @@ Inn.View = Backbone.View.extend({
   #---
   # Обработчик завершения рендеринга
   # 
-  _readyHandler: (flipContext) -> 
+  _readyHandler: (replaceContext) -> 
     # Устанавливаем флажок ready в true, если элемент не корневой
     unless @isRoot()
       @ready = on
@@ -173,10 +173,10 @@ Inn.View = Backbone.View.extend({
     # Снимаем блокировку рендеринга
     @_rendering = off
 
-    if flipContext
-      @flip()
+    if replaceContext
+      @replaceContext()
     else
-      @trigger 'readyForFlip', @
+      @trigger 'readyForReplacement', @
 
     @trigger 'ready'
 
