@@ -63,10 +63,12 @@ Inn.View = Backbone.View.extend({
     return @
 
 
-  ##### render()
+  ##### render(skipChildren)
   #
   #---
   # Рендерит View и всех его детей
+  #
+  # **skipChildren** - Не выполняет рендеринг partials, при этом добавляя их в children
   render: (skipChildren = off) ->
     @stopRender() if @_rendering
 
@@ -76,6 +78,7 @@ Inn.View = Backbone.View.extend({
     @options.templateName = this.$el.data('view-template') if this.$el.data('view-template')?
 
     @_loadTemplate (template) =>
+      # Если это необходимо, подгружаем недостающие i18n bundles
       require @options.i18nRequire ? [], =>
         # Получаем данные для рендеринга шаблона
         # @todo: написать тесты!
@@ -113,7 +116,7 @@ Inn.View = Backbone.View.extend({
         for child, idx in @pullChildren()
           @initPartial child, patchedOptions, off
 
-        # Если нет partial-ов, генериуем событие **ready**
+        # Если нет partial-ов или их рендеринг запрещён, генериуем событие **ready**
         if skipChildren or @children.isEmpty()
           # Устанавливаем флажок ready в true, если элемент не корневой
           unless @isRoot()
