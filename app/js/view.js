@@ -21,10 +21,13 @@
       this.trigger('destroyed', this);
       return this;
     },
-    render: function(skipChildren) {
+    render: function(skipChildren, replaceContext) {
       var _this = this;
       if (skipChildren == null) {
         skipChildren = false;
+      }
+      if (replaceContext == null) {
+        replaceContext = true;
       }
       if (this._rendering) {
         this.stopRender();
@@ -37,6 +40,9 @@
         var _ref1;
         return require((_ref1 = _this.options.i18nRequire) != null ? _ref1 : [], function() {
           var $ctx, child, foundPartial, idx, partial, patchedOptions, view, _i, _j, _len, _len1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
+          _this._$memorizedEl = _this.$el;
+          _this.$el = _this.$el.clone(true, true);
+          _this.el = _this.$el.get();
           _this.$el.html(template((_ref2 = (_ref3 = (_ref4 = _this.options.model) != null ? _ref4.toJSON() : void 0) != null ? _ref3 : (_ref5 = _this.options.dataManager) != null ? _ref5.getDataAsset() : void 0) != null ? _ref2 : {}));
           patchedOptions = _.clone(_this.options);
           patchedOptions.partials = [];
@@ -71,9 +77,14 @@
               _this.ready = true;
             }
             _this._rendering = false;
+            if (replaceContext) {
+              _this.replaceContext();
+            } else {
+              _this.trigger('readyForReplacement', _this);
+            }
             return _this.trigger('ready');
           } else {
-            _this.children.on('ready', _this._readyHandler, _this);
+            _this.children.on('ready', _.bind(_this._readyHandler, _this, replaceContext));
             return _this.children.render();
           }
         });
@@ -100,12 +111,21 @@
       }
       return view;
     },
-    _readyHandler: function() {
+    replaceContext: function() {
+      this._$memorizedEl.replaceWith(this.$el);
+      return this._$memorizedEl = void 0;
+    },
+    _readyHandler: function(replaceContext) {
       if (!this.isRoot()) {
         this.ready = true;
       }
       this.children.reset();
       this._rendering = false;
+      if (replaceContext) {
+        this.replaceContext();
+      } else {
+        this.trigger('readyForReplacement', this);
+      }
       return this.trigger('ready');
     },
     stopRender: function() {

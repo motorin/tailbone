@@ -63,11 +63,13 @@ Inn.View = Backbone.View.extend({
     return @
 
 
-  ##### render()
+  ##### render(skipChildren)
   #
   #---
   # Рендерит View и всех его детей
-  render: (skipChildren = off) ->
+  #
+  # **skipChildren** - Не выполняет рендеринг partials, при этом добавляя их в children
+  render: (skipChildren = off, replaceContext = on) ->
     @stopRender() if @_rendering
 
     @_rendering = on
@@ -76,9 +78,14 @@ Inn.View = Backbone.View.extend({
     @options.templateName = this.$el.data('view-template') if this.$el.data('view-template')?
 
     @_loadTemplate (template) =>
+      # Если это необходимо, подгружаем недостающие i18n bundles
       require @options.i18nRequire ? [], =>
         # Получаем данные для рендеринга шаблона
         # @todo: написать тесты!
+        @_$memorizedEl = @$el
+        @$el = @$el.clone on, on
+        @el = @$el.get()
+
         @$el.html template @options.model?.toJSON() ? @options.dataManager?.getDataAsset() ? {}
 
         # Унаследованные опции с очищенным полем partials
@@ -113,17 +120,23 @@ Inn.View = Backbone.View.extend({
         for child, idx in @pullChildren()
           @initPartial child, patchedOptions, off
 
-        # Если нет partial-ов, генериуем событие **ready**
+        # Если нет partial-ов или их рендеринг запрещён, генериуем событие **ready**
         if skipChildren or @children.isEmpty()
           # Устанавливаем флажок ready в true, если элемент не корневой
           unless @isRoot()
             @ready = on
 
           @_rendering = off
+
+          if replaceContext
+            @replaceContext()
+          else
+            @trigger 'readyForReplacement', @
+
           @trigger 'ready'
         else
           # Ожидаем завершения рендеринга **partial**-ов
-          @children.on 'ready', @_readyHandler, @
+          @children.on 'ready', _.bind(@_readyHandler, @, replaceContext)
 
           @children.render()
 
@@ -141,13 +154,16 @@ Inn.View = Backbone.View.extend({
     @children.add view unless silent
     return view
 
+  replaceContext: ->
+    @_$memorizedEl.replaceWith @$el
+    @_$memorizedEl = undefined
 
   ##### _readyHandler()
   #
   #---
   # Обработчик завершения рендеринга
   # 
-  _readyHandler: -> 
+  _readyHandler: (replaceContext) -> 
     # Устанавливаем флажок ready в true, если элемент не корневой
     unless @isRoot()
       @ready = on
@@ -156,6 +172,12 @@ Inn.View = Backbone.View.extend({
     @children.reset()
     # Снимаем блокировку рендеринга
     @_rendering = off
+
+    if replaceContext
+      @replaceContext()
+    else
+      @trigger 'readyForReplacement', @
+
     @trigger 'ready'
 
   ##### stopRender()
