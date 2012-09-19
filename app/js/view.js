@@ -135,7 +135,7 @@
       return this;
     },
     _loadTemplate: function(callback) {
-      var template,
+      var req, template,
         _this = this;
       template = function() {
         try {
@@ -152,8 +152,16 @@
           return callback.call(this, template);
         });
       } else {
-        $.getScript(this._getTemplateURL(), function() {
-          return callback.call(this, template);
+        req = $.getScript(this._getTemplateURL(), function() {
+          return callback.call(_this, template);
+        });
+        req.fail(function() {
+          callback.call(_this, function() {
+            return '';
+          });
+          if (typeof window.console === 'object' && typeof window.console.warn === 'function') {
+            return console.warn("tailbone: failed to load template '" + (_this._getTemplateName()) + "' from '" + (_this._getTemplateURL()) + "'");
+          }
         });
       }
       return this;
