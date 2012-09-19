@@ -217,8 +217,14 @@ Inn.View = Backbone.View.extend({
       setTimeout ->
         callback.call @, template
     else
-      $.getScript @_getTemplateURL(), ->
+      req = $.getScript @_getTemplateURL(), =>
         callback.call @, template
+
+      req.fail =>
+        callback.call @, -> ''
+
+        if typeof window.console is 'object' and typeof window.console.warn is 'function'
+          console.warn "tailbone: failed to load template '#{@_getTemplateName()}' from '#{@_getTemplateURL()}'"
 
     return @
 
